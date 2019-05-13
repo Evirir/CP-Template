@@ -24,44 +24,21 @@ typedef unsigned long long ull;
 
 //DSU start
 struct DSU{
-	int S;
-	
-	struct node{
-		int p;
-		ll sum;
-	};
+	struct node{ int p; ll sum; };
 	vector<node> dsu;
-	
-	DSU(int n){
-		S = n;
-		dsu.resize(S);
-		forn(i,0,n){
-			dsu[i].p=i; dsu[i].sum=0;
-		}
+	DSU(int n){ dsu.resize(n);
+		forn(i,0,n){ dsu[n].p=i; }
 	}
-	
-	int rt(int u){
-		if(dsu[u].p == u) return u;
-		dsu[u].p = rt(dsu[u].p);
-		return dsu[u].p;
-	}
+	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(u); }
+	bool sameset(int u, int v){ return rt(u)==rt(v); }
 	void merge(int u, int v){
 		u = rt(u); v = rt(v);
 		if(u == v) return;
 		if(rand()&1) swap(u,v);
 		dsu[v].p = u;
-		dsu[u].sum += dsu[v].sum;
 	}
-	bool sameset(int u, int v){
-		if(rt(u) == rt(v)) return true;
-		return false;
-	}
-	ll getstat(int u){
-		return dsu[rt(u)].sum;
-	}
-	void setstat(int u,int val){
-		dsu[rt(u)].sum = val;
-	}
+	//ll getstat(int u){ return dsu[rt(u)].sum; }
+	//void setstat(int u,ll val){ dsu[rt(u)].sum = val; }
 };
 //DSU end
 
@@ -285,7 +262,31 @@ void dfs_hld(int u=0,int p=-1){
 }
 //HLD end
 
-//Sparse Table start
+//Sparse Table start: O(1) Min Query example
+struct SparseTable{
+	ll spt[MAXN][LG];
+	
+	int lg[MAXN+1];
+	lg[1]=0;
+	fore(i,2,MAXN)	lg[i]=lg[i/2]+1;
+	
+	ll merge(ll x,ll y){
+		return min(x,y);
+	}
+	
+	SparseTable(int n){
+		forn(i,0,n) spt[i][0] = spt[i];
+		fore(j,1,LG)
+			for(int i=0; i+(1<<j)<=n; i++)
+				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
+	}
+	
+	ll query(int l,int r){
+		int j=lg[r-l+1];		
+		return min(spt[i][j],spt[r-(1<<j)+1][j]);
+	}
+}
 
+#define LG 25
 //Sparse Table end
 
