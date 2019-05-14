@@ -130,16 +130,16 @@ public:
 	}
 	inline void push(int k, int l, int r){
 		if(lazy[k]!=0){
-			v[k]^=lazy[k];
+			v[k]=lazy[k];
 			if(l!=r){
-				lazy[k*2]^=lazy[k];
-				lazy[k*2+1]^=lazy[k];
+				lazy[k*2]+=lazy[k];
+				lazy[k*2+1]+=lazy[k];
 			}
 			lazy[k]=0;
 		}
 	}
 	inline ll merge(ll x, ll y){
-		return x^y;
+		return x+y;
 	}
 	inline void update(int l, int r, ll val){
 		update(l, r, val, 1, 0, size_-1);
