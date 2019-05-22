@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
+using namespace __gnu_pbds;
 
 #define watch(x) cout<<(#x)<<"="<<(x)<<endl
 #define mset(d,val) memset(d,val,sizeof(d))
@@ -19,6 +22,7 @@ typedef pair<ll,ll> ii;
 typedef vector<ll> vi;
 typedef vector<ii> vii;
 typedef unsigned long long ull;
+typedef tree<ll,null_type,less<ll>,rb_tree_tag,tree_order_statistics_node_update> pbds;
 
 #define MAXN 100005
 
@@ -27,9 +31,9 @@ struct DSU{
 	struct node{ int p; ll sum; };
 	vector<node> dsu;
 	DSU(int n){ dsu.resize(n);
-		forn(i,0,n){ dsu[n].p=i; }
+		forn(i,0,n){ dsu[i].p=i; dsu[i].sum=0;}
 	}
-	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(u); }
+	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
 	bool sameset(int u, int v){ return rt(u)==rt(v); }
 	void merge(int u, int v){
 		u = rt(u); v = rt(v);
@@ -46,7 +50,8 @@ struct DSU{
 int n,m;
 vector<pair<ll,ii>> edge;
 vector<pair<ii,ll>> mst;
-ll totw=0;
+int cnt=0;
+ll sumw=0;
 
 void kruskal(){
 	DSU dsu(n);
@@ -55,10 +60,11 @@ void kruskal(){
 	forn(i,0,m){
 		int u=edge[i].S.F, v=edge[i].S.S; ll w=edge[i].F;
 		if(dsu.sameset(u,v)) continue;
-		dsu.merge(u,v);
 		mst.pb({{u,v},w});
-		totw+=w;
-		if(mst.size()>=n-1) break;
+		dsu.merge(u,v);
+		sumw+=w;
+		cnt++;
+		if(cnt>=n-1) break;
 	}
 }
 //Kruskal end
@@ -66,8 +72,6 @@ void kruskal(){
 //Dijkstra start
 vii adj[MAXN];
 ll dist[MAXN];
-
-int n;
 
 void dijkstra(int src){
 	pqueue<ii,vii,greater<ii>> q;
@@ -87,10 +91,6 @@ void dijkstra(int src){
 	}
 }
 //Dijkstra end
-
-//Prim start
-
-//Prim end
 
 //Lazy Recursive ST start
 class LazySegmentTree{
@@ -148,27 +148,76 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-
-ll a[MAXN],xr[MAXN];
-LazySegmentTree st(n);
-
 //Lazy recursive ST end
 
-//Euler path start
-int in[MAXN],out[MAXN];
-int tmr=-1;
+//HLD start
+#define LG 19
 
-void dfs(int u, int p)
-{
-	in[u]=++tmr;
-	for(int v:adj[u])
-	{
-		if(v==p) continue;
-		dfs(v,u);
+int in[MAXN],out[MAXN];
+int prt[MAXN][LG];
+int sz[MAXN],dep[MAXN];
+int top[MAXN];
+int tmr=0;
+
+void dfs_sz(int u){
+	sz[u]=1;
+	prt[u][0]=p;
+	dep[u]=0;
+	
+	for(int &v: adj[u]){
+		dep[v]=dep[u]+1;
+		dfs_sz(v);
+		sz[u]+=sz[v];
+		if(sz[v]>sz[adj[u][0]]) swap(v,adj[u][0]);
+	}
+}
+
+void dfs_hld(int u){
+	in[u]=tmr++;
+	for(int v: adj[u]){
+		top[v] = (v==adj[u][0]) ? top[u] : v;
+		dfs_hld(v);
 	}
 	out[u]=tmr;
 }
-//Euler path end
+//HLD end
+
+//Binary parent start
+int goup(int u, int h){
+	for(int i=LG;i>=0;i--){
+		if(i&(1<<h)) u=prt[u][i];
+	}
+	return u;
+}
+//Binary parent end
+
+//Sparse Table start: O(1) Min Query example
+struct SparseTable{
+	ll spt[MAXN][LG];
+	int lg[MAXN+1];
+	
+	ll merge(ll x,ll y){
+		return min(x,y);
+	}
+	
+	SparseTable(int n, ll arr[]){
+		lg[1]=0;
+		fore(i,2,n)	lg[i]=lg[i/2]+1;
+		
+		forn(i,0,n) spt[i][0] = arr[i];
+		fore(j,1,LG)
+			for(int i=0; i+(1<<j)<=n; i++)
+				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
+	}
+	
+	ll query(int l,int r){
+		int len=lg[r-l+1];		
+		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
+	}	
+};
+
+#define LG 25
+//Sparse Table end
 
 //LCA start
 #define LG 18
@@ -179,6 +228,9 @@ mset(prt,-1);
 void dfs(int u, int p)
 {
 	prt[0][u]=p;
+	forn(j,1,LG){
+		if(prt[u][j-1]!=-1) prt[u][j]=prt[prt[u][j-1]][j-1];
+	}
 	for(int v:adj[u])
 	{
 		if(v==p) continue;
@@ -230,63 +282,3 @@ ll query(int l,int r){
 	return sum;
 }
 //Iterative ST end
-
-int in[MAXN],out[MAXN],prt[MAXN];
-ll sz[MAXN];
-
-//HLD start
-void dfs_sz(int u=0,int p=-1){
-	sz[u]=1;
-	prt[u]=p;
-	depth[u]=0;
-	if(adj[u][0]==p && adj[u].size()>1) swap(adj[u][0],adj[u][1]);
-	for(auto &v: adj[u]){
-		if(v==p) continue;
-		depth[v]=depth[u]+1;
-		dfs_sz(v,u);
-		sz[u]+=sz[v];
-		if(sz[v]>sz[adj[u][0]]) swap(v,adj[u][0]);
-	}
-}
-
-int timer=0;
-void dfs_hld(int u=0,int p=-1){
-	in[u]=timer++;
-	pos[in[u]]=arr[u];
-	for(auto v:adj[u]){
-		if(v==p) continue;
-		head[v] = (v==adj[u][0]) ? head[u] : v;
-		dfs_hld(v,u);
-	}
-	out[u]=timer;
-}
-//HLD end
-
-//Sparse Table start: O(1) Min Query example
-struct SparseTable{
-	ll spt[MAXN][LG];
-	
-	int lg[MAXN+1];
-	lg[1]=0;
-	fore(i,2,MAXN)	lg[i]=lg[i/2]+1;
-	
-	ll merge(ll x,ll y){
-		return min(x,y);
-	}
-	
-	SparseTable(int n){
-		forn(i,0,n) spt[i][0] = spt[i];
-		fore(j,1,LG)
-			for(int i=0; i+(1<<j)<=n; i++)
-				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
-	}
-	
-	ll query(int l,int r){
-		int j=lg[r-l+1];		
-		return min(spt[i][j],spt[r-(1<<j)+1][j]);
-	}
-}
-
-#define LG 25
-//Sparse Table end
-
