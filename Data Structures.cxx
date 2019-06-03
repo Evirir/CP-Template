@@ -14,7 +14,7 @@ using namespace __gnu_pbds;
 #define F first
 #define S second
 #define PI 3.14159265358979323846264338327
-#define INF 0x3f3f3f3f
+#define INF 2e14
 #define MOD 998244353
 #define pqueue priority_queue
 typedef long long ll;
@@ -185,7 +185,7 @@ void dfs_hld(int u, int p){
 	out[u]=tmr;
 }
 
-ll Query(int u,int v, LazySegmentTree st){
+ll Query(int u,int v){
 	ll ans=0;
 	while(top[u]!=top[v]){
 		if(dep[top[u]]<dep[top[v]]) swap(u,v);
@@ -194,7 +194,7 @@ ll Query(int u,int v, LazySegmentTree st){
 	}
 	
 	if(dep[u]<dep[v]) swap(u,v);
-	return ans + st.query(in[v],in[u]));
+	return ans + st.query(in[v],in[u]);
 }
 
 st.update(in[u],in[u],w);
