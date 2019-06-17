@@ -98,9 +98,10 @@ struct DSU{
 		if(u == v) return;
 		if(rand()&1) swap(u,v);
 		dsu[v].p = u;
+		//dsu[u].sum += dsu[v].sum;
 	}
 	//ll getstat(int u){ return dsu[rt(u)].sum; }
-	//void setstat(int u,ll val){ dsu[rt(u)].sum = val; }
+	//void setstat(int u, ll val){ dsu[rt(u)].sum = val; }
 };
 //DSU end
 
