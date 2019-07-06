@@ -144,12 +144,23 @@ void dijkstra(int src){
 			int v=tmp.F; ll w=tmp.S;
 			if(dist[v]>dist[u]+w){
 				dist[v]=dist[u]+w;
-				q.push({d[v],v});
+				q.push({dist[v],v});
 			}
 		}
 	}
 }
 //Dijkstra end
+
+//Floyd start
+ll dist[MAXN][MAXN];
+void Floyd(){
+	forn(i,0,n) forn(j,0,n) dist[i][j]=adj[i][j];
+	forn(k,0,n) forn(i,0,n) forn(j,0,n){
+		if(dist[i][j]>dist[i][k]+dist[k][j])
+			dist[i][j]=dist[i][k]+dist[k][j];
+	}
+}
+//Floyd end
 
 //HLD start
 #define LG 19
