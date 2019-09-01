@@ -62,6 +62,10 @@ public:
 		v.resize(size_*4);
 		lazy.resize(size_*4);
 	}
+	void clear(){
+		v.resize(size_*4,0);
+		lazy.resize(size_*4,0);
+	}
 	inline void push(int k, int l, int r){
 		if(lazy[k]!=0){
 			v[k]+=lazy[k];
@@ -253,7 +257,7 @@ struct SparseTable{
 //LCA start
 #define LG 18
 
-int depth[MAXN],prt[LG+1][MAXN];
+int depth[MAXN],prt[MAXN][LG+1];
 mset(prt,-1);
 
 void dfs(int u, int p)
@@ -275,20 +279,20 @@ int lca(int u, int v)
 	if(depth[u]>depth[v]) swap(u,v);
 	for(int i=LG-1;i>=0;i--)
 	{
-		if(prt[i][v]!=-1&&depth[prt[i][v]]>=depth[u])
+		if(prt[v][i]!=-1&&depth[prt[v][i]]>=depth[u])
 		{
-			v=prt[i][v];
+			v=prt[v][i];
 		}
 	}
 	if(u==v) return u;
 	for(int i=LG-1;i>=0;i--)
 	{
-		if(prt[i][v]!=-1&&prt[i][v]!=prt[i][u])
+		if(prt[v][i]!=-1&&prt[v][i]!=prt[u][i])
 		{
-			v=prt[i][v]; u=prt[i][u];
+			v=prt[v][i]; u=prt[u][i];
 		}
 	}
-	return prt[0][u];
+	return prt[u][0];
 }
 //LCA end
 
