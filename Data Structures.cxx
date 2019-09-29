@@ -63,9 +63,8 @@ public:
 		lazy.resize(size_*4);
 	}
 	void clear(){
-		v.clear(); lazy.clear();
-		v.resize(size_*4,0);
-		lazy.resize(size_*4,0);
+		v.assign(size_*4,0);
+		lazy.assign(size_*4,0);
 	}
 	inline void push(int k, int l, int r){
 		if(lazy[k]!=0){
@@ -89,20 +88,20 @@ public:
 };
 //Lazy recursive ST end
 
-//Point update ST start
-class LazySegmentTree{
+//Point recursive ST start
+class RecSegmentTree{
 private:
 	int size_;
 	vector<ll> v;
 	
-	void update(int s, int e, ll val, int k, int l, int r){
-		if(r < s || e < l) return;
-		if(s <= l && r <= e){
-			v[k] = v[k*2] | v[k*2+1];
+	void update(int p, ll val, int k, int l, int r){
+		if(l==r){
+			v[k]=val;
 		}
 		else{
-			update(s, e, val, k*2, l, (l+r)>>1);
-			update(s, e, val, k*2+1, ((l+r)>>1)+1, r);
+			int m=(l+r)>>1;
+			if(p<=m) update(u, val, k*2, l, m);
+			else update(u, val, k*2+1, m+1, r);
 			v[k] = merge(v[k*2], v[k*2+1]);
 		}
 	}
@@ -116,17 +115,16 @@ private:
 	}
  
 public:
-	LazySegmentTree(): v(vector<ll>())) {};
-	LazySegmentTree(int n){
+	RecSegmentTree(): v(vector<ll>())) {};
+	RecSegmentTree(int n){
 		for(size_=1;size_<n;) size_<<=1;
 		v.resize(size_*4);
 	}
 	void clear(){
-		v.clear();
-		v.resize(size_*4,0);
+		v.assign(size_*4,0);
 	}
 	inline ll merge(ll x, ll y){
-		return x|y;
+		return x+y;
 	}
 	inline void update(int l, int r, ll val){
 		update(l, r, val, 1, 0, size_-1);
@@ -135,7 +133,75 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-//Point update ST end
+//Point recursive ST end
+
+//Point iterative ST start
+struct IterSegmentTree{
+	void build(){
+		for(int i=n-1; i>0; i--) t[i]=t[i<<1]+t[i<<1|1];
+	}
+	
+	void modify(int p, int val){
+		for(t[p+=n]=value; p>1; p>>=1) t[p>>1]=t[p]+t[p^1];
+	}
+	
+	int query(int l, int r){
+		int res=0;
+		for(l+=n,r+=n; l<r; l>>=1,r>>=1){
+			if(l&1) res+=t[l++];
+			if(r&1) res+=t[--r];
+		}
+		return res;
+	}
+};
+
+forn(i,0,n) cin>>t[n+i];
+//Point iterative ST end
+
+//Start FenwickRange
+struct FenwickRange
+{
+	vector<ll> fw,fw2;
+    int siz;
+    FenwickRange(int N)
+    {
+        fw.assign(N+1,0);
+        fw2.assign(N+1,0);
+        siz = N+1;
+    }
+    void reset(int N)
+    {
+		fw.assign(N+1,0);
+        fw2.assign(N+1,0);
+        siz = N+1;
+	}
+    void update(int l, int r, ll val) //[l,r] + val
+    {    
+        for(int tl=l; tl<siz; tl+=(tl&(-tl)))
+        {
+            fw[tl]+=val, fw2[tl]-=val*ll(l-1);
+        }
+        for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
+        {
+            fw[tr]-=val, fw2[tr]+=val*ll(r);
+        }
+    }
+    ll sum(int r) //[1,r]
+    {                         
+        ll res=0;
+        for(int tr=r; tr; tr-=(tr&(-tr)))
+        {
+            res+=fw[tr]*ll(r)+fw2[tr];
+        }
+        return res;
+    }
+    ll query(ll l, ll r)
+    {
+		if(l==0) return sum(r);
+		return sum(r)-sum(l-1);
+	}
+};
+//End FenwickRange
 
 //DSU start
 struct DSU{
@@ -153,8 +219,8 @@ struct DSU{
 		dsu[v].p = u;
 		//dsu[u].sum += dsu[v].sum;
 	}
-	//ll getstat(int u){ return dsu[rt(u)].sum; }
-	//void setstat(int u, ll val){ dsu[rt(u)].sum = val; }
+	//ll get(int u){ return dsu[rt(u)].sum; }
+	//void set(int u, ll val){ dsu[rt(u)].sum = val; }
 };
 //DSU end
 
