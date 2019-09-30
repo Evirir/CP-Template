@@ -432,3 +432,74 @@ ll query(int l,int r){
 	return sum;
 }
 //Iterative ST end
+
+//Math start
+struct Maths
+{
+	vector<ll> fact,ifact,inv,pow2;
+	ll add(ll a,ll b)
+	{
+		a+=b;
+		while(a>=MOD) a-=MOD;
+		return a;
+	}
+	ll mult(ll a, ll b)
+	{
+		return (a*1LL*b)%MOD;
+	}
+	ll pw(ll a, ll b)
+	{
+		ll r=1;
+		while(b){
+			if(b&1) r=mult(r,a);
+			a=mult(a,a);
+			b>>=1;
+		}
+		return r;
+	}
+	ll choose(ll a, ll b)
+	{
+		if(a<b) return 0;
+		if(b==0) return 1;
+		if(a==b) return 1;
+		return mult(fact[a],mult(ifact[b],ifact[a-b]));
+	}
+	ll inverse(ll a)
+	{
+		return pw(a,MOD-2);
+	}
+	void init(ll _n)
+	{
+		fact.clear(); ifact.clear(); inv.clear(); pow2.clear();
+		fact.resize(_n+1); ifact.resize(_n+1); inv.resize(_n+1); pow2.resize(_n+1);
+		pow2[0]=1; ifact[0]=1; fact[0]=1;
+		for(int i=1;i<=_n;i++){
+			pow2[i]=add(pow2[i-1],pow2[i-1]);
+			fact[i]=mult(fact[i-1],i);
+			//ifact[i]=mult(ifact[i-1],inv[i]);
+		}
+		ifact[_n] = inverse(fact[_n]);
+		for(int i=_n-1;i>=1;i--){
+		    ifact[i] = mult(ifact[i + 1], i + 1);
+		}
+		for(int i=1;i<=_n;i++){
+		    inv[i] = mult(fact[i-1],ifact[i]);
+		}
+	}
+	
+	//NT area start
+	void getpf(vector<ii>& pf, ll n)
+	{
+		for(ll i=2; i*i<=n; i++)
+		{
+			int cnt=0;
+			while(n%i==0){
+				n/=i; cnt++;
+			}
+			if(cnt>0) pf.pb({i,cnt});
+		}
+		if(n>1) pf.pb({n,1});
+	}
+	//NT area end
+};
+//Math end
