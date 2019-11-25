@@ -62,7 +62,7 @@ public:
 		v.resize(size_*4);
 		lazy.resize(size_*4);
 	}
-	void clear(){
+	void reset(){
 		v.assign(size_*4,0);
 		lazy.assign(size_*4,0);
 	}
@@ -96,12 +96,12 @@ private:
 	
 	void update(int p, ll val, int k, int l, int r){
 		if(l==r){
-			v[k]=val;
+			push(k,val);
 		}
 		else{
-			int m=(l+r)>>1;
-			if(p<=m) update(u, val, k*2, l, m);
-			else update(u, val, k*2+1, m+1, r);
+			int mid=(l+r)>>1;
+			if(p<=mid) update(p, val, k*2, l, mid);
+			else update(p, val, k*2+1, mid+1, r);
 			v[k] = merge(v[k*2], v[k*2+1]);
 		}
 	}
@@ -115,19 +115,22 @@ private:
 	}
  
 public:
-	RecSegmentTree(): v(vector<ll>())) {};
+	RecSegmentTree(): v(vector<ll>()) {};
 	RecSegmentTree(int n){
 		for(size_=1;size_<n;) size_<<=1;
 		v.resize(size_*4);
 	}
-	void clear(){
+	void reset(){
 		v.assign(size_*4,0);
+	}
+	inline void push(int k, ll val){
+		v[k]+=val;
 	}
 	inline ll merge(ll x, ll y){
 		return x+y;
 	}
-	inline void update(int l, int r, ll val){
-		update(l, r, val, 1, 0, size_-1);
+	inline void update(int p, ll val){
+		update(p, val, 1, 0, size_-1);
 	}
 	inline ll query(int l, int r){
 		return query(l, r, 1, 0, size_-1);
@@ -205,7 +208,7 @@ struct FenwickRange
 
 //DSU start
 struct DSU{
-	struct node{ int p; ll sum; };
+	struct node{ int p; //ll sum; };
 	vector<node> dsu;
 	DSU(int n){ dsu.resize(n);
 		forn(i,0,n){ dsu[i].p=i; dsu[i].sum=0;}
@@ -251,7 +254,8 @@ void kruskal(){
 vii adj[MAXN];
 ll dist[MAXN];
 
-void dijkstra(int src){
+void dijkstra(int src)
+{
 	pqueue<ii,vii,greater<ii>> q;
 	forn(i,0,n)	dist[i]=INF;
 	dist[src]=0;
@@ -273,11 +277,9 @@ void dijkstra(int src){
 //Floyd start
 ll dist[MAXN][MAXN];
 void Floyd(){
-	forn(i,0,n) forn(j,0,n) dist[i][j]=adj[i][j];
-	forn(k,0,n) forn(i,0,n) forn(j,0,n){
-		if(dist[i][j]>dist[i][k]+dist[k][j])
-			dist[i][j]=dist[i][k]+dist[k][j];
-	}
+	forn(i,0,n) forn(j,0,n) dist[i][j]=adj[i][j]==0?INF:adj[i][j];
+	forn(k,0,n) forn(i,0,n) forn(j,0,n)
+		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
 }
 //Floyd end
 
@@ -342,10 +344,13 @@ int goup(int u, int h){
 //Binary parent end
 
 //Sparse Table start: O(1) Min Query example
-struct SparseTable{
-	ll spt[MAXN][LG];
-	int lg[MAXN+1];
-	
+#define LG 25
+
+ll spt[MAXN][LG+1];
+int lg[MAXN+1];
+
+struct SparseTable
+{	
 	ll merge(ll x,ll y){
 		return min(x,y);
 	}
@@ -365,8 +370,6 @@ struct SparseTable{
 		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
 	}	
 };
-
-#define LG 25
 //Sparse Table end
 
 //LCA start
@@ -439,13 +442,16 @@ struct Maths
 	vector<ll> fact,ifact,inv,pow2;
 	ll add(ll a,ll b)
 	{
-		a+=b;
-		while(a>=MOD) a-=MOD;
+		a+=b;a%=MOD;
+		if(a<0) a+=MOD;
 		return a;
 	}
 	ll mult(ll a, ll b)
 	{
-		return (a*1LL*b)%MOD;
+		a%=MOD; b%=MOD;
+		ll ans=(a*b)%MOD;
+		if(ans<0) ans+=MOD;
+		return ans;
 	}
 	ll pw(ll a, ll b)
 	{
@@ -487,7 +493,6 @@ struct Maths
 		}
 	}
 	
-	//NT area start
 	void getpf(vector<ii>& pf, ll n)
 	{
 		for(ll i=2; i*i<=n; i++)
@@ -500,6 +505,163 @@ struct Maths
 		}
 		if(n>1) pf.pb({n,1});
 	}
-	//NT area end
 };
 //Math end
+
+//NT start
+struct NumberTheory
+{
+	vector<ll> primes;
+	vector<bool> prime;
+	vector<ll> totient;
+	vector<ll> sumdiv;
+	vector<ll> bigdiv;
+	void Sieve(ll n)
+	{
+		prime.assign(n+1, 1);
+		prime[1] = false;
+		for(ll i = 2; i <= n; i++)
+		{
+			if(prime[i])
+			{
+				primes.pb(i);
+				for(ll j = i*2; j <= n; j += i)
+				{
+					prime[j] = false;
+				}
+			}
+		}
+	}
+	
+	ll phi(ll x)
+	{
+		map<ll,ll> pf;
+		ll num = 1; ll num2 = x;
+		for(ll i = 0; primes[i]*primes[i] <= x; i++)
+		{
+			if(x%primes[i]==0)
+			{
+				num2/=primes[i];
+				num*=(primes[i]-1);
+			}
+			while(x%primes[i]==0)
+			{
+				x/=primes[i];
+				pf[primes[i]]++;
+			}
+		}
+		if(x>1)
+		{
+			pf[x]++; num2/=x; num*=(x-1);
+		}
+		x = 1;
+		num*=num2;
+		return num;
+	}
+	
+	bool isprime(ll x)
+	{
+		if(x==1) return false;
+		for(ll i = 0; primes[i]*primes[i] <= x; i++)
+		{
+			if(x%primes[i]==0) return false;
+		}
+		return true;
+	}
+
+	void SievePhi(ll n)
+	{
+		totient.resize(n+1);
+		for (int i = 1; i <= n; ++i) totient[i] = i;
+		for (int i = 2; i <= n; ++i)
+		{
+			if (totient[i] == i)
+			{
+				for (int j = i; j <= n; j += i)
+				{
+					totient[j] -= totient[j] / i;
+				}
+			}
+		}
+	}
+	
+	void SieveSumDiv(ll n)
+	{
+		sumdiv.resize(n+1);
+		for(int i = 1; i <= n; ++i)
+		{
+			for(int j = i; j <= n; j += i)
+			{
+				sumdiv[j] += i;
+			}
+		}
+	}
+	
+	ll getPhi(ll n)
+	{
+		return totient[n];
+	}
+	
+	ll getSumDiv(ll n)
+	{
+		return sumdiv[n];
+	}
+	
+	ll modpow(ll a, ll b, ll mod)
+	{
+		ll r = 1;
+		if(b < 0) b += mod*100000LL;
+		while(b)
+		{
+			if(b&1) r = (r*a)%mod;
+			a = (a*a)%mod;
+			b>>=1;
+		}
+		return r;
+	}
+	
+	ll inv(ll a, ll mod)
+	{
+		return modpow(a, mod - 2, mod);
+	}
+	
+	ll invgeneral(ll a, ll mod)
+	{
+		ll ph = phi(mod);
+		ph--;
+		return modpow(a, ph, mod);
+	}
+	
+	void getpf(vector<ii>& pf, ll n)
+	{
+		for(ll i = 0; primes[i]*primes[i] <= n; i++)
+		{
+			int cnt = 0;
+			while(n%primes[i]==0)
+			{
+				n/=primes[i]; cnt++;
+			}
+			if(cnt>0) pf.pb(ii(primes[i], cnt));
+		}
+		if(n>1)
+		{
+			pf.pb(ii(n, 1));
+		}
+	}
+
+	//ll op;
+	void getDiv(vector<ll>& div, vector<ii>& pf, ll n, int i)
+	{
+		//op++;
+		ll x, k;
+		if(i >= pf.size()) return ;
+		x = n;
+		for(k = 0; k <= pf[i].S; k++)
+		{
+			if(i==int(pf.size())-1) div.pb(x);
+			getDiv(div, pf, x, i + 1);
+			x *= pf[i].F;
+		}
+	}
+};
+//End NT
