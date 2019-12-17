@@ -89,53 +89,40 @@ public:
 //Lazy recursive ST end
 
 //Point recursive ST start
-class RecSegmentTree{
-private:
-	int size_;
-	vector<ll> v;
-	
-	void update(int p, ll val, int k, int l, int r){
-		if(l==r){
-			push(k,val);
-		}
-		else{
-			int mid=(l+r)>>1;
-			if(p<=mid) update(p, val, k*2, l, mid);
-			else update(p, val, k*2+1, mid+1, r);
-			v[k] = merge(v[k*2], v[k*2+1]);
-		}
-	}
-	
-	ll query(int s, int e, int k, int l, int r){
-		if(r < s || e < l) return 0;
-		if(s <= l && r <= e) return v[k];
-		ll lc = query(s, e, k*2, l, (l+r)>>1);
-		ll rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
-		return merge(lc, rc);
-	}
- 
-public:
-	RecSegmentTree(): v(vector<ll>()) {};
-	RecSegmentTree(int n){
-		for(size_=1;size_<n;) size_<<=1;
-		v.resize(size_*4);
-	}
-	void reset(){
-		v.assign(size_*4,0);
-	}
-	inline void push(int k, ll val){
-		v[k]+=val;
-	}
-	inline ll merge(ll x, ll y){
-		return x+y;
-	}
-	inline void update(int p, ll val){
-		update(p, val, 1, 0, size_-1);
-	}
-	inline ll query(int l, int r){
-		return query(l, r, 1, 0, size_-1);
-	}
+struct Node
+{
+	int sum,mn,mx;
+	Node(){sum=mn=mx=0;}
 };
+ 
+Node st[MAXN];
+ 
+void combine(int id)
+{
+	st[id].sum = st[id*2].sum + st[id*2+1].sum;
+	st[id].mn = min(st[id*2].mn, st[id*2].sum+st[id*2+1].mn);
+	st[id].mx = max(st[id*2].mx, st[id*2].sum+st[id*2+1].mx);
+}
+ 
+void update(int id, int l, int r, int pos, int v)
+{
+	if(pos<l || pos>r) return;
+	if(l==r){
+		st[id].sum=v;
+		st[id].mx=max(0,v);
+		st[id].mn=min(0,v);
+		return;
+	}
+	int mid=(l+r)>>1;
+	update(id*2, l, mid, pos, v);
+	update(id*2+1, mid+1, r, pos, v);
+	combine(id);
+}
+
+Node query(int id, int l, int r, int pos, int v)
+{
+	
+}
 //Point recursive ST end
 
 //Point iterative ST start
@@ -208,7 +195,7 @@ struct FenwickRange
 
 //DSU start
 struct DSU{
-	struct node{ int p; //ll sum; };
+	struct node{ int p; ll sum; };
 	vector<node> dsu;
 	DSU(int n){ dsu.resize(n);
 		forn(i,0,n){ dsu[i].p=i; dsu[i].sum=0;}
@@ -277,17 +264,17 @@ void dijkstra(int src)
 //Floyd start
 ll dist[MAXN][MAXN];
 void Floyd(){
-	forn(i,0,n) forn(j,0,n) dist[i][j]=adj[i][j]==0?INF:adj[i][j];
+	forn(i,0,n) forn(j,0,n) dist[i][j] = (adj[i][j]==0 ? INF : adj[i][j]);
 	forn(k,0,n) forn(i,0,n) forn(j,0,n)
 		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
 }
 //Floyd end
 
-//HLD start
+//HLD/Euler path start
 #define LG 19
 
 vi adj[MAXN];
-int in[MAXN],out[MAXN],rin[MAXN];
+int in[MAXN],out[MAXN];
 int prt[MAXN][LG];
 int sz[MAXN],dep[MAXN];
 int top[MAXN];
@@ -317,17 +304,18 @@ void dfs_hld(int u, int p){
 	}
 	out[u]=tmr;
 }
+//Euler path end
 
 ll Query(int u,int v){
 	ll ans=0;
 	while(top[u]!=top[v]){
 		if(dep[top[u]]<dep[top[v]]) swap(u,v);
-		ans=ans + st.query(in[top[u]],in[u]);
+		ans+=st.query(in[top[u]],in[u]);
 		u=prt[top[u]];
 	}
 	
 	if(dep[u]<dep[v]) swap(u,v);
-	return ans + st.query(in[v],in[u]);
+	return ans+st.query(in[v],in[u]);
 }
 
 st.update(in[u],in[u],w);
@@ -373,31 +361,31 @@ struct SparseTable
 //Sparse Table end
 
 //LCA start
-#define LG 18
+#define LG 20
 
-int depth[MAXN],prt[MAXN][LG+1];
+int dep[MAXN],prt[MAXN][LG];
 mset(prt,-1);
 
 void dfs(int u, int p)
 {
-	prt[0][u]=p;
+	prt[u][0]=p;
 	forn(j,1,LG){
 		if(prt[u][j-1]!=-1) prt[u][j]=prt[prt[u][j-1]][j-1];
 	}
 	for(int v:adj[u])
 	{
 		if(v==p) continue;
-		depth[v]=depth[u]+1;
+		dep[v]=dep[u]+1;
 		dfs(v,u);
 	}
 }
 
 int lca(int u, int v)
 {
-	if(depth[u]>depth[v]) swap(u,v);
+	if(dep[u]>dep[v]) swap(u,v);
 	for(int i=LG-1;i>=0;i--)
 	{
-		if(prt[v][i]!=-1&&depth[prt[v][i]]>=depth[u])
+		if(prt[v][i]!=-1&&dep[prt[v][i]]>=dep[u])
 		{
 			v=prt[v][i];
 		}
@@ -436,7 +424,7 @@ ll query(int l,int r){
 }
 //Iterative ST end
 
-//Math start
+//Combi/Maths start
 struct Maths
 {
 	vector<ll> fact,ifact,inv,pow2;
@@ -506,7 +494,7 @@ struct Maths
 		if(n>1) pf.pb({n,1});
 	}
 };
-//Math end
+//Combi/Maths end
 
 //NT start
 struct NumberTheory
