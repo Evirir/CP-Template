@@ -33,7 +33,7 @@ private:
 	vector<ll> v,lazy;
 	
 	void update(int s, int e, ll val, int k, int l, int r){
-		push(k,l,r);
+		push(k, l, r);
 		if(r < s || e < l) return;
 		if(s <= l && r <= e){
 			lazy[k] = val;
@@ -47,8 +47,8 @@ private:
 	}
 	
 	ll query(int s, int e, int k, int l, int r){
-		push(k,l,r);
-		if(r < s || e < l) return 0;
+		push(k, l, r);
+		if(r < s || e < l) return 0; //dummy value
 		if(s <= l && r <= e) return v[k];
 		ll lc = query(s, e, k*2, l, (l+r)>>1);
 		ll rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
@@ -88,42 +88,188 @@ public:
 };
 //Lazy recursive ST end
 
-//Point recursive ST start
-struct Node
-{
-	int sum,mn,mx;
+//Lazy recursive ST with struct start
+struct Node{
+	ll sum,mn,mx;
 	Node(){sum=mn=mx=0;}
+	Node(ll _s,ll _mn,ll _mx){ sum=_s; mn=_mn; mx=_mx; }
 };
- 
-Node st[MAXN];
- 
-void combine(int id)
-{
-	st[id].sum = st[id*2].sum + st[id*2+1].sum;
-	st[id].mn = min(st[id*2].mn, st[id*2].sum+st[id*2+1].mn);
-	st[id].mx = max(st[id*2].mx, st[id*2].sum+st[id*2+1].mx);
-}
- 
-void update(int id, int l, int r, int pos, int v)
-{
-	if(pos<l || pos>r) return;
-	if(l==r){
-		st[id].sum=v;
-		st[id].mx=max(0,v);
-		st[id].mn=min(0,v);
-		return;
-	}
-	int mid=(l+r)>>1;
-	update(id*2, l, mid, pos, v);
-	update(id*2+1, mid+1, r, pos, v);
-	combine(id);
-}
 
-Node query(int id, int l, int r, int pos, int v)
-{
+class LazySegmentTreeNode{
+private:	
+	int size_;
+	vector<Node> v,lazy;
 	
-}
+	void update(int s, int e, Node val, int k, int l, int r){
+		push(k, l, r);
+		if(r < s || e < l) return;
+		if(s <= l && r <= e){
+			lazy[k] = val;
+			push(k, l, r);
+		}
+		else{
+			update(s, e, val, k*2, l, (l+r)>>1);
+			update(s, e, val, k*2+1, ((l+r)>>1)+1, r);
+			v[k] = merge(v[k*2], v[k*2+1]);
+		}
+	}
+	
+	Node query(int s, int e, int k, int l, int r){
+		push(k, l, r);
+		if(r < s || e < l) return Node(0,INF,-1); //dummy value
+		if(s <= l && r <= e) return v[k];
+		ll lc = query(s, e, k*2, l, (l+r)>>1);
+		ll rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
+		return merge(lc, rc);
+	}
+ 
+public:
+	LazySegmentTreeNode(): v(vector<Node>()), lazy(vector<Node>()) {};
+	LazySegmentTreeNode(int n){
+		for(size_=1;size_<n;) size_<<=1;
+		v.resize(size_*4);
+		lazy.resize(size_*4);
+	}
+	//void reset(){}
+	inline void push(int k, int l, int r){
+		if(lazy[k]!=Node(0,0,0)){
+			v[k].sum+=(r-l+1)*lazy[k].sum;	//remember to consider the range!
+			v[k].mn+=lazy[k].mn;
+			v[k].mx+=lazy[k].mx;
+			if(l!=r){
+				lazy[k*2].sum+=lazy[k].sum;
+				lazy[k*2+1].sum+=lazy[k].sum;
+				lazy[k*2].mn+=lazy[k].mn;
+				lazy[k*2+1].mn+=lazy[k].mn;
+				lazy[k*2].mx+=lazy[k].mx;
+				lazy[k*2+1].mx+=lazy[k].mx;
+			}
+			lazy[k]=Node(0,0,0);
+		}
+	}
+	inline Node merge(Node x, Node y){
+		Node tmp;
+		tmp.sum = x.sum + y.sum;
+		tmp.mn = min(x.mn, y.mn);
+		tmp.mx = max(x.mx, y.mx);
+		return tmp;
+	}
+	inline void update(int l, int r, Node val){
+		update(l, r, val, 1, 0, size_-1);
+	}
+	inline Node query(int l, int r){
+		return query(l, r, 1, 0, size_-1);
+	}
+};
+//Lazy recursive ST with struct end
+
+//Point recursive ST start
+class PointSegmentTree{
+private:
+	int size_;
+	vector<ll> v;
+	
+	void update(int p, ll val, int k, int l, int r)
+	{
+		if(p < l || p > r) return;
+		if(l == r){
+			v[k]+=val;	//modification
+			return;
+		}
+		int mid = (l+r)>>1;
+		update(p, val, k*2, l, mid);
+		update(p, val, k*2+1, mid+1, r);
+		v[k] = merge(v[k*2], v[k*2+1]);
+	}
+	
+	ll query(int s, int e, int k, int l, int r)
+	{
+		if(e < l || s > r) return 0; //dummy value
+		if(s <= l && r <= e) return v[k];
+		int mid = (l+r)>>1;
+		ll lc = query(s, e, k*2, l, mid);
+		ll rc = query(s, e, k*2+1, mid+1, r);
+		return merge(lc, rc);
+	}
+	
+public:
+	PointSegmentTree(): v(vector<ll>()) {};
+	PointSegmentTree(int n){
+		for(size_=1;size_<n;) size_<<=1;
+		v.resize(size_*4);
+	}
+	//void reset(){}
+	inline ll merge(ll x, ll y){
+		return x+y;
+	}
+	inline void update(int p, ll val){
+		update(p, val, 1, 0, size_-1);
+	}
+	inline ll query(int l, int r){
+		return query(l, r, 1, 0, size_-1);
+	}
+};
 //Point recursive ST end
+
+//Point recursive ST with struct start
+struct Node{
+	ll sum,mn,mx;
+	Node(){sum=mn=mx=0;}
+	Node(ll _s,ll _mn,ll _mx){ sum=_s; mn=_mn; mx=_mx; }
+};
+
+class PointSegmentTreeNode{
+private:
+	int size_;
+	vector<Node> v;
+	
+	void update(int p, Node val, int k, int l, int r)
+	{
+		if(p < l || p > r) return;
+		if(l == r){
+			v[k].sum += val.sum; //modifications
+			v[k].mx = val.mx;
+			v[k].mn = val.mn;
+			return;
+		}
+		int mid = (l+r)>>1;
+		update(p, val, k*2, l, mid);
+		update(p, val, k*2+1, mid+1, r);
+		v[k] = merge(v[k*2], v[k*2+1]);
+	}
+	
+	Node query(int s, int e, int k, int l, int r)
+	{
+		if(e < l || s > r) return Node(0,INF,-1); //dummy value
+		if(s <= l && r <= e) return v[k];
+		int mid = (l+r)>>1;
+		Node lc = query(s, e, k*2, l, mid);
+		Node rc = query(s, e, k*2+1, mid+1, r);
+		return merge(lc, rc);
+	}
+	
+public:
+	PointSegmentTreeNode(): v(vector<Node>()) {};
+	PointSegmentTreeNode(int n){
+		for(size_=1;size_<n;) size_<<=1;
+		v.resize(size_*4);
+	}
+	//void reset(){}
+	inline Node merge(Node x, Node y){
+		Node tmp;
+		tmp.sum = x.sum + y.sum;
+		tmp.mn = min(x.mn, y.mn);
+		tmp.mx = max(x.mx, y.mx);
+		return tmp;
+	}
+	inline void update(int p, Node val){
+		update(p, val, 1, 0, size_-1);
+	}
+	inline Node query(int l, int r){
+		return query(l, r, 1, 0, size_-1);
+	}
+};
+//Point recursive with struct ST end
 
 //Point iterative ST start
 struct IterSegmentTree{
@@ -470,7 +616,6 @@ struct Maths
 		for(int i=1;i<=_n;i++){
 			pow2[i]=add(pow2[i-1],pow2[i-1]);
 			fact[i]=mult(fact[i-1],i);
-			//ifact[i]=mult(ifact[i-1],inv[i]);
 		}
 		ifact[_n] = inverse(fact[_n]);
 		for(int i=_n-1;i>=1;i--){
