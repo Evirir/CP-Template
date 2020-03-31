@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+m#include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
@@ -339,12 +339,64 @@ struct FenwickRange
 };
 //End FenwickRange
 
+//Randomizer start
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+uniform_int_distribution<> dis(1,6);
+	
+	Examples:
+	cout<<rng()<<'\n';
+	cout<<dis(rng)<<'\n';
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+//Randomizer end
+
+//KMP/prefix function start
+vector<int> prefix_function(string &Z){
+	int n=(int)Z.length();
+	vector<int> F(n);
+	F[0]=0;
+	forn(i,1,n){
+		int j=F[i-1];
+		while(j>0 && Z[i]!=Z[j]){
+			j=F[j-1];
+        }
+		if(Z[i]==Z[j]) j++;
+		F[i]=j;
+	}
+	return F;
+}
+//KMP/prefix function end
+
+//Trie start
+struct TrieNode{
+	int next[26];
+	bool leaf = false;
+	
+    TrieNode(){fill(begin(next), end(next), -1);}
+};
+
+vector<TrieNode> Trie(1);
+
+void add_string(const string &s){
+    int v = 0;
+    for(char ch : s){
+		int c = ch - 'a';
+		if(Trie[v].next[c] == -1){
+			Trie[v].next[c] = Trie.size();
+			Trie.emplace_back();
+		}
+		v = Trie[v].next[c];
+	}
+	Trie[v].leaf = true;
+}
+//Trie end
+
 //DSU start
 struct DSU{
-	struct node{ int p; ll sum; };
+	struct node{ int p; ll sz; };
 	vector<node> dsu;
 	DSU(int n){ dsu.resize(n);
-		forn(i,0,n){ dsu[i].p=i; dsu[i].sum=0;}
+		forn(i,0,n){ dsu[i].p=i; dsu[i].sz=0;}
 	}
 	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
 	bool sameset(int u, int v){ return rt(u)==rt(v); }
@@ -353,10 +405,10 @@ struct DSU{
 		if(u == v) return;
 		if(rand()&1) swap(u,v);
 		dsu[v].p = u;
-		//dsu[u].sum += dsu[v].sum;
+		//dsu[u].sz += dsu[v].sz;
 	}
-	//ll get(int u){ return dsu[rt(u)].sum; }
-	//void set(int u, ll val){ dsu[rt(u)].sum = val; }
+	//ll get(int u){ return dsu[rt(u)].sz; }
+	//void set(int u, ll val){ dsu[rt(u)].sz = val; }
 };
 //DSU end
 
@@ -490,15 +542,16 @@ int goup(int u, int h){
 }
 //Binary parent end
 
-//Sparse Table start: O(1) Min Query example
+//Sparse Table start: O(1) Min Query
 #define LG 25
 
-ll spt[MAXN][LG+1];
 int lg[MAXN+1];
 
 struct SparseTable
-{	
-	ll merge(ll x,ll y){
+{
+	ll spt[MAXN][LG+1];
+	
+	ll merge(ll x, ll y){
 		return min(x,y);
 	}
 	
@@ -519,13 +572,13 @@ struct SparseTable
 };
 //Sparse Table end
 
-//LCA start
+//LCA O(log n) query start
 #define LG 20
 
 int dep[MAXN],prt[MAXN][LG];
-mset(prt,-1);
+mset(prt,-1); mset(dep,0);
 
-void dfs(int u, int p)
+void dfs_lca(int u, int p)
 {
 	prt[u][0]=p;
 	forn(j,1,LG){
@@ -535,7 +588,7 @@ void dfs(int u, int p)
 	{
 		if(v==p) continue;
 		dep[v]=dep[u]+1;
-		dfs(v,u);
+		dfs_lca(v,u);
 	}
 }
 
@@ -559,7 +612,63 @@ int lca(int u, int v)
 	}
 	return prt[u][0];
 }
-//LCA end
+//LCA O(log n) query end
+
+//LCA O(1) query start
+vi adj[MAXN];
+int lg[MAXN+1];
+ll spt[MAXN][LG+1];
+int in[MAXN],out[MAXN],dep[MAXN];
+vi euler;
+int tmr=-1;
+
+struct SparseTableLCA
+{	
+	ll merge(ll x, ll y){
+		return (dep[x]<dep[y] ? x:y);
+	}
+	
+	SparseTableLCA(){}	
+	SparseTableLCA(vi arr){
+		int N=arr.size();
+		lg[1]=0;
+		fore(i,2,N)	lg[i]=lg[i/2]+1;
+		
+		forn(i,0,N) spt[i][0] = arr[i];
+		fore(j,1,LG)
+			for(int i=0; i+(1<<j)<=N; i++)
+				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
+	}
+	
+	ll query(int l,int r){
+		int len=lg[r-l+1];		
+		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
+	}	
+}lcast;
+
+void dfs_lca(int u, int p){
+	in[u]=++tmr;
+	euler.pb(u);
+	for(int v: adj[u]){
+		if(v==p) continue;
+		dep[v]=dep[u]+1;
+		dfs_lca(v,u);
+		euler.pb(u);
+	}
+	out[u]=tmr;
+}
+
+int lca(int u, int v){
+	int l=in[u],r=in[v];
+	if(l>r) swap(l,r);
+	return lcast.query(l,r);
+}	
+
+//in main()
+dfs_lca(0,-1);
+lcast=SparseTableLCA(euler);
+
+//LCA O(1) query end
 
 //Iterative ST start
 ll t[2*MAXN];
@@ -584,232 +693,223 @@ ll query(int l,int r){
 //Iterative ST end
 
 //Combi/Maths start
-struct Maths
+vector<ll> fact,ifact,inv,pow2;
+ll add(ll a,ll b)
 {
-	vector<ll> fact,ifact,inv,pow2;
-	ll add(ll a,ll b)
-	{
-		a+=b;a%=MOD;
-		if(a<0) a+=MOD;
-		return a;
+	a+=b;a%=MOD;
+	if(a<0) a+=MOD;
+	return a;
+}
+ll mult(ll a, ll b)
+{
+	a%=MOD; b%=MOD;
+	ll ans=(a*b)%MOD;
+	if(ans<0) ans+=MOD;
+	return ans;
+}
+ll pw(ll a, ll b)
+{
+	ll r=1;
+	while(b){
+		if(b&1) r=mult(r,a);
+		a=mult(a,a);
+		b>>=1;
 	}
-	ll mult(ll a, ll b)
-	{
-		a%=MOD; b%=MOD;
-		ll ans=(a*b)%MOD;
-		if(ans<0) ans+=MOD;
-		return ans;
+	return r;
+}
+ll choose(ll a, ll b)
+{
+	if(a<b) return 0;
+	if(b==0) return 1;
+	if(a==b) return 1;
+	return mult(fact[a],mult(ifact[b],ifact[a-b]));
+}
+ll inverse(ll a)
+{
+	return pw(a,MOD-2);
+}
+void init(ll _n)
+{
+	fact.clear(); ifact.clear(); inv.clear(); pow2.clear();
+	fact.resize(_n+1); ifact.resize(_n+1); inv.resize(_n+1); pow2.resize(_n+1);
+	pow2[0]=1; ifact[0]=1; fact[0]=1;
+	for(int i=1;i<=_n;i++){
+		pow2[i]=add(pow2[i-1],pow2[i-1]);
+		fact[i]=mult(fact[i-1],i);
 	}
-	ll pw(ll a, ll b)
+	ifact[_n] = inverse(fact[_n]);
+	for(int i=_n-1;i>=1;i--){
+	    ifact[i] = mult(ifact[i + 1], i + 1);
+	}
+	for(int i=1;i<=_n;i++){
+	    inv[i] = mult(fact[i-1],ifact[i]);
+	}
+}
+void getpf(vector<ii>& pf, ll n)
+{
+	for(ll i=2; i*i<=n; i++)
 	{
-		ll r=1;
-		while(b){
-			if(b&1) r=mult(r,a);
-			a=mult(a,a);
-			b>>=1;
+		int cnt=0;
+		while(n%i==0){
+			n/=i; cnt++;
 		}
-		return r;
+		if(cnt>0) pf.pb({i,cnt});
 	}
-	ll choose(ll a, ll b)
-	{
-		if(a<b) return 0;
-		if(b==0) return 1;
-		if(a==b) return 1;
-		return mult(fact[a],mult(ifact[b],ifact[a-b]));
-	}
-	ll inverse(ll a)
-	{
-		return pw(a,MOD-2);
-	}
-	void init(ll _n)
-	{
-		fact.clear(); ifact.clear(); inv.clear(); pow2.clear();
-		fact.resize(_n+1); ifact.resize(_n+1); inv.resize(_n+1); pow2.resize(_n+1);
-		pow2[0]=1; ifact[0]=1; fact[0]=1;
-		for(int i=1;i<=_n;i++){
-			pow2[i]=add(pow2[i-1],pow2[i-1]);
-			fact[i]=mult(fact[i-1],i);
-		}
-		ifact[_n] = inverse(fact[_n]);
-		for(int i=_n-1;i>=1;i--){
-		    ifact[i] = mult(ifact[i + 1], i + 1);
-		}
-		for(int i=1;i<=_n;i++){
-		    inv[i] = mult(fact[i-1],ifact[i]);
-		}
-	}
-	
-	void getpf(vector<ii>& pf, ll n)
-	{
-		for(ll i=2; i*i<=n; i++)
-		{
-			int cnt=0;
-			while(n%i==0){
-				n/=i; cnt++;
-			}
-			if(cnt>0) pf.pb({i,cnt});
-		}
-		if(n>1) pf.pb({n,1});
-	}
-};
+	if(n>1) pf.pb({n,1});
+}
 //Combi/Maths end
 
 //NT start
-struct NumberTheory
+vector<ll> primes;
+vector<bool> prime;
+vector<ll> totient;
+vector<ll> sumdiv;
+vector<ll> bigdiv;
+void Sieve(ll n)
 {
-	vector<ll> primes;
-	vector<bool> prime;
-	vector<ll> totient;
-	vector<ll> sumdiv;
-	vector<ll> bigdiv;
-	void Sieve(ll n)
+	prime.assign(n+1, 1);
+	prime[1] = false;
+	for(ll i = 2; i <= n; i++)
 	{
-		prime.assign(n+1, 1);
-		prime[1] = false;
-		for(ll i = 2; i <= n; i++)
+		if(prime[i])
 		{
-			if(prime[i])
+			primes.pb(i);
+			for(ll j = i*2; j <= n; j += i)
 			{
-				primes.pb(i);
-				for(ll j = i*2; j <= n; j += i)
-				{
-					prime[j] = false;
-				}
+				prime[j] = false;
 			}
 		}
 	}
-	
-	ll phi(ll x)
-	{
-		map<ll,ll> pf;
-		ll num = 1; ll num2 = x;
-		for(ll i = 0; primes[i]*primes[i] <= x; i++)
-		{
-			if(x%primes[i]==0)
-			{
-				num2/=primes[i];
-				num*=(primes[i]-1);
-			}
-			while(x%primes[i]==0)
-			{
-				x/=primes[i];
-				pf[primes[i]]++;
-			}
-		}
-		if(x>1)
-		{
-			pf[x]++; num2/=x; num*=(x-1);
-		}
-		x = 1;
-		num*=num2;
-		return num;
-	}
-	
-	bool isprime(ll x)
-	{
-		if(x==1) return false;
-		for(ll i = 0; primes[i]*primes[i] <= x; i++)
-		{
-			if(x%primes[i]==0) return false;
-		}
-		return true;
-	}
+}
 
-	void SievePhi(ll n)
+ll phi(ll x)
+{
+	map<ll,ll> pf;
+	ll num = 1; ll num2 = x;
+	for(ll i = 0; primes[i]*primes[i] <= x; i++)
 	{
-		totient.resize(n+1);
-		for (int i = 1; i <= n; ++i) totient[i] = i;
-		for (int i = 2; i <= n; ++i)
+		if(x%primes[i]==0)
 		{
-			if (totient[i] == i)
-			{
-				for (int j = i; j <= n; j += i)
-				{
-					totient[j] -= totient[j] / i;
-				}
-			}
+			num2/=primes[i];
+			num*=(primes[i]-1);
+		}
+		while(x%primes[i]==0)
+		{
+			x/=primes[i];
+			pf[primes[i]]++;
 		}
 	}
-	
-	void SieveSumDiv(ll n)
+	if(x>1)
 	{
-		sumdiv.resize(n+1);
-		for(int i = 1; i <= n; ++i)
-		{
-			for(int j = i; j <= n; j += i)
-			{
-				sumdiv[j] += i;
-			}
-		}
+		pf[x]++; num2/=x; num*=(x-1);
 	}
-	
-	ll getPhi(ll n)
-	{
-		return totient[n];
-	}
-	
-	ll getSumDiv(ll n)
-	{
-		return sumdiv[n];
-	}
-	
-	ll modpow(ll a, ll b, ll mod)
-	{
-		ll r = 1;
-		if(b < 0) b += mod*100000LL;
-		while(b)
-		{
-			if(b&1) r = (r*a)%mod;
-			a = (a*a)%mod;
-			b>>=1;
-		}
-		return r;
-	}
-	
-	ll inv(ll a, ll mod)
-	{
-		return modpow(a, mod - 2, mod);
-	}
-	
-	ll invgeneral(ll a, ll mod)
-	{
-		ll ph = phi(mod);
-		ph--;
-		return modpow(a, ph, mod);
-	}
-	
-	void getpf(vector<ii>& pf, ll n)
-	{
-		for(ll i = 0; primes[i]*primes[i] <= n; i++)
-		{
-			int cnt = 0;
-			while(n%primes[i]==0)
-			{
-				n/=primes[i]; cnt++;
-			}
-			if(cnt>0) pf.pb(ii(primes[i], cnt));
-		}
-		if(n>1)
-		{
-			pf.pb(ii(n, 1));
-		}
-	}
+	x = 1;
+	num*=num2;
+	return num;
+}
 
-	//ll op;
-	void getDiv(vector<ll>& div, vector<ii>& pf, ll n, int i)
+bool isprime(ll x)
+{
+	if(x==1) return false;
+	for(ll i = 0; primes[i]*primes[i] <= x; i++)
 	{
-		//op++;
-		ll x, k;
-		if(i >= pf.size()) return ;
-		x = n;
-		for(k = 0; k <= pf[i].S; k++)
+		if(x%primes[i]==0) return false;
+	}
+	return true;
+}
+
+void SievePhi(ll n)
+{
+	totient.resize(n+1);
+	for (int i = 1; i <= n; ++i) totient[i] = i;
+	for (int i = 2; i <= n; ++i)
+	{
+		if (totient[i] == i)
 		{
-			if(i==int(pf.size())-1) div.pb(x);
-			getDiv(div, pf, x, i + 1);
-			x *= pf[i].F;
+			for (int j = i; j <= n; j += i)
+			{
+				totient[j] -= totient[j] / i;
+			}
 		}
 	}
-};
+}
+
+void SieveSumDiv(ll n)
+{
+	sumdiv.resize(n+1);
+	for(int i = 1; i <= n; ++i)
+	{
+		for(int j = i; j <= n; j += i)
+		{
+			sumdiv[j] += i;
+		}
+	}
+}
+
+ll getPhi(ll n)
+{
+	return totient[n];
+}
+
+ll getSumDiv(ll n)
+{
+	return sumdiv[n];
+}
+
+ll modpow(ll a, ll b, ll mod)
+{
+	ll r = 1;
+	if(b < 0) b += mod*100000LL;
+	while(b)
+	{
+		if(b&1) r = (r*a)%mod;
+		a = (a*a)%mod;
+		b>>=1;
+	}
+	return r;
+}
+
+ll inv(ll a, ll mod)
+{
+	return modpow(a, mod - 2, mod);
+}
+
+ll invgeneral(ll a, ll mod)
+{
+	ll ph = phi(mod);
+	ph--;
+	return modpow(a, ph, mod);
+}
+
+void getpf(vector<ii>& pf, ll n)
+{
+	for(ll i = 0; primes[i]*primes[i] <= n; i++)
+	{
+		int cnt = 0;
+		while(n%primes[i]==0)
+		{
+			n/=primes[i]; cnt++;
+		}
+		if(cnt>0) pf.pb(ii(primes[i], cnt));
+	}
+	if(n>1)
+	{
+		pf.pb(ii(n, 1));
+	}
+}
+
+void getDiv(vector<ll>& div, vector<ii>& pf, ll n, int i)
+{
+	ll x, k;
+	if(i >= pf.size()) return ;
+	x = n;
+	for(k = 0; k <= pf[i].S; k++)
+	{
+		if(i==int(pf.size())-1) div.pb(x);
+		getDiv(div, pf, x, i + 1);
+		x *= pf[i].F;
+	}
+}
 //End NT
 
 //Sqrt Decomposition/Mo's algorithm start
@@ -866,6 +966,42 @@ forn(i,0,Q){
 //Sqrt decomposition/Mo's algorithm end
 
 //Convex Hull Dynamic short start
+struct Line{
+	mutable ll m,b,p;
+	bool operator<(const Line& o) const { return m < o.m; }
+	bool operator<(ll x) const { return p < x; }
+};
+
+struct ConvexHullDynamic: multiset<Line, less<>> {
+	// (for doubles, use inf = 1/.0, div(a,b) = a/b)
+	const ll inf = LLONG_MAX;
+	bool Max = 1;
+	
+	ll div(ll a, ll b) { // floored division
+		return a / b - ((a ^ b) < 0 && a % b); }
+	bool isect(iterator x, iterator y) {
+		if (y == end()) { x->p = inf; return false; }
+		if (x->m == y->m) x->p = x->b > y->b ? inf : -inf;
+		else x->p = div(y->b - x->b, x->m - y->m);
+		return x->p >= y->p;
+	}
+	void addline(ll m, ll b) {
+		if(!Max) { m=-m; b=-b; }
+		auto z = insert({m, b, 0}), y = z++, x = y;
+		while (isect(y, z)) z = erase(z);
+		if (x != begin() && isect(--x, y)) isect(x, y = erase(y));
+		while ((y = x) != begin() && (--x)->p >= y->p)
+			isect(x, erase(y));
+	}
+	ll query(ll x) {
+		//if(empty()) return 0;
+		auto l = *lower_bound(x);
+		return (l.m * x + l.b)*(Max ? 1 : -1);
+	}
+};
+//Convex Hull Dynamic short end
+
+//Convex Hull Dynamic short 2 start
 const ll is_query = -(1LL<<62);
 
 struct Line{
@@ -881,6 +1017,8 @@ struct Line{
 };
 
 struct ConvexHullDynamic: public multiset<Line>{ //will maintain upper hull for maximum
+	bool Max = 1;
+	
     bool bad(iterator y){
         auto z = next(y);
         if(y == begin()){
@@ -892,18 +1030,20 @@ struct ConvexHullDynamic: public multiset<Line>{ //will maintain upper hull for 
         return (x->b - y->b)*1.0L*(z->m - y->m) >= (y->b - z->b)*1.0L*(y->m - x->m);
     }
     void addline(ll m, ll b){
+		if(!Max) { m=-m; b=-b; }
         auto y = insert({m,b});
         y->succ = [=] { return next(y)==end() ? 0 : &*next(y); };
         if(bad(y)) { erase(y); return; }
         while(next(y)!=end() && bad(next(y))) erase(next(y));
         while(y != begin() && bad(prev(y))) erase(prev(y));
     }
-    ll eval(ll x){
+    ll query(ll x){
+		//if(empty()) return 0;
         auto l = *lower_bound((Line){x,is_query});
-        return l.m * x + l.b;
+        return (l.m * x + l.b)*(Max ? 1 : -1);
     }
 };
-//Convex Hull Dynamic short end
+//Convex Hull Dynamic short 2 end
 
 //Convex Hull Dynamic long start
 class ConvexHullDynamic {
