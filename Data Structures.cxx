@@ -965,7 +965,7 @@ forn(i,0,Q){
 }
 //Sqrt decomposition/Mo's algorithm end
 
-//Convex Hull Dynamic short start
+//Convex Hull Dynamic short start (CHT)
 struct Line{
 	mutable ll m,b,p;
 	bool operator<(const Line& o) const { return m < o.m; }
@@ -999,7 +999,7 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 		return (l.m * x + l.b)*(Max ? 1 : -1);
 	}
 };
-//Convex Hull Dynamic short end
+//Convex Hull Dynamic short end (CHT)
 
 //Convex Hull Dynamic short 2 start
 const ll is_query = -(1LL<<62);
