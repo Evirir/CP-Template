@@ -270,11 +270,18 @@ public:
 
 //Point iterative ST start
 struct IterSegmentTree{
+	vector<ll> t;
+	
+	IterSegmentTree: t(vector<ll>()) {}
+	IterSegmentTree(int _n){
+		t.resize(_n*2);
+	}
+	
 	void build(){
 		for(int i=n-1; i>0; i--) t[i]=t[i<<1]+t[i<<1|1];
 	}
 	
-	void modify(int p, int val){
+	void update(int p, int val){
 		for(t[p+=n]=value; p>1; p>>=1) t[p>>1]=t[p]+t[p^1];
 	}
 	
@@ -291,7 +298,7 @@ struct IterSegmentTree{
 forn(i,0,n) cin>>t[n+i];
 //Point iterative ST end
 
-//Start FenwickRange
+//FenwickRange start
 struct FenwickRange
 {
 	vector<ll> fw,fw2;
@@ -308,7 +315,7 @@ struct FenwickRange
         fw2.assign(N+1,0);
         siz = N+1;
 	}
-    void update(int l, int r, ll val) //[l,r] + val
+    void add(int l, int r, ll val) //[l,r] + val
     {   
 		l++; r++;
         for(int tl=l; tl<siz; tl+=(tl&(-tl)))
@@ -329,15 +336,63 @@ struct FenwickRange
         }
         return res;
     }
-    ll query(ll l, ll r)
+    ll query(int l, int r)
     {
 		l++; r++;
 		if(r<l) return 0;
 		if(l==0) return sum(r);
 		return sum(r)-sum(l-1);
 	}
+	void modify(int p, ll val)
+	{
+		add(p, val-query(p,p));
+	}
 };
-//End FenwickRange
+//FenwickRange end
+
+//Fenwick Tree start
+struct FenwickTree{
+    vector<ll> fw;
+    int siz;
+    FenwickTree(int N)
+    {
+        fw.assign(N+1,0);
+        siz = N+1;
+    }
+    void reset(int N)
+    {
+		fw.assign(N+1,0);
+        siz = N+1;
+	}
+	void add(int p, ll val)
+	{
+		for(p++; p<=siz; p+=(p&(-p)))
+		{
+			fw[p]+=val;
+		}
+	}
+	ll sum(int p)
+	{
+		ll res=0;
+		for(; p; p-=(p&(-p)))
+		{
+			res+=fw[p];
+		}
+		return res;
+	}
+	ll query(int l, int r)
+    {
+		l++; r++;
+		if(r<l) return 0;
+		if(l==0) return sum(r);
+		return sum(r)-sum(l-1);
+	}
+	void modify(int p, ll val)
+	{
+		add(p, val-query(p,p));
+	}
+};
+//Fenwick Tree end
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
@@ -717,16 +772,16 @@ ll pw(ll a, ll b)
 	}
 	return r;
 }
+ll inverse(ll a)
+{
+	return pw(a,MOD-2);
+}
 ll choose(ll a, ll b)
 {
 	if(a<b) return 0;
 	if(b==0) return 1;
 	if(a==b) return 1;
 	return mult(fact[a],mult(ifact[b],ifact[a-b]));
-}
-ll inverse(ll a)
-{
-	return pw(a,MOD-2);
 }
 void init(ll _n)
 {
@@ -739,10 +794,10 @@ void init(ll _n)
 	}
 	ifact[_n] = inverse(fact[_n]);
 	for(int i=_n-1;i>=1;i--){
-	    ifact[i] = mult(ifact[i + 1], i + 1);
+	    ifact[i] = mult(ifact[i+1], i+1);
 	}
 	for(int i=1;i<=_n;i++){
-	    inv[i] = mult(fact[i-1],ifact[i]);
+	    inv[i] = mult(fact[i-1], ifact[i]);
 	}
 }
 void getpf(vector<ii>& pf, ll n)
@@ -1167,8 +1222,8 @@ public:
 };
 //Convex Hull Dynamic long end
 
-//binary start
-string Bin(ll x)
+//binary converter start
+string BinToString(ll x)
 {
 	string res;
 	for(int i=8;i>=0;i--){
@@ -1177,4 +1232,4 @@ string Bin(ll x)
 	}
 	return res;
 }
-//binary end
+//binary converter end
