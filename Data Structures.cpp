@@ -1,28 +1,28 @@
-m#include <bits/stdc++.h>
+#include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
 using namespace __gnu_pbds;
 
-#define watch(x) cout<<(#x)<<"="<<(x)<<endl
+#define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
 #define forn(i,a,b) for(int i=a;i<b;i++)
 #define fore(i,a,b) for(int i=a;i<=b;i++)
 #define pb push_back
-#define mp make_pair
 #define F first
 #define S second
-#define PI 3.14159265358979323846264338327
-#define INF 2e14
+#define INF ll(1e18)
 #define MOD 998244353
 #define pqueue priority_queue
+#define fbo find_by_order
+#define ook order_of_key
 typedef long long ll;
 typedef pair<ll,ll> ii;
 typedef vector<ll> vi;
 typedef vector<ii> vii;
-typedef unsigned long long ull;
-typedef tree<ll,null_type,less<ll>,rb_tree_tag,tree_order_statistics_node_update> pbds;
+typedef long double ld;
+typedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> pbds;
 
 #define MAXN 100005
 
@@ -168,7 +168,7 @@ private:
 	
 	void update(int p, ll val, int k, int l, int r)
 	{
-		if(p < l || p > r) return;
+		if(p < l || r < p) return;
 		if(l == r){
 			v[k]=val;	//modification
 			return;
@@ -181,7 +181,7 @@ private:
 	
 	ll query(int s, int e, int k, int l, int r)
 	{
-		if(e < l || s > r) return 0; //dummy value
+		if(e < l || r < s) return 0; //dummy value
 		if(s <= l && r <= e) return v[k];
 		int mid = (l+r)>>1;
 		ll lc = query(s, e, k*2, l, mid);
@@ -222,7 +222,7 @@ private:
 	
 	void update(int p, Node val, int k, int l, int r)
 	{
-		if(p < l || p > r) return;
+		if(p < l || r < p) return;
 		if(l == r){
 			v[k].sum += val.sum; //modifications
 			v[k].mx = val.mx;
@@ -237,7 +237,7 @@ private:
 	
 	Node query(int s, int e, int k, int l, int r)
 	{
-		if(e < l || s > r) return Node(0,INF,-1); //dummy value
+		if(e < l || r < s) return Node(0,INF,-1); //dummy value
 		if(s <= l && r <= e) return v[k];
 		int mid = (l+r)>>1;
 		Node lc = query(s, e, k*2, l, mid);
@@ -397,6 +397,7 @@ struct FenwickTree{
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 uniform_int_distribution<> dis(1,6);
+uniform_int_distribution<int>(1,6)(rng);
 	
 	Examples:
 	cout<<rng()<<'\n';
@@ -449,18 +450,19 @@ void add_string(const string &s){
 //DSU start
 struct DSU{
 	struct node{ int p; ll sz; };
-	vector<node> dsu;
+	vector<node> dsu; int cc;
 	DSU(int n){ dsu.resize(n);
-		forn(i,0,n){ dsu[i].p=i; dsu[i].sz=0;}
+		forn(i,0,n){ cc=n; dsu[i].p=i; dsu[i].sz=1;}
 	}
 	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
 	bool sameset(int u, int v){ return rt(u)==rt(v); }
 	void merge(int u, int v){
 		u = rt(u); v = rt(v);
 		if(u == v) return;
-		if(rand()&1) swap(u,v);
+		if(dsu[u].sz < dsu[v].sz) swap(u,v);
 		dsu[v].p = u;
-		//dsu[u].sz += dsu[v].sz;
+		dsu[u].sz += dsu[v].sz;
+		cc--;
 	}
 	//ll get(int u){ return dsu[rt(u)].sz; }
 	//void set(int u, ll val){ dsu[rt(u)].sz = val; }
@@ -469,23 +471,21 @@ struct DSU{
 
 //Kruskal start
 int n,m;
-vector<pair<ll,ii>> edge;
+vector<pair<ll,ii>> edges;
 vector<pair<ii,ll>> mst;
-int cnt=0;
 ll sumw=0;
 
 void kruskal(){
 	DSU dsu(n);
-	sort(edge.begin(),edge.end());
+	sort(edges.begin(),edges.end());
 	
-	forn(i,0,m){
-		int u=edge[i].S.F, v=edge[i].S.S; ll w=edge[i].F;
+	forn(i,0,edges.size()){
+		int u=edges[i].S.F, v=edges[i].S.S; ll w=edges[i].F;
 		if(dsu.sameset(u,v)) continue;
 		mst.pb({{u,v},w});
 		dsu.merge(u,v);
 		sumw+=w;
-		cnt++;
-		if(cnt>=n-1) break;
+		if(dsu.cc<=1) break;
 	}
 }
 //Kruskal end
@@ -537,18 +537,18 @@ void dfs_euler(int u, int p){
 }
 //Euler path end
 
-//HLD start
+//HLD (Heavy-light decomposition) start
 #define LG 19
 
-vi adj[MAXN];
 int in[MAXN],out[MAXN];
-int prt[MAXN][LG];
+int tmr=-1;
+int prt[MAXN];
 int sz[MAXN],dep[MAXN];
 int top[MAXN];
 
 void dfs_sz(int u, int p){
-	sz[u]=1; 
-	prt[u][0]=p;
+	sz[u]=1;
+	prt[u]=p;
 
 	if(adj[u][0]==p && adj[u].size()>1) swap(adj[u][0],adj[u][1]);
 	
@@ -561,7 +561,6 @@ void dfs_sz(int u, int p){
 	}
 }
 
-int tmr=-1;
 void dfs_hld(int u, int p){
 	in[u]=++tmr;
 	for(int v: adj[u]){
@@ -572,30 +571,23 @@ void dfs_hld(int u, int p){
 	out[u]=tmr;
 }
 
-ll Query(int u,int v){
+ll merge_hld(ll x, ll y){ return x+y; }
+ll Query(int u, int v){
 	ll ans=0;
 	while(top[u]!=top[v]){
 		if(dep[top[u]]<dep[top[v]]) swap(u,v);
-		ans+=st.query(in[top[u]],in[u]);
+		ans=merge_hld(ans,st.query(in[top[u]],in[u]));
 		u=prt[top[u]];
 	}
 	
 	if(dep[u]<dep[v]) swap(u,v);
-	return ans+st.query(in[v],in[u]);
+	return merge_hld(ans,st.query(in[v],in[u]));
 }
 
 st.update(in[u],in[u],w);
-dfs_sz(0,0);
-//HLD end
-
-//Binary parent start
-int goup(int u, int h){
-	for(int i=LG;i>=0;i--){
-		if(i&(1<<h)) u=prt[u][i];
-	}
-	return u;
-}
-//Binary parent end
+dfs_sz(0,-1);
+dfs_hld(0,-1);
+//HLD (Heavy-light decomposition) end
 
 //Sparse Table start: O(1) Min Query
 #define LG 25
@@ -668,6 +660,15 @@ int lca(int u, int v)
 	return prt[u][0];
 }
 //LCA O(log n) query end
+
+//Binary parent start
+int goup(int u, int h){
+	for(int i=LG;i>=0;i--){
+		if(h&(1LL<<i)) u=prt[u][i];
+	}
+	return u;
+}
+//Binary parent end
 
 //LCA O(1) query start
 vi adj[MAXN];
@@ -814,7 +815,7 @@ void getpf(vector<ii>& pf, ll n)
 }
 //Combi/Maths end
 
-//NT start
+//Number Theory NT start
 vector<ll> primes;
 vector<bool> prime;
 vector<ll> totient;
@@ -965,7 +966,7 @@ void getDiv(vector<ll>& div, vector<ii>& pf, ll n, int i)
 		x *= pf[i].F;
 	}
 }
-//End NT
+//End Number Theory NT
 
 //Sqrt Decomposition/Mo's algorithm start
 int BS;
