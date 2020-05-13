@@ -118,8 +118,8 @@ private:
 		push(k, l, r);
 		if(r < s || e < l) return Node(0,INF,-1); //dummy value
 		if(s <= l && r <= e) return v[k];
-		ll lc = query(s, e, k*2, l, (l+r)>>1);
-		ll rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
+		Node lc = query(s, e, k*2, l, (l+r)>>1);
+		Node rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
 		return merge(lc, rc);
 	}
  
@@ -396,8 +396,8 @@ struct FenwickTree{
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-uniform_int_distribution<> dis(1,6);
 uniform_int_distribution<int>(1,6)(rng);
+uniform_int_distribution<> dis(1,6);
 	
 	Examples:
 	cout<<rng()<<'\n';
@@ -593,11 +593,10 @@ dfs_hld(0,-1);
 #define LG 25
 
 int lg[MAXN+1];
+ll spt[MAXN][LG+1];
 
 struct SparseTable
-{
-	ll spt[MAXN][LG+1];
-	
+{	
 	ll merge(ll x, ll y){
 		return min(x,y);
 	}
@@ -663,7 +662,7 @@ int lca(int u, int v)
 
 //Binary parent start
 int goup(int u, int h){
-	for(int i=LG;i>=0;i--){
+	for(int i=LG-1;i>=0;i--){
 		if(h&(1LL<<i)) u=prt[u][i];
 	}
 	return u;
@@ -752,6 +751,7 @@ ll query(int l,int r){
 vector<ll> fact,ifact,inv,pow2;
 ll add(ll a,ll b)
 {
+	a%=MOD; b%=MOD;
 	a+=b;a%=MOD;
 	if(a<0) a+=MOD;
 	return a;
@@ -1223,7 +1223,7 @@ public:
 };
 //Convex Hull Dynamic long end
 
-//binary converter start
+//Binary converter start
 string BinToString(ll x)
 {
 	string res;
@@ -1233,4 +1233,25 @@ string BinToString(ll x)
 	}
 	return res;
 }
-//binary converter end
+//Binary converter end
+
+//Grid movement (4-direction) start
+int dx[4]={-1,1,0,0};
+int dy[4]={0,0,-1,1};
+bool oob(int x, int y){
+	return x<0 || y<0 || x>=n || y>=m;
+}
+
+forn(k,0,4){
+	int x1=x+dx[k], y1=y+dy[k];
+	if(oob(x1,y1)) continue;
+	if(vst[x1][y1]) continue;
+	
+	
+}
+//Grid movement (4-direction) end
+
+//Grid movement (8-direction) start
+int dx[8]={-1,0,1,-1,1,-1,0,1};
+int dy[8]={-1,-1,-1,0,0,1,1,1};
+//Grid movement (8-direction) end
