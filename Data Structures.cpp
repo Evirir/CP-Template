@@ -1303,6 +1303,107 @@ int maxMatching()
 }
 //Hopkroft-Karp matching end
 
+//SCC (Strongly connected components) start
+//init(n) -> read input -> tarjan()
+struct SCC
+{
+	const int INF2 = int(1e9);
+	vector<vector<int> > vec;
+	int index;
+	vector<int> idx;
+	vector<int> lowlink;
+	vector<bool> onstack;
+	stack<int> s;
+	vector<int> sccidx;
+	int scccnt;
+	vi topo;
+	
+	//lower sccidx means appear later
+	void init(int n)
+	{
+		idx.assign(n,-1);
+		index = 0;
+		onstack.assign(n,0);
+		lowlink.assign(n,INF2);
+		while(!s.empty()) s.pop();
+		sccidx.assign(n,-1);
+		scccnt = 0;
+		vec.clear();
+		topo.clear();
+		vec.resize(n);
+	}
+	
+	void addedge(int u, int v) //u -> v
+	{
+		vec[u].pb(v);
+	}
+	
+	void connect(int u)
+	{
+		idx[u] = index;
+		lowlink[u] = index;
+		index++;
+		s.push(u);
+		onstack[u] = true;
+		for(int i = 0; i < vec[u].size(); i++)
+		{
+			int v = vec[u][i];
+			if(idx[v] == -1)
+			{
+				connect(v);
+				lowlink[u] = min(lowlink[u], lowlink[v]);
+			}
+			else if(onstack[v])
+			{
+				lowlink[u] = min(lowlink[u], idx[v]);
+			}
+		}
+		if(lowlink[u] == idx[u])
+		{
+			while(1)
+			{
+				int v = s.top();
+				s.pop();
+				onstack[v] = false;
+				sccidx[v] = scccnt;
+				if(v == u) break;
+			}
+			scccnt++;
+		}
+	}
+	
+	void tarjan()
+	{
+		for(int i = 0; i < vec.size(); i++)
+		{
+			if(idx[i] == -1)
+			{
+				connect(i);
+			}
+		}
+	}
+	
+	void toposort() //if graph is a DAG and i just want to toposort
+	{
+		tarjan();
+		int n = vec.size();
+		topo.resize(n);
+		vector<ii> tmp;
+		for(int i = 0; i < n; i++)
+		{
+			tmp.pb(ii(sccidx[i],i));
+		}
+		sort(tmp.begin(),tmp.end());
+		reverse(tmp.begin(),tmp.end());
+		for(int i = 0; i < n; i++)
+		{
+			topo[i]=tmp[i].S;
+			if(i>0) assert(tmp[i].F!=tmp[i-1].F);
+		}
+	}
+};
+//SCC end
+
 //Binary converter start
 string BinToString(ll x)
 {
