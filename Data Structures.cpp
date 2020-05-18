@@ -350,11 +350,11 @@ struct FenwickRange
 };
 //FenwickRange end
 
-//Fenwick Tree start
-struct FenwickTree{
+//Fenwick Tree (FenwickPoint) start
+struct FenwickPoint{
     vector<ll> fw;
     int siz;
-    FenwickTree(int N)
+    FenwickPoint(int N)
     {
         fw.assign(N+1,0);
         siz = N+1;
@@ -392,7 +392,7 @@ struct FenwickTree{
 		add(p, val-query(p,p));
 	}
 };
-//Fenwick Tree end
+//Fenwick Tree (FenwickPoint) end
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
@@ -814,6 +814,45 @@ void getpf(vector<ii>& pf, ll n)
 	if(n>1) pf.pb({n,1});
 }
 //Combi/Maths end
+
+//Matrix start
+const int DIM = 4;
+
+struct Matrix{
+	ll a[DIM][DIM];
+	ll *operator[](ll r){ return a[r]; }
+
+	Matrix(int x = 0){
+		memset(a, 0, sizeof(a));
+		if(x) for(int i = 0; i < DIM; i++) a[i][i] = x;
+	}
+} const I(1);
+
+Matrix operator*(Matrix A, Matrix B){
+	const ll MOD2 = ll(MOD)*MOD;
+	Matrix C;
+	for(int i = 0; i < DIM; i++){
+		for(int j = 0; j < DIM; j++){
+			ll w = 0;
+			for(int k = 0; k < DIM; k++){
+				w += ll(A[i][k]) * B[k][j];
+				if (w >= MOD2) w -= MOD2;
+			}
+			C[i][j] = w % MOD;
+		}
+	}
+	return C;
+}
+
+Matrix operator^(Matrix A, ll b){
+	Matrix R = I;
+	for(; b > 0; b /= 2){
+		if(b&1) R = R*A;
+		A = A*A;
+	}
+	return R;
+}
+//Matrix end
 
 //Number Theory NT start
 vector<ll> primes;
@@ -1304,7 +1343,7 @@ int maxMatching()
 //Hopkroft-Karp matching end
 
 //SCC (Strongly connected components) start
-//init(n) -> read input -> tarjan()
+//init(n) -> read input -> tarjan() -> sccidx[]
 struct SCC
 {
 	const int INF2 = int(1e9);
