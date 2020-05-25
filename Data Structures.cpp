@@ -818,6 +818,8 @@ void getpf(vector<ii>& pf, ll n)
 //Combi/Maths end
 
 //Matrix start
+const int DIM = 4;
+
 struct Matrix{
 	ll a[DIM][DIM];
 	ll *operator[](ll r){ return a[r]; }
