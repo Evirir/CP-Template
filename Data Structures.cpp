@@ -475,9 +475,11 @@ vector<pair<ll,ii>> edges;
 vector<pair<ii,ll>> mst;
 ll sumw=0;
 
-void kruskal(){
+void kruskal()
+{
 	DSU dsu(n);
 	sort(edges.begin(),edges.end());
+	sumw=0;
 	
 	forn(i,0,edges.size()){
 		int u=edges[i].S.F, v=edges[i].S.S; ll w=edges[i].F;
@@ -619,7 +621,7 @@ struct SparseTable
 //Sparse Table end
 
 //LCA O(log n) query start
-#define LG 20
+#define LG 11
 
 int dep[MAXN],prt[MAXN][LG];
 mset(prt,-1); mset(dep,0);
@@ -816,8 +818,6 @@ void getpf(vector<ii>& pf, ll n)
 //Combi/Maths end
 
 //Matrix start
-const int DIM = 4;
-
 struct Matrix{
 	ll a[DIM][DIM];
 	ll *operator[](ll r){ return a[r]; }
@@ -993,10 +993,10 @@ void getpf(vector<ii>& pf, ll n)
 	}
 }
 
-void getDiv(vector<ll>& div, vector<ii>& pf, ll n, int i)
+void getDiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 {
 	ll x, k;
-	if(i >= pf.size()) return ;
+	if(i >= pf.size()) return;
 	x = n;
 	for(k = 0; k <= pf[i].S; k++)
 	{
@@ -1261,6 +1261,84 @@ public:
 	}
 };
 //Convex Hull Dynamic long end
+
+//O(V^2E) Dinic Flow
+//Initialize : MaxFlow<# of vertices, Max Value> M;
+
+template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and MX (the Max number of vertices)
+{
+	struct edge
+	{
+		int to,cap,rev;
+		edge(int to=0,int cap=0,int rev=0):to(to),cap(cap),rev(rev){}
+	};
+	vector <edge> vec[MX];
+	int level[MX];
+	int iter[MX];
+	
+	void addedge(int s,int t,int c) //adds an edge of cap c to the flow graph
+	{
+		int S=vec[s].size(),T=vec[t].size();
+		vec[s].push_back(edge(t,c,T));
+		vec[t].push_back(edge(s,0,S));
+	}
+	void bfs(int s)
+	{
+		memset(level,-1,sizeof(level));
+		queue <int> que;
+		level[s] = 0;
+		que.push(s);
+		while (!que.empty())
+		{
+			int v = que.front();que.pop();
+			for(int i=0;i<vec[v].size();i++)
+			{
+				edge&e=vec[v][i];
+				if (e.cap>0&&level[e.to]<0)
+				{
+					level[e.to]=level[v]+1;
+					que.push(e.to);
+				}
+			}
+		}
+	}
+	ll flow_dfs(int v,int t,ll f)
+	{
+		if (v==t) return f;
+		for(int &i=iter[v];i<vec[v].size();i++)
+		{
+			edge &e=vec[v][i];
+			if (e.cap>0&&level[v]<level[e.to])
+			{
+				ll d=flow_dfs(e.to,t,min(f,ll(e.cap)));
+				if (d>0)
+				{
+					e.cap-=d;
+					vec[e.to][e.rev].cap+=d;
+					return d;
+				}
+			}
+		}
+		return 0;
+	}
+	ll maxflow(int s,int t) //finds max flow using dinic from s to t
+	{
+		ll flow = 0;
+		while(1)
+		{
+			bfs(s);
+			if (level[t]<0) return flow;
+			memset(iter,0,sizeof(iter));
+			while (1)
+			{
+				ll f=flow_dfs(s,t,INF);
+				if(f==0) break;
+				flow += f;
+			}
+		}
+	}
+};
+//Dinic Flow end
 
 //Hopkroft-Karp matching (MCBM, max-cardinality bipartite matching) start
 //Read n1,n2 -> init() -> addEdge() -> maxMatching()
