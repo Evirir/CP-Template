@@ -298,75 +298,24 @@ struct IterSegmentTree{
 forn(i,0,n) cin>>t[n+i];
 //Point iterative ST end
 
-//FenwickRange start
-struct FenwickRange
-{
-	vector<ll> fw,fw2;
-    int siz;
-    FenwickRange(int N)
-    {
-        fw.assign(N+1,0);
-        fw2.assign(N+1,0);
-        siz = N+1;
-    }
-    void reset(int N)
-    {
-		fw.assign(N+1,0);
-        fw2.assign(N+1,0);
-        siz = N+1;
-	}
-    void add(int l, int r, ll val) //[l,r] + val
-    {   
-		l++; r++;
-        for(int tl=l; tl<siz; tl+=(tl&(-tl)))
-        {
-            fw[tl]+=val, fw2[tl]-=val*ll(l-1);
-        }
-        for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
-        {
-            fw[tr]-=val, fw2[tr]+=val*ll(r);
-        }
-    }
-    ll sum(int r) //[1,r]
-    {                         
-        ll res=0;
-        for(int tr=r; tr; tr-=(tr&(-tr)))
-        {
-            res+=fw[tr]*ll(r)+fw2[tr];
-        }
-        return res;
-    }
-    ll query(int l, int r)
-    {
-		l++; r++;
-		if(r<l) return 0;
-		if(l==0) return sum(r);
-		return sum(r)-sum(l-1);
-	}
-	void modify(int p, ll val)
-	{
-		add(p, val-query(p,p));
-	}
-};
-//FenwickRange end
-
 //Fenwick Tree (FenwickPoint) start
 struct FenwickPoint{
-    vector<ll> fw;
-    int siz;
-    FenwickPoint(int N)
-    {
-        fw.assign(N+1,0);
-        siz = N+1;
-    }
-    void reset(int N)
-    {
+	vector<ll> fw;
+	int siz;
+	FenwickPoint(): fw(vector<ll>()), siz(0) {}
+	FenwickPoint(int N)
+	{
 		fw.assign(N+1,0);
-        siz = N+1;
+		siz = N+1;
+	}
+	void reset(int N)
+	{
+		fw.assign(N+1,0);
+		siz = N+1;
 	}
 	void add(int p, ll val)
 	{
-		for(p++; p<=siz; p+=(p&(-p)))
+		for(p++; p<siz; p+=(p&(-p)))
 		{
 			fw[p]+=val;
 		}
@@ -381,7 +330,7 @@ struct FenwickPoint{
 		return res;
 	}
 	ll query(int l, int r)
-    {
+	{
 		l++; r++;
 		if(r<l) return 0;
 		if(l==0) return sum(r);
@@ -394,10 +343,63 @@ struct FenwickPoint{
 };
 //Fenwick Tree (FenwickPoint) end
 
+//FenwickRange start
+struct FenwickRange
+{
+	vector<ll> fw,fw2;
+	int siz;
+	FenwickRange(): fw(vector<ll>()), fw2(vector<ll>()), siz(0) {}
+	FenwickRange(int N)
+	{
+		fw.assign(N+1,0);
+		fw2.assign(N+1,0);
+		siz = N+1;
+	}
+	void reset(int N)
+	{
+		fw.assign(N+1,0);
+		fw2.assign(N+1,0);
+		siz = N+1;
+	}
+	void add(int l, int r, ll val) //[l,r] + val
+	{   
+		l++; r++;
+		for(int tl=l; tl<siz; tl+=(tl&(-tl)))
+		{
+			fw[tl]+=val, fw2[tl]-=val*ll(l-1);
+		}
+		for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
+		{
+			fw[tr]-=val, fw2[tr]+=val*ll(r);
+		}
+	}
+	ll sum(int r) //[1,r]
+	{                         
+		ll res=0;
+		for(int tr=r; tr; tr-=(tr&(-tr)))
+		{
+			res+=fw[tr]*ll(r)+fw2[tr];
+		}
+		return res;
+	}
+	ll query(int l, int r)
+	{
+		l++; r++;
+		if(r<l) return 0;
+		if(l==0) return sum(r);
+		return sum(r)-sum(l-1);
+	}
+	void modify(int p, ll val)
+	{
+		add(p,p,val-query(p,p));
+	}
+};
+//FenwickRange end
+
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-uniform_int_distribution<int>(1,6)(rng);
-uniform_int_distribution<> dis(1,6);
+uniform_int_distribution<int>(1,6)(rng)
+uniform_int_distribution<> dis(1,6)
 	
 	Examples:
 	cout<<rng()<<'\n';
@@ -451,6 +453,7 @@ void addstring(const string &s){
 struct DSU{
 	struct node{ int p; ll sz; };
 	vector<node> dsu; int cc;
+	node& operator[](int id){ return dsu[id]; }
 	DSU(int n){ dsu.resize(n);
 		forn(i,0,n){ cc=n; dsu[i].p=i; dsu[i].sz=1;}
 	}
@@ -1536,18 +1539,26 @@ string BinToString(ll x)
 //Binary converter end
 
 //Grid movement (4-direction) start
-int dx[4]={-1,1,0,0};
-int dy[4]={0,0,-1,1};
+const int dx[4]={-1,1,0,0};
+const int dy[4]={0,0,-1,1};
+const char dc[4]={'U','D','L','R'};
 bool oob(int x, int y){
 	return x<0 || y<0 || x>=n || y>=m;
 }
 
-forn(k,0,4){
-	int x1=x+dx[k], y1=y+dy[k];
-	if(oob(x1,y1)) continue;
-	if(vst[x1][y1]) continue;
-	
-	
+bool vst[MAXN][MAXN];
+
+void dfs(int x, int y)
+{
+	if(vst[x][y]) return;
+	vst[x][y]=1;
+	forn(k,0,4){
+		int x1=x+dx[k], y1=y+dy[k];
+		if(oob(x1,y1)) continue;
+		if(vst[x1][y1]) continue;
+		
+		
+	}
 }
 //Grid movement (4-direction) end
 
