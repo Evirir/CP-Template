@@ -23,6 +23,8 @@ typedef vector<ll> vi;
 typedef vector<ii> vii;
 typedef long double ld;
 typedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> pbds;
+void amin(ll &a, ll b){ a=min(a,b); }
+void amax(ll &a, ll b){ a=max(a,b); }
 
 #define MAXN 100005
 
@@ -408,22 +410,33 @@ uniform_int_distribution<> dis(1,6)
 mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
 //Randomizer end
 
-//KMP/prefix function start
-vector<int> prefix_function(string &Z){
-	int n=(int)Z.length();
-	vector<int> F(n);
-	F[0]=0;
-	forn(i,1,n){
-		int j=F[i-1];
-		while(j>0 && Z[i]!=Z[j]){
-			j=F[j-1];
-        }
-		if(Z[i]==Z[j]) j++;
-		F[i]=j;
+//Prefix function start/KMP (Knuth–Morris–Pratt)
+vector<int> prefix_function(string &s){
+	int n=(int)s.length();
+	vector<int> pi(n);
+	pi[0]=0;
+	for(int i=1;i<n;i++){
+		int j=pi[i-1];
+		while(j>0 && s[i]!=s[j]) j=pi[j-1];
+		if(s[i]==s[j]) j++;
+		pi[i]=j;
 	}
-	return F;
+	return pi;
 }
-//KMP/prefix function end
+//Prefix function end
+
+//Z-algorithm start [Z algorithm]
+vector<int> z_function(string &s){
+	int n=(int)s.length();
+	vector<int> z(n);
+	for(int i=1,l=0,r=0; i<n; ++i){
+		if(i<=r) z[i]=min(r-i+1, z[i-l]);
+		while(i+z[i]<n && s[z[i]]==s[i+z[i]]) ++z[i];
+		if(i+z[i]-1>r) l=i, r=i+z[i]-1;
+	}
+	return z;
+}
+//Z-algorithm end [Z algorithm]
 
 //Trie start
 struct TrieNode{
@@ -756,7 +769,6 @@ ll query(int l,int r){
 vector<ll> fact,ifact,inv,pow2;
 ll add(ll a,ll b)
 {
-	a%=MOD; b%=MOD;
 	a+=b;a%=MOD;
 	if(a<0) a+=MOD;
 	return a;
@@ -874,7 +886,7 @@ void Sieve(ll n)
 		if(prime[i])
 		{
 			primes.pb(i);
-			for(ll j = i*2; j <= n; j += i)
+			for(ll j = i*i; j <= n; j += i)
 			{
 				prime[j] = false;
 			}
@@ -1539,6 +1551,7 @@ string BinToString(ll x)
 //Binary converter end
 
 //Grid movement (4-direction) start
+int n,m;
 const int dx[4]={-1,1,0,0};
 const int dy[4]={0,0,-1,1};
 const char dc[4]={'U','D','L','R'};
@@ -1547,6 +1560,14 @@ bool oob(int x, int y){
 }
 
 bool vst[MAXN][MAXN];
+
+forn(k,0,4){
+	int x1=x+dx[k], y1=y+dy[k];
+	if(oob(x1,y1)) continue;
+	if(vst[x1][y1]) continue;
+	
+	
+}
 
 void dfs(int x, int y)
 {
@@ -1557,7 +1578,7 @@ void dfs(int x, int y)
 		if(oob(x1,y1)) continue;
 		if(vst[x1][y1]) continue;
 		
-		
+		dfs(x1,y1);
 	}
 }
 //Grid movement (4-direction) end
