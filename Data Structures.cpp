@@ -1357,6 +1357,122 @@ template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and 
 };
 //Dinic Flow end
 
+//Min Cost Max Flow (MCBM) start
+struct MinCostFlow{
+    int n, s, t;
+    long long flow, cost;
+    vector<vector<int> > graph;
+    vector<Edge> e;
+    vector<long long> dist, potential;
+    vector<int> parent;
+    bool negativeCost;
+ 
+    MinCostFlow(int _n){
+        // 0-based indexing
+        n = _n;
+        graph.assign(n, vector<int> ());
+        negativeCost = false;
+    }
+ 
+    void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
+        if(cost < 0)
+            negativeCost = true;
+ 
+        graph[u].push_back(e.size());
+        e.push_back(Edge(u, v, cap, cost));
+ 
+        graph[v].push_back(e.size());
+        e.push_back(Edge(v, u, 0, -cost));
+ 
+        if(!directed)
+            addEdge(v, u, cap, cost, true);
+    }
+ 
+    pair<long long, long long> getMinCostFlow(int _s, int _t){
+        s = _s; t = _t;
+        flow = 0, cost = 0;
+ 
+        potential.assign(n, 0);
+        if(negativeCost){
+            // run Bellman-Ford to find starting potential
+            dist.assign(n, 1LL<<62);
+            for(int i = 0, relax = false; i < n && relax; i++, relax = false){
+                for(int u = 0; u < n; u++){
+                    for(int k = 0; k < graph[u].size(); k++){
+                        int eIdx = graph[u][i];
+                        int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
+ 
+                        if(dist[v] > dist[u] + w && cap > 0){
+                            dist[v] = dist[u] + w;
+                            relax = true;
+            }   }   }   }
+ 
+            for(int i = 0; i < n; i++){
+                if(dist[i] < (1LL<<62)){
+                    potential[i] = dist[i];
+        }   }   }
+ 
+        while(dijkstra()){
+            flow += sendFlow(t, 1LL<<62);
+        }
+ 
+        return make_pair(flow, cost);
+    }
+ 
+    bool dijkstra(){
+        parent.assign(n, -1);
+        dist.assign(n, 1LL<<62);
+        priority_queue<ii, vector<ii>, greater<ii> > pq;
+ 
+        dist[s] = 0;
+        pq.push(ii(0, s));
+ 
+ 
+        while(!pq.empty()){
+            int u = pq.top().second;
+            long long d = pq.top().first;
+            pq.pop();
+ 
+            if(d != dist[u]) continue;
+ 
+            for(int i = 0; i < graph[u].size(); i++){
+                int eIdx = graph[u][i];
+                int v = e[eIdx].v; ll cap = e[eIdx].cap;
+                ll w = e[eIdx].cost + potential[u] - potential[v];
+ 
+                if(dist[u] + w < dist[v] && cap > 0){
+                    dist[v] = dist[u] + w;
+                    parent[v] = eIdx;
+ 
+                    pq.push(ii(dist[v], v));
+        }   }   }
+ 
+        // update potential
+        for(int i = 0; i < n; i++){
+            if(dist[i] < (1LL<<62))
+                potential[i] += dist[i];
+        }
+ 
+        return dist[t] != (1LL<<62);
+    }
+ 
+    long long sendFlow(int v, long long curFlow){
+        if(parent[v] == -1)
+            return curFlow;
+        int eIdx = parent[v];
+        int u = e[eIdx].u; ll w = e[eIdx].cost;
+ 
+        long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
+ 
+        cost += f*w;
+        e[eIdx].cap -= f;
+        e[eIdx^1].cap += f;
+ 
+        return f;
+    }
+};
+//Min Cost Max Flow (MCBM) end
+
 //Hopkroft-Karp matching (MCBM, max-cardinality bipartite matching) start
 //Read n1,n2 -> init() -> addEdge() -> maxMatching()
 const int MAXN1 = 50000;
@@ -1587,3 +1703,62 @@ void dfs(int x, int y)
 int dx[8]={-1,0,1,-1,1,-1,0,1};
 int dy[8]={-1,-1,-1,0,0,1,1,1};
 //Grid movement (8-direction) end
+
+//Nearest/Closest pair of points start
+struct Point{
+	ll x,y,id;
+};
+
+ll dist(const Point &a, const Point &b){
+	return (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y);
+}
+
+bool cmp_x(const Point &a, const Point &b){
+	return a.x<b.x || (a.x==b.x && a.y<b.y);
+}
+bool cmp_y(const Point &a, const Point &b){
+	return a.y<b.y;
+}
+
+vector<Point> Temp;
+ll mindist=INF;
+ii best={-1,-1};
+void rec(int l, int r, vector<Point> &a)
+{
+	if(r-l<=3){
+		for(int i=l;i<r;i++) for(int j=i+1;j<r;j++){
+			if(mindist>dist(a[i],a[j])){
+				mindist=dist(a[i],a[j]);
+				best={a[i].id, a[j].id};
+			}
+		}
+		sort(a.begin()+l, a.begin()+r, cmp_y);
+		return;
+	}
+	
+	int mid=(l+r)/2;
+	ll midx=a[mid].x;
+	rec(l,mid,a);
+	rec(mid,r,a);
+	
+	merge(a.begin()+l, a.begin()+mid, a.begin()+mid, a.begin()+r, Temp.begin(), cmp_y);
+	copy(Temp.begin(), Temp.begin()+r-l, a.begin()+l);
+	
+	int sz=0;
+	for(int i=l;i<r;i++){
+		if(abs(a[i].x-midx)<mindist){
+			for(int j=sz-1; j>=0 && a[i].y-Temp[j].y<mindist; j--){
+				if(mindist>dist(a[i],Temp[j])){
+					mindist=dist(a[i],Temp[j]);
+					best={a[i].id, Temp[j].id};
+				}
+			}
+			Temp[sz++]=a[i];
+		}
+	}
+}
+
+Temp.resize(n);
+sort(a.begin(), a.end(), cmp_x);
+rec(0,n,a);
+//Nearest pair of points end
