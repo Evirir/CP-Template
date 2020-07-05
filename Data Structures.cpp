@@ -7,13 +7,11 @@ using namespace __gnu_pbds;
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
-#define forn(i,a,b) for(int i=a;i<b;i++)
-#define fore(i,a,b) for(int i=a;i<=b;i++)
+#define forn(i,a,b) for(int i=(a);i<(b);i++)
+#define fore(i,a,b) for(int i=(a);i<=(b);i++)
 #define pb push_back
 #define F first
 #define S second
-#define INF ll(1e18)
-#define MOD 998244353
 #define pqueue priority_queue
 #define fbo find_by_order
 #define ook order_of_key
@@ -25,8 +23,13 @@ typedef long double ld;
 typedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> pbds;
 void amin(ll &a, ll b){ a=min(a,b); }
 void amax(ll &a, ll b){ a=max(a,b); }
+void YES(){cout<<"YES\n";} void NO(){cout<<"NO\n";}
+void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
+const ll INF = ll(1e18);
+const int MOD = 998244353;
 
-#define MAXN 100005
+bool DEBUG = 1;
+const int MAXN = 100005;
 
 //Lazy Recursive ST start
 class LazySegmentTree{
@@ -543,10 +546,12 @@ void Floyd(){
 
 //Euler path start
 int in[MAXN],out[MAXN];
+vi euler;
 int tmr=-1;
 
 void dfs_euler(int u, int p){
 	in[u]=++tmr;
+	euler.pb(u);
 	for(int v: adj[u]){
 		if(v==p) continue;
 		dfs_euler(v,u);
@@ -558,8 +563,7 @@ void dfs_euler(int u, int p){
 //HLD (Heavy-light decomposition) start
 #define LG 19
 
-int in[MAXN],out[MAXN];
-int tmr=-1;
+int in[MAXN],out[MAXN],tmr=-1;
 int prt[MAXN];
 int sz[MAXN],dep[MAXN];
 int top[MAXN];
@@ -893,7 +897,6 @@ void Sieve(ll n)
 		}
 	}
 }
-
 ll phi(ll x)
 {
 	map<ll,ll> pf;
@@ -919,7 +922,6 @@ ll phi(ll x)
 	num*=num2;
 	return num;
 }
-
 bool isprime(ll x)
 {
 	if(x==1) return false;
@@ -929,7 +931,6 @@ bool isprime(ll x)
 	}
 	return true;
 }
-
 void SievePhi(ll n)
 {
 	totient.resize(n+1);
@@ -945,7 +946,6 @@ void SievePhi(ll n)
 		}
 	}
 }
-
 void SieveSumDiv(ll n)
 {
 	sumdiv.resize(n+1);
@@ -957,17 +957,14 @@ void SieveSumDiv(ll n)
 		}
 	}
 }
-
 ll getPhi(ll n)
 {
 	return totient[n];
 }
-
 ll getSumDiv(ll n)
 {
 	return sumdiv[n];
 }
-
 ll modpow(ll a, ll b, ll mod)
 {
 	ll r = 1;
@@ -980,19 +977,16 @@ ll modpow(ll a, ll b, ll mod)
 	}
 	return r;
 }
-
 ll inv(ll a, ll mod)
 {
 	return modpow(a, mod - 2, mod);
 }
-
 ll invgeneral(ll a, ll mod)
 {
 	ll ph = phi(mod);
 	ph--;
 	return modpow(a, ph, mod);
 }
-
 void getpf(vector<ii>& pf, ll n)
 {
 	for(ll i = 0; primes[i]*primes[i] <= n; i++)
@@ -1009,8 +1003,7 @@ void getpf(vector<ii>& pf, ll n)
 		pf.pb(ii(n, 1));
 	}
 }
-
-void getDiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
+void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 {
 	ll x, k;
 	if(i >= pf.size()) return;
@@ -1018,7 +1011,7 @@ void getDiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 	for(k = 0; k <= pf[i].S; k++)
 	{
 		if(i==int(pf.size())-1) div.pb(x);
-		getDiv(div, pf, x, i + 1);
+		getdiv(div, pf, x, i + 1);
 		x *= pf[i].F;
 	}
 }
@@ -1289,11 +1282,12 @@ template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and 
 		int to,cap,rev;
 		edge(int to=0,int cap=0,int rev=0):to(to),cap(cap),rev(rev){}
 	};
-	vector <edge> vec[MX];
+	vector<edge> vec[MX];
 	int level[MX];
 	int iter[MX];
 	
-	void addedge(int s,int t,int c) //adds an edge of cap c to the flow graph
+	//adds an edge of cap c to the flow graph
+	void addedge(int s,int t,int c)
 	{
 		int S=vec[s].size(),T=vec[t].size();
 		vec[s].push_back(edge(t,c,T));
@@ -1302,10 +1296,10 @@ template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and 
 	void bfs(int s)
 	{
 		memset(level,-1,sizeof(level));
-		queue <int> que;
+		queue<int> que;
 		level[s] = 0;
 		que.push(s);
-		while (!que.empty())
+		while(!que.empty())
 		{
 			int v = que.front();que.pop();
 			for(int i=0;i<vec[v].size();i++)
@@ -1321,11 +1315,11 @@ template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and 
 	}
 	ll flow_dfs(int v,int t,ll f)
 	{
-		if (v==t) return f;
+		if(v==t) return f;
 		for(int &i=iter[v];i<vec[v].size();i++)
 		{
 			edge &e=vec[v][i];
-			if (e.cap>0&&level[v]<level[e.to])
+			if(e.cap>0&&level[v]<level[e.to])
 			{
 				ll d=flow_dfs(e.to,t,min(f,ll(e.cap)));
 				if (d>0)
@@ -1338,15 +1332,16 @@ template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and 
 		}
 		return 0;
 	}
-	ll maxflow(int s,int t) //finds max flow using dinic from s to t
+	//finds max flow using dinic from s to t
+	ll maxflow(int s,int t)
 	{
 		ll flow = 0;
 		while(1)
 		{
 			bfs(s);
-			if (level[t]<0) return flow;
+			if(level[t]<0) return flow;
 			memset(iter,0,sizeof(iter));
-			while (1)
+			while(1)
 			{
 				ll f=flow_dfs(s,t,INF);
 				if(f==0) break;
@@ -1680,7 +1675,6 @@ bool vst[MAXN][MAXN];
 forn(k,0,4){
 	int x1=x+dx[k], y1=y+dy[k];
 	if(oob(x1,y1)) continue;
-	if(vst[x1][y1]) continue;
 	
 	
 }
