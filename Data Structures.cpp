@@ -25,10 +25,10 @@ void amin(ll &a, ll b){ a=min(a,b); }
 void amax(ll &a, ll b){ a=max(a,b); }
 void YES(){cout<<"YES\n";} void NO(){cout<<"NO\n";}
 void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
-
 const ll INF = ll(1e18);
 const int MOD = 998244353;
-bool DEBUG = 1;
+
+bool DEBUG = 0;
 const int MAXN = 100005;
 
 //Lazy Recursive ST start
@@ -762,7 +762,7 @@ void addstring(const string &s){
 //Trie end
 
 //DSU start
-struct DSU{
+struct DSU {
 	struct node{ int p; ll sz; };
 	vector<node> dsu; int cc;
 	node& operator[](int id){ return dsu[id]; }
@@ -936,10 +936,47 @@ struct SparseTable
 };
 //Sparse Table end
 
-//LCA O(log n) query start
-#define LG 11
+//LCA euler O(log n) query start
+const int LG = 20;
 
-int dep[MAXN],prt[MAXN][LG];
+int in[MAXN],out[MAXN],tmr=-1;
+int prt[MAXN][LG];
+mset(prt,-1);
+
+void dfs_lca(int u, int p)
+{
+	in[u]=++tmr;
+	prt[u][0]=p;
+	forn(j,1,LG){
+		if(prt[u][j-1]!=-1) prt[u][j]=prt[prt[u][j-1]][j-1];
+	}
+	for(int v: adj[u]){
+		if(v==p) continue;
+		dfs_lca(v,u);
+	}
+	out[u]=tmr;
+}
+
+bool ischild(int u, int v)
+{
+	return in[u]<=in[v] && out[v]<=out[u];
+}
+
+int lca(int u, int v)
+{
+	if(ischild(u,v)) return u;
+	for(int i=LG-1;i>=0;i--){
+		if(prt[u][i]!=-1 && !ischild(prt[u][i],v))
+			u=prt[u][i];
+	}
+	return prt[u][0];
+}
+//LCA euler O(log n) query end
+
+//LCA depth O(log n) query start
+const int LG = 20;
+
+int dep[MAXN], prt[MAXN][LG];
 mset(prt,-1); mset(dep,0);
 
 void dfs_lca(int u, int p)
@@ -948,7 +985,7 @@ void dfs_lca(int u, int p)
 	forn(j,1,LG){
 		if(prt[u][j-1]!=-1) prt[u][j]=prt[prt[u][j-1]][j-1];
 	}
-	for(int v:adj[u])
+	for(int v: adj[u])
 	{
 		if(v==p) continue;
 		dep[v]=dep[u]+1;
@@ -961,7 +998,7 @@ int lca(int u, int v)
 	if(dep[u]>dep[v]) swap(u,v);
 	for(int i=LG-1;i>=0;i--)
 	{
-		if(prt[v][i]!=-1&&dep[prt[v][i]]>=dep[u])
+		if(prt[v][i]!=-1 && dep[prt[v][i]]>=dep[u])
 		{
 			v=prt[v][i];
 		}
@@ -969,19 +1006,19 @@ int lca(int u, int v)
 	if(u==v) return u;
 	for(int i=LG-1;i>=0;i--)
 	{
-		if(prt[v][i]!=-1&&prt[v][i]!=prt[u][i])
+		if(prt[v][i]!=-1 && prt[v][i]!=prt[u][i])
 		{
 			v=prt[v][i]; u=prt[u][i];
 		}
 	}
 	return prt[u][0];
 }
-//LCA O(log n) query end
+//LCA depth O(log n) query end
 
 //Binary parent start
 int goup(int u, int h){
 	for(int i=LG-1;i>=0;i--){
-		if(h&(1LL<<i)) u=prt[u][i];
+		if(h&(1<<i)) u=prt[u][i];
 	}
 	return u;
 }
