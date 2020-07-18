@@ -1404,11 +1404,12 @@ forn(i,0,Q){
 }
 //Sqrt decomposition/Mo's algorithm end
 
-//Convex Hull Dynamic short start (CHT)
+//Convex Hull Dynamic start (CHT)
 struct Line{
 	mutable ll m,b,p;
 	bool operator<(const Line& o) const { return m < o.m; }
 	bool operator<(ll x) const { return p < x; }
+	inline ll eval(ll x) { return m * x + b; }
 };
 
 struct ConvexHullDynamic: multiset<Line, less<>> {
@@ -1433,178 +1434,40 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 			isect(x, erase(y));
 	}
 	ll query(ll x) {
-		//if(empty()) return 0;
+		if(empty()) return 0;
 		auto l = *lower_bound(x);
-		return (l.m * x + l.b)*(Max ? 1 : -1);
+		return eval(x)*(Max ? 1 : -1);
 	}
 };
-//Convex Hull Dynamic short end (CHT)
+//Convex Hull Dynamic end (CHT)
 
-//Convex Hull Dynamic short 2 start
-const ll is_query = -(1LL<<62);
-
-struct Line{
-    ll m,b;
-    mutable function<const Line*()> succ;
-    bool operator<(const Line& rhs) const{
-        if(rhs.b != is_query) return m < rhs.m;
-        const Line* s = succ();
-        if(!s) return 0;
-        ll x = rhs.m;
-        return 1.0L * b - s->b < 1.0L * (s->m - m) * x;
-    }
+//Convex Hull start (CHT)
+struct Line {
+	ll m, b;
+	Line(ll _m, ll _b) : m(_m), b(_b) {}
+	inline ll eval(ll x) { return m * x + b; }
 };
 
-struct ConvexHullDynamic: public multiset<Line>{ //will maintain upper hull for maximum
-	bool Max = 1;
-	
-    bool bad(iterator y){
-        auto z = next(y);
-        if(y == begin()){
-            if (z == end()) return 0;
-            return y->m == z->m && y->b <= z->b;
-        }
-        auto x = prev(y);
-        if(z == end()) return y->m == x->m && y->b <= x->b;
-        return (x->b - y->b)*1.0L*(z->m - y->m) >= (y->b - z->b)*1.0L*(y->m - x->m);
-    }
-    void addline(ll m, ll b){
-		if(!Max) { m=-m; b=-b; }
-        auto y = insert({m,b});
-        y->succ = [=] { return next(y)==end() ? 0 : &*next(y); };
-        if(bad(y)) { erase(y); return; }
-        while(next(y)!=end() && bad(next(y))) erase(next(y));
-        while(y != begin() && bad(prev(y))) erase(prev(y));
-    }
-    ll query(ll x){
-		//if(empty()) return 0;
-        auto l = *lower_bound((Line){x,is_query});
-        return (l.m * x + l.b)*(Max ? 1 : -1);
-    }
-};
-//Convex Hull Dynamic short 2 end
-
-//Convex Hull Dynamic long start
-class ConvexHullDynamic {
-	typedef long long coef_t;
-	typedef long long coord_t;
-	typedef long long val_t;
-
-private:
-	struct Line {
-		coef_t a, b;
-		double xLeft;
-
-		enum Type {
-			line, maxQuery, minQuery
-		} type;
-		coord_t val;
-
-		explicit Line(coef_t aa = 0, coef_t bb = 0) :
-				a(aa), b(bb), xLeft(-INF), type(Type::line), val(0) {
-		}
-		val_t valueAt(coord_t x) const {
-			return a * x + b;
-		}
-		friend bool areParallel(const Line& l1, const Line& l2) {
-			return l1.a == l2.a;
-		}
-		friend double intersectX(const Line& l1, const Line& l2) {
-			return areParallel(l1, l2) ?
-					INF : 1.0 * (l2.b - l1.b) / (l1.a - l2.a);
-		}
-		bool operator<(const Line& l2) const {
-			if (l2.type == line)
-				return this->a < l2.a;
-			if (l2.type == maxQuery)
-				return this->xLeft < l2.val;
-			if (l2.type == minQuery)
-				return this->xLeft > l2.val;
-
-			return 0;
-		}
-	};
-
-private:
-	bool isMax;
-	std::set<Line> hull;
-
-private:
-	bool hasPrev(std::set<Line>::iterator it) {
-		return it != hull.begin();
+struct ConvexHull {
+	deque<Line> d;
+	inline void clear() { d.clear(); }
+	bool irrelevant(Line Z) {
+		if(int(d.size()) < 2) return false;
+		Line X = d[int(d.size())-2], Y = d[int(d.size())-1];
+		return (X.b - Z.b) * (Y.m - X.m) <= (X.b - Y.b) * (Z.m - X.m);
 	}
-	bool hasNext(std::set<Line>::iterator it) {
-		return it != hull.end() && std::next(it) != hull.end();
+	void addline(ll m, ll b) {
+		Line l = Line(m,b);
+		while(irrelevant(l)) d.pop_back();
+		d.push_back(l);
 	}
-	bool irrelevant(const Line& l1, const Line& l2, const Line& l3) {
-		return intersectX(l1, l3) <= intersectX(l1, l2);
-	}
-	bool irrelevant(std::set<Line>::iterator it) {
-		return hasPrev(it) && hasNext(it) && ((isMax && irrelevant(*std::prev(it), *it, *std::next(it)))
-										  || (!isMax && irrelevant(*std::next(it), *it, *std::prev(it))));
-	}
-
-	std::set<Line>::iterator updateLeftBorder(std::set<Line>::iterator it) {
-		if ((isMax && !hasPrev(it)) || (!isMax && !hasNext(it)))
-			return it;
-
-		double val = intersectX(*it, isMax ? *std::prev(it) : *std::next(it));
-		Line buf(*it);
-		it = hull.erase(it);
-		buf.xLeft = val;
-		it = hull.insert(it, buf);
-		return it;
-	}
-
-public:
-	ConvexHullDynamic(bool _isMax = 1) {
-		isMax = true;
-	}
-
-	void addLine(coef_t a, coef_t b) {
-		Line l3 = Line(a, b);
-		auto it = hull.lower_bound(l3);
-
-		if (it != hull.end() && areParallel(*it, l3)) {
-			if ((isMax && it->b < b) || (!isMax && it->b > b))
-				it = hull.erase(it);
-			else
-				return;
-		}
-
-		it = hull.insert(it, l3);
-		if (irrelevant(it)) {
-			hull.erase(it);
-			return;
-		}
-
-		while (hasPrev(it) && irrelevant(std::prev(it)))
-			hull.erase(std::prev(it));
-		while (hasNext(it) && irrelevant(std::next(it)))
-			hull.erase(std::next(it));
-
-		it = updateLeftBorder(it);
-		if (hasPrev(it))
-			updateLeftBorder(std::prev(it));
-		if (hasNext(it))
-			updateLeftBorder(std::next(it));
-	}
-	
-	val_t getBest(coord_t x) const {
-		if (hull.size() == 0) {
-			return -INF;
-		}
-		Line q;
-		q.val = x;
-		q.type = isMax ? Line::Type::maxQuery : Line::Type::minQuery;
-
-		auto bestLine = hull.lower_bound(q);
-		if (isMax)
-			--bestLine;
-		return bestLine->valueAt(x);
+	ll query(ll x) {
+		if(d.empty()) return 0;
+		while(int(d.size()) > 1 && (d[0].b - d[1].b <= x * (d[1].m - d[0].m))) d.pop_front();
+		return d.front().eval(x);
 	}
 };
-//Convex Hull Dynamic long end
+//COnvex Hull end (CHT)
 
 //O(V^2E) Dinic Flow
 //Initialize : MaxFlow<# of vertices, Max Value> M;
