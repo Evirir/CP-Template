@@ -908,7 +908,7 @@ dfs_hld(0,-1);
 //HLD (Heavy-light decomposition) end
 
 //Sparse Table start: O(1) Min Query
-#define LG 25
+const int LG = 20;
 
 int lg[MAXN+1];
 ll spt[MAXN][LG+1];
@@ -1171,39 +1171,50 @@ void getpf(vector<ii>& pf, ll n)
 //Combi/Maths end
 
 //Matrix start
-const int DIM = 4;
-
 struct Matrix{
-	ll a[DIM][DIM];
-	ll *operator[](ll r){ return a[r]; }
+	int r, c;
+	vector<vector<ll>> a;
+	vector<ll>& operator[](int x){ return a[x]; }
 
-	Matrix(int x = 0){
-		memset(a, 0, sizeof(a));
-		if(x) for(int i = 0; i < DIM; i++) a[i][i] = x;
+	Matrix(int r_ = 0, int c_ = 0, bool identity = 0){
+		r = r_, c = c_;
+		a.resize(r, vector<ll>(c));
+		if(identity){
+			assert(r == c);
+			for(int i = 0; i < r; i++) a[i][i] = 1;
+		}
 	}
-} const I(1);
-
+	Matrix(const vector<vector<ll>>& v){
+		r = v.size(); c = (v.size() ? v[0].size() : 0);
+		a = v;
+	}
+	void operator=(const vector<vector<ll>>& v){
+		r = v.size(); c = (v.size() ? v[0].size() : 0);
+		a = v;
+	}
+};
 Matrix operator*(Matrix A, Matrix B){
-	const ll MOD2 = ll(MOD)*MOD;
-	Matrix C;
-	for(int i = 0; i < DIM; i++){
-		for(int j = 0; j < DIM; j++){
+	assert(A.c == B.r);
+	const ll MOD2 = ll(MOD) * MOD; //MOD
+	Matrix C(A.r, B.c);
+	for(int i = 0; i < A.r; i++){
+		for(int j = 0; j < B.c; j++){
 			ll w = 0;
-			for(int k = 0; k < DIM; k++){
+			for(int k = 0; k < A.c; k++){
 				w += ll(A[i][k]) * B[k][j];
-				if (w >= MOD2) w -= MOD2;
+				if(w >= MOD2) w -= MOD2; //MOD
 			}
-			C[i][j] = w % MOD;
+			C[i][j] = w % MOD; //MOD
 		}
 	}
 	return C;
 }
-
 Matrix operator^(Matrix A, ll b){
-	Matrix R = I;
-	for(; b > 0; b /= 2){
-		if(b&1) R = R*A;
-		A = A*A;
+	assert(A.r == A.c);
+	Matrix R = Matrix(A.r, A.r, 1);
+	for(; b; b >>= 1){
+		if(b & 1) R = R * A;
+		A = A * A;
 	}
 	return R;
 }
@@ -1441,7 +1452,7 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 };
 //Convex Hull Dynamic end (CHT)
 
-//Convex Hull start (CHT)
+//Convex Hull fast start (CHT)
 struct Line {
 	ll m, b;
 	Line(ll _m, ll _b) : m(_m), b(_b) {}
@@ -1451,9 +1462,9 @@ struct Line {
 struct ConvexHull {
 	deque<Line> d;
 	inline void clear() { d.clear(); }
-	bool irrelevant(Line Z) {
+	bool irrelevant(const Line &Z) {
 		if(int(d.size()) < 2) return false;
-		Line X = d[int(d.size())-2], Y = d[int(d.size())-1];
+		const Line &X = d[int(d.size())-2], &Y = d[int(d.size())-1];
 		return (X.b - Z.b) * (Y.m - X.m) <= (X.b - Y.b) * (Z.m - X.m);
 	}
 	void addline(ll m, ll b) {
@@ -1467,7 +1478,7 @@ struct ConvexHull {
 		return d.front().eval(x);
 	}
 };
-//COnvex Hull end (CHT)
+//Convex Hull fast end (CHT)
 
 //O(V^2E) Dinic Flow
 //Initialize : MaxFlow<# of vertices, Max Value> M;
