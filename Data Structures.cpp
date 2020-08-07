@@ -1172,35 +1172,29 @@ void getpf(vector<ii>& pf, ll n)
 
 //Matrix start
 struct Matrix{
-	int r, c;
 	vector<vector<ll>> a;
 	vector<ll>& operator[](int x){ return a[x]; }
-
+	inline int r(){ return a.size(); }
+	inline int c(){ return (a.size() ? a[0].size() : 0); }
+	
 	Matrix(int r_ = 0, int c_ = 0, bool identity = 0){
-		r = r_, c = c_;
-		a.resize(r, vector<ll>(c));
+		a.resize(r_, vector<ll>(c_));
 		if(identity){
-			assert(r == c);
-			for(int i = 0; i < r; i++) a[i][i] = 1;
+			assert(r_ == c_);
+			for(int i = 0; i < r_; i++) a[i][i] = 1;
 		}
 	}
-	Matrix(const vector<vector<ll>>& v){
-		r = v.size(); c = (v.size() ? v[0].size() : 0);
-		a = v;
-	}
-	void operator=(const vector<vector<ll>>& v){
-		r = v.size(); c = (v.size() ? v[0].size() : 0);
-		a = v;
-	}
+	inline Matrix(const vector<vector<ll>>& v){ a = v; }
+	inline void operator=(const vector<vector<ll>>& v){ a = v; }
 };
 Matrix operator*(Matrix A, Matrix B){
-	assert(A.c == B.r);
+	assert(A.c() == B.r());
 	const ll MOD2 = ll(MOD) * MOD; //MOD
-	Matrix C(A.r, B.c);
-	for(int i = 0; i < A.r; i++){
-		for(int j = 0; j < B.c; j++){
+	Matrix C(A.r(), B.c());
+	for(int i = 0; i < A.r(); i++){
+		for(int j = 0; j < B.c(); j++){
 			ll w = 0;
-			for(int k = 0; k < A.c; k++){
+			for(int k = 0; k < A.c(); k++){
 				w += ll(A[i][k]) * B[k][j];
 				if(w >= MOD2) w -= MOD2; //MOD
 			}
@@ -1210,8 +1204,8 @@ Matrix operator*(Matrix A, Matrix B){
 	return C;
 }
 Matrix operator^(Matrix A, ll b){
-	assert(A.r == A.c);
-	Matrix R = Matrix(A.r, A.r, 1);
+	assert(A.r() == A.c());
+	Matrix R = Matrix(A.r(), A.r(), 1);
 	for(; b; b >>= 1){
 		if(b & 1) R = R * A;
 		A = A * A;
