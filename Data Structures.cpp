@@ -813,6 +813,7 @@ ll dist[MAXN];
 
 void dijkstra(int src)
 {
+	pqueue<ii,vii,greater<ii>> q;
 	forn(i,0,n)	dist[i]=INF;
 	dist[src]=0;
 	q.push({dist[src],src});
