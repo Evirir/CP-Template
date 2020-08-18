@@ -835,6 +835,7 @@ void dijkstra(int src)
 ll dist[MAXN][MAXN];
 void floyd(){
 	forn(i,0,n) forn(j,0,n) dist[i][j] = (adj[i][j]==0 ? INF : adj[i][j]);
+	forn(i,0,n) dist[i][i] = 0;
 	forn(k,0,n) forn(i,0,n) forn(j,0,n)
 		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
 }
