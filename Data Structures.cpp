@@ -813,13 +813,13 @@ ll dist[MAXN];
 
 void dijkstra(int src)
 {
-	pqueue<ii,vii,greater<ii>> q;
 	forn(i,0,n)	dist[i]=INF;
 	dist[src]=0;
 	q.push({dist[src],src});
 	
 	while(!q.empty()){
-		int u=q.top().S; q.pop();
+		int u=q.top().S; ll curd=q.top().F; q.pop();
+		if(curd>dist[u]) continue;
 		for(auto tmp: adj[u]){
 			int v=tmp.F; ll w=tmp.S;
 			if(dist[v]>dist[u]+w){
@@ -833,7 +833,7 @@ void dijkstra(int src)
 
 //Floyd start
 ll dist[MAXN][MAXN];
-void Floyd(){
+void floyd(){
 	forn(i,0,n) forn(j,0,n) dist[i][j] = (adj[i][j]==0 ? INF : adj[i][j]);
 	forn(k,0,n) forn(i,0,n) forn(j,0,n)
 		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
@@ -857,11 +857,10 @@ void dfs_euler(int u, int p){
 //Euler path end
 
 //HLD (Heavy-light decomposition) start
-#define LG 19
+#define LG 21
 
 int in[MAXN],out[MAXN],tmr=-1;
-int prt[MAXN];
-int sz[MAXN],dep[MAXN];
+int prt[MAXN],sz[MAXN],dep[MAXN];
 int top[MAXN];
 
 void dfs_sz(int u, int p){
@@ -1104,7 +1103,7 @@ ll query(int l,int r){
 
 //Combi/Maths start
 vector<ll> fact,ifact,inv,pow2;
-ll add(ll a,ll b)
+ll add(ll a, ll b)
 {
 	a+=b; a%=MOD;
 	if(a<0) a+=MOD;
@@ -1215,11 +1214,8 @@ Matrix operator^(Matrix A, ll b){
 //Matrix end
 
 //Number Theory NT start
-vector<ll> primes;
+vector<ll> primes, totient, sumdiv, bigdiv;
 vector<bool> prime;
-vector<ll> totient;
-vector<ll> sumdiv;
-vector<ll> bigdiv;
 void Sieve(ll n)
 {
 	prime.assign(n+1, 1);
@@ -1410,38 +1406,36 @@ forn(i,0,Q){
 //Sqrt decomposition/Mo's algorithm end
 
 //Convex Hull Dynamic start (CHT)
-struct Line{
-	mutable ll m,b,p;
-	bool operator<(const Line& o) const { return m < o.m; }
+//Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
+struct Line {
+	mutable ll k, m, p;
+	bool operator<(const Line& o) const { return k < o.k; }
 	bool operator<(ll x) const { return p < x; }
-	inline ll eval(ll x) { return m * x + b; }
 };
 
 struct ConvexHullDynamic: multiset<Line, less<>> {
-	// (for doubles, use inf = 1/.0, div(a,b) = a/b)
-	const ll inf = LLONG_MAX;
-	bool Max = 1;
-	
-	ll div(ll a, ll b) { // floored division
-		return a / b - ((a ^ b) < 0 && a % b); }
-	bool isect(iterator x, iterator y) {
-		if (y == end()) { x->p = inf; return false; }
-		if (x->m == y->m) x->p = x->b > y->b ? inf : -inf;
-		else x->p = div(y->b - x->b, x->m - y->m);
+	const ll inf = LLONG_MAX; //double: inf = 1.0L
+	inline ll div(ll a, ll b){
+		return a/b - ((a^b)<0 && a%b);
+	}
+	bool isect(iterator x, iterator y){
+		if(y == end()){ x->p = inf; return false; }
+		if(x->k == y->k) x->p = x->m > y->m ? inf : -inf;
+		else x->p = div(y->m - x->m, x->k - y->k);
 		return x->p >= y->p;
 	}
-	void addline(ll m, ll b) {
-		if(!Max) { m=-m; b=-b; }
-		auto z = insert({m, b, 0}), y = z++, x = y;
-		while (isect(y, z)) z = erase(z);
-		if (x != begin() && isect(--x, y)) isect(x, y = erase(y));
-		while ((y = x) != begin() && (--x)->p >= y->p)
+	void add(ll k, ll m){
+		auto z = insert({k, m, 0}), y = z++, x = y;
+		while(isect(y, z)) z = erase(z);
+		if(x!=begin() && isect(--x, y))
+			isect(x, y = erase(y));
+		while((y=x) != begin() && (--x)->p >= y->p)
 			isect(x, erase(y));
 	}
-	ll query(ll x) {
+	ll query(ll x){
 		if(empty()) return 0;
 		auto l = *lower_bound(x);
-		return eval(x)*(Max ? 1 : -1);
+		return l.k * x + l.m;
 	}
 };
 //Convex Hull Dynamic end (CHT)
@@ -1449,26 +1443,26 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 //Convex Hull fast start (CHT)
 struct Line {
 	ll m, b;
-	Line(ll _m, ll _b) : m(_m), b(_b) {}
-	inline ll eval(ll x) { return m * x + b; }
+	Line(ll _m, ll _b): m(_m), b(_b) {}
+	inline ll eval(ll x){ return m*x+b; }
 };
 
 struct ConvexHull {
 	deque<Line> d;
-	inline void clear() { d.clear(); }
-	bool irrelevant(const Line &Z) {
-		if(int(d.size()) < 2) return false;
+	inline void clear(){ d.clear(); }
+	bool bad(const Line &Z){
+		if(int(d.size())<2) return false;
 		const Line &X = d[int(d.size())-2], &Y = d[int(d.size())-1];
-		return (X.b - Z.b) * (Y.m - X.m) <= (X.b - Y.b) * (Z.m - X.m);
+		return (X.b-Z.b)*(Y.m-X.m) <= (X.b-Y.b)*(Z.m-X.m);
 	}
-	void addline(ll m, ll b) {
+	void addline(ll m, ll b){
 		Line l = Line(m,b);
-		while(irrelevant(l)) d.pop_back();
+		while(bad(l)) d.pop_back();
 		d.push_back(l);
 	}
-	ll query(ll x) {
+	ll query(ll x){
 		if(d.empty()) return 0;
-		while(int(d.size()) > 1 && (d[0].b - d[1].b <= x * (d[1].m - d[0].m))) d.pop_front();
+		while(int(d.size())>1 && (d[0].b-d[1].b <= x*(d[1].m-d[0].m))) d.pop_front();
 		return d.front().eval(x);
 	}
 };
@@ -1958,3 +1952,59 @@ Temp.resize(n);
 sort(a.begin(), a.end(), cmp_x);
 rec(0,n,a);
 //Nearest pair of points end
+
+//Centroid decomposition start
+int sz[MAXN];
+bool vst[MAXN];
+
+void dfs_sz(int u, int p)
+{
+	sz[u]=1;
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		dfs_sz(v,u);
+		sz[u]+=sz[v];
+	}
+}
+
+void centroid(int u, int p, int r)
+{
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		if(sz[v]*2>sz[r]) return centroid(v,u,r);
+	}
+	return u;
+}
+
+void prep(int u, int p)
+{
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		
+	}
+}
+
+void solve(int u)
+{
+	dfs_sz(u,-1);
+	u=centroid(u,-1,u);
+	
+	//do stuffs
+	prep(u,-1);
+	for(int v: adj[u])
+	{
+		if(vst[v]) continue;
+		
+	}
+	
+	vst[u]=1;
+	for(int v: adj[u])
+	{
+		if(vst[v]) continue;
+		solve(v);
+	}
+}
+//Centroid decomposition end
