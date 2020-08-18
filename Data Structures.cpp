@@ -818,12 +818,15 @@ void dijkstra(int src)
 	dist[src]=0;
 	q.push({dist[src],src});
 	
-	while(!q.empty()){
+	while(!q.empty())
+	{
 		int u=q.top().S; ll curd=q.top().F; q.pop();
 		if(curd>dist[u]) continue;
-		for(auto tmp: adj[u]){
+		for(auto tmp: adj[u])
+		{
 			int v=tmp.F; ll w=tmp.S;
-			if(dist[v]>dist[u]+w){
+			if(dist[v]>dist[u]+w)
+			{
 				dist[v]=dist[u]+w;
 				q.push({dist[v],v});
 			}
