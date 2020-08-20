@@ -31,8 +31,9 @@ List of things (in order):
 		- Euler tour compression
 		- Heavy-light decomposition (HLD)
 		- Lowest Common Ancestor (LCA)
-			- Euler tour method
-			- Depth method
+			- Euler tour method: O(log n) query
+			- Depth method: O(log n) query
+			- Sparse table: O(1) query but long
 		- Centroid decomposition: solving for all paths crossing cuurrent centroid 
 
 4. Data structures
