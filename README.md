@@ -34,7 +34,7 @@ List of things (in order):
 			- Euler tour method: O(log n) query
 			- Depth method: O(log n) query
 			- Sparse table: O(1) query but long
-		- Centroid decomposition: solving for all paths crossing cuurrent centroid 
+		- Centroid decomposition: solving for all paths crossing current centroid 
 
 4. Data structures
 	- Sparse table
