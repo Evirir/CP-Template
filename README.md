@@ -24,7 +24,7 @@ List of things (in order):
 		- Floyd-Warshall
 		- SPFA (Shortest path faster algorithm)/Bellman-Ford
 		- Dinic Flow O(V^2E)
-		- Edmond's Karp: Min Cost Max Flow
+		- Edmonds-Karp: Min Cost Max Flow
 		- Hopkroft-Karp matching (max-cardinality bipartite matching/MCBM)
 		- Strongly connected component (SCC): Tarjan's algorithm
 	- Problem dependent
