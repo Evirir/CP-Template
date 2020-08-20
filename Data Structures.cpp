@@ -697,18 +697,6 @@ public:
 };
 //Segment Tree Beats end
 
-//Randomizer start
-mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-uniform_int_distribution<int>(1,6)(rng)
-uniform_int_distribution<> dis(1,6)
-	
-	Examples:
-	cout<<rng()<<'\n';
-	cout<<dis(rng)<<'\n';
-
-mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
-//Randomizer end
-
 //Prefix function start/KMP (Knuth–Morris–Pratt)
 vector<int> prefix_function(string &s){
 	int n=(int)s.length();
@@ -835,7 +823,7 @@ void dijkstra(int src)
 }
 //Dijkstra end
 
-//Floyd start
+//Floyd-Warshall start
 ll dist[MAXN][MAXN];
 void floyd(){
 	forn(i,0,n) forn(j,0,n) dist[i][j] = (adj[i][j]==0 ? INF : adj[i][j]);
@@ -843,9 +831,430 @@ void floyd(){
 	forn(k,0,n) forn(i,0,n) forn(j,0,n)
 		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
 }
-//Floyd end
+//Floyd-Warshall end
 
-//Euler path start
+// SPFA/Bellman-Ford/Shortest Path Faster Algorithm start
+// returns one of the nodes in neg cycle if it exists, otherwise -1
+int spfa(int src)
+{
+	int cnt[n]{};
+	bool inqueue[n]{};
+	
+	forn(i,0,n) dist[i]=INF, prt[i]=-1;
+	dist[src]=0;
+	
+	queue<int> q;
+	q.push(src);
+	inqueue[src]=true;
+	
+	while(!q.empty())
+	{
+		int u=q.front(); q.pop();
+		inqueue[u]=false;
+		for(ii tmp: adj[u])
+		{
+			int v=tmp.F; ll w=tmp.S;
+			if(dist[v]>dist[u]+w)
+			{
+				dist[v]=dist[u]+w;
+				prt[v]=u;
+				if(!inqueue[v])
+				{
+					q.push(v);
+					inqueue[v]=true;
+					cnt[v]++;
+					if(cnt[v]==n)
+					{
+						forn(i,0,n) v=prt[v];
+						return v;
+					}
+				}
+			}
+		}
+	}
+	
+	return -1;
+}
+// SPFA/Bellman-Ford/Shortest Path Faster Algorithm end
+
+//O(V^2E) Dinic Flow
+//Initialize : MaxFlow<# of vertices, Max Value> M;
+
+template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and MX (the Max number of vertices)
+{
+	struct edge
+	{
+		int to,cap,rev;
+		edge(int to=0,int cap=0,int rev=0):to(to),cap(cap),rev(rev){}
+	};
+	vector<edge> vec[MX];
+	int level[MX];
+	int iter[MX];
+	
+	//adds an edge of cap c to the flow graph
+	void addedge(int s,int t,int c)
+	{
+		int S=vec[s].size(),T=vec[t].size();
+		vec[s].push_back(edge(t,c,T));
+		vec[t].push_back(edge(s,0,S));
+	}
+	void bfs(int s)
+	{
+		memset(level,-1,sizeof(level));
+		queue<int> que;
+		level[s] = 0;
+		que.push(s);
+		while(!que.empty())
+		{
+			int v = que.front();que.pop();
+			for(int i=0;i<vec[v].size();i++)
+			{
+				edge&e=vec[v][i];
+				if (e.cap>0&&level[e.to]<0)
+				{
+					level[e.to]=level[v]+1;
+					que.push(e.to);
+				}
+			}
+		}
+	}
+	ll flow_dfs(int v,int t,ll f)
+	{
+		if(v==t) return f;
+		for(int &i=iter[v];i<vec[v].size();i++)
+		{
+			edge &e=vec[v][i];
+			if(e.cap>0&&level[v]<level[e.to])
+			{
+				ll d=flow_dfs(e.to,t,min(f,ll(e.cap)));
+				if (d>0)
+				{
+					e.cap-=d;
+					vec[e.to][e.rev].cap+=d;
+					return d;
+				}
+			}
+		}
+		return 0;
+	}
+	//finds max flow using dinic from s to t
+	ll maxflow(int s,int t)
+	{
+		ll flow = 0;
+		while(1)
+		{
+			bfs(s);
+			if(level[t]<0) return flow;
+			memset(iter,0,sizeof(iter));
+			while(1)
+			{
+				ll f=flow_dfs(s,t,INF);
+				if(f==0) break;
+				flow += f;
+			}
+		}
+	}
+};
+//Dinic Flow end
+
+//Min Cost Max Flow start
+struct MinCostFlow{
+    int n, s, t;
+    long long flow, cost;
+    vector<vector<int> > graph;
+    vector<Edge> e;
+    vector<long long> dist, potential;
+    vector<int> parent;
+    bool negativeCost;
+ 
+    MinCostFlow(int _n){
+        // 0-based indexing
+        n = _n;
+        graph.assign(n, vector<int> ());
+        negativeCost = false;
+    }
+ 
+    void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
+        if(cost < 0)
+            negativeCost = true;
+ 
+        graph[u].push_back(e.size());
+        e.push_back(Edge(u, v, cap, cost));
+ 
+        graph[v].push_back(e.size());
+        e.push_back(Edge(v, u, 0, -cost));
+ 
+        if(!directed)
+            addEdge(v, u, cap, cost, true);
+    }
+ 
+    pair<long long, long long> getMinCostFlow(int _s, int _t){
+        s = _s; t = _t;
+        flow = 0, cost = 0;
+ 
+        potential.assign(n, 0);
+        if(negativeCost){
+            // run Bellman-Ford to find starting potential
+            dist.assign(n, 1LL<<62);
+            for(int i = 0, relax = false; i < n && relax; i++, relax = false){
+                for(int u = 0; u < n; u++){
+                    for(int k = 0; k < graph[u].size(); k++){
+                        int eIdx = graph[u][i];
+                        int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
+ 
+                        if(dist[v] > dist[u] + w && cap > 0){
+                            dist[v] = dist[u] + w;
+                            relax = true;
+            }   }   }   }
+ 
+            for(int i = 0; i < n; i++){
+                if(dist[i] < (1LL<<62)){
+                    potential[i] = dist[i];
+        }   }   }
+ 
+        while(dijkstra()){
+            flow += sendFlow(t, 1LL<<62);
+        }
+ 
+        return make_pair(flow, cost);
+    }
+ 
+    bool dijkstra(){
+        parent.assign(n, -1);
+        dist.assign(n, 1LL<<62);
+        priority_queue<ii, vector<ii>, greater<ii> > pq;
+ 
+        dist[s] = 0;
+        pq.push(ii(0, s));
+ 
+ 
+        while(!pq.empty()){
+            int u = pq.top().second;
+            long long d = pq.top().first;
+            pq.pop();
+ 
+            if(d != dist[u]) continue;
+ 
+            for(int i = 0; i < graph[u].size(); i++){
+                int eIdx = graph[u][i];
+                int v = e[eIdx].v; ll cap = e[eIdx].cap;
+                ll w = e[eIdx].cost + potential[u] - potential[v];
+ 
+                if(dist[u] + w < dist[v] && cap > 0){
+                    dist[v] = dist[u] + w;
+                    parent[v] = eIdx;
+ 
+                    pq.push(ii(dist[v], v));
+        }   }   }
+ 
+        // update potential
+        for(int i = 0; i < n; i++){
+            if(dist[i] < (1LL<<62))
+                potential[i] += dist[i];
+        }
+ 
+        return dist[t] != (1LL<<62);
+    }
+ 
+    long long sendFlow(int v, long long curFlow){
+        if(parent[v] == -1)
+            return curFlow;
+        int eIdx = parent[v];
+        int u = e[eIdx].u; ll w = e[eIdx].cost;
+ 
+        long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
+ 
+        cost += f*w;
+        e[eIdx].cap -= f;
+        e[eIdx^1].cap += f;
+ 
+        return f;
+    }
+};
+//Min Cost Max Flow end
+
+//Hopkroft-Karp matching (MCBM, max-cardinality bipartite matching) start
+//Read n1,n2 -> init() -> addEdge() -> maxMatching()
+const int MAXN1 = 50000;
+const int MAXN2 = 50000;
+const int MAXM = 150000;
+
+int n1, n2, edges, last[MAXN1], pre[MAXM], head[MAXM];
+int matching[MAXN2], dist[MAXN1], Q[MAXN1];
+bool used[MAXN1], vis[MAXN1];
+
+void init(int _n1, int _n2) 
+{
+    n1 = _n1;
+    n2 = _n2;
+    edges = 0;
+    fill(last, last + n1, -1);
+}
+
+void addEdge(int u, int v) 
+{
+    head[edges] = v;
+    pre[edges] = last[u];
+    last[u] = edges++;
+}
+
+void bfs() 
+{
+    fill(dist, dist + n1, -1);
+    int sizeQ = 0;
+    for (int u = 0; u < n1; ++u) {
+        if (!used[u]) {
+            Q[sizeQ++] = u;
+            dist[u] = 0;
+        }
+    }
+    for (int i = 0; i < sizeQ; i++) {
+        int u1 = Q[i];
+        for (int e = last[u1]; e >= 0; e = pre[e]) {
+            int u2 = matching[head[e]];
+            if (u2 >= 0 && dist[u2] < 0) {
+                dist[u2] = dist[u1] + 1;
+                Q[sizeQ++] = u2;
+            }
+        }
+    }
+}
+
+bool dfs(int u1) 
+{
+    vis[u1] = true;
+    for (int e = last[u1]; e >= 0; e = pre[e]) {
+        int v = head[e];
+        int u2 = matching[v];
+        if (u2 < 0 || ((!vis[u2] && dist[u2] == dist[u1] + 1) && dfs(u2))) {
+            matching[v] = u1;
+            used[u1] = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+int maxMatching() 
+{
+    fill(used, used + n1, false);
+    fill(matching, matching + n2, -1);
+    for (int res = 0;;) {
+        bfs();
+        fill(vis, vis + n1, false);
+        int f = 0;
+        for (int u = 0; u < n1; ++u)
+            if (!used[u] && dfs(u))
+                ++f;
+        if (!f)
+            return res;
+        res += f;
+    }
+}
+//Hopkroft-Karp matching end
+
+//SCC (Strongly connected components) start
+//init(n) -> read input -> tarjan() -> sccidx[]
+struct SCC
+{
+	const int INF2 = int(1e9);
+	vector<vector<int> > vec;
+	int index;
+	vector<int> idx;
+	vector<int> lowlink;
+	vector<bool> onstack;
+	stack<int> s;
+	vector<int> sccidx;
+	int scccnt;
+	vi topo;
+	
+	//lower sccidx means appear later
+	void init(int n)
+	{
+		idx.assign(n,-1);
+		index = 0;
+		onstack.assign(n,0);
+		lowlink.assign(n,INF2);
+		while(!s.empty()) s.pop();
+		sccidx.assign(n,-1);
+		scccnt = 0;
+		vec.clear();
+		topo.clear();
+		vec.resize(n);
+	}
+	
+	void addedge(int u, int v) //u -> v
+	{
+		vec[u].pb(v);
+	}
+	
+	void connect(int u)
+	{
+		idx[u] = index;
+		lowlink[u] = index;
+		index++;
+		s.push(u);
+		onstack[u] = true;
+		for(int i = 0; i < vec[u].size(); i++)
+		{
+			int v = vec[u][i];
+			if(idx[v] == -1)
+			{
+				connect(v);
+				lowlink[u] = min(lowlink[u], lowlink[v]);
+			}
+			else if(onstack[v])
+			{
+				lowlink[u] = min(lowlink[u], idx[v]);
+			}
+		}
+		if(lowlink[u] == idx[u])
+		{
+			while(1)
+			{
+				int v = s.top();
+				s.pop();
+				onstack[v] = false;
+				sccidx[v] = scccnt;
+				if(v == u) break;
+			}
+			scccnt++;
+		}
+	}
+	
+	void tarjan()
+	{
+		for(int i = 0; i < vec.size(); i++)
+		{
+			if(idx[i] == -1)
+			{
+				connect(i);
+			}
+		}
+	}
+	
+	void toposort() //if graph is a DAG and i just want to toposort
+	{
+		tarjan();
+		int n = vec.size();
+		topo.resize(n);
+		vector<ii> tmp;
+		for(int i = 0; i < n; i++)
+		{
+			tmp.pb(ii(sccidx[i],i));
+		}
+		sort(tmp.begin(),tmp.end());
+		reverse(tmp.begin(),tmp.end());
+		for(int i = 0; i < n; i++)
+		{
+			topo[i]=tmp[i].S;
+			if(i>0) assert(tmp[i].F!=tmp[i-1].F);
+		}
+	}
+};
+//SCC end
+
+//Euler tour start
 int in[MAXN],out[MAXN];
 vi euler;
 int tmr=-1;
@@ -859,7 +1268,7 @@ void dfs_euler(int u, int p){
 	}
 	out[u]=tmr;
 }
-//Euler path end
+//Euler tour end
 
 //HLD (Heavy-light decomposition) start
 #define LG 21
@@ -911,48 +1320,19 @@ dfs_sz(0,-1);
 dfs_hld(0,-1);
 //HLD (Heavy-light decomposition) end
 
-//Sparse Table start: O(1) Min Query
-const int LG = 20;
-
-int lg[MAXN+1];
-ll spt[MAXN][LG+1];
-
-struct SparseTable
-{	
-	ll merge(ll x, ll y){
-		return min(x,y);
-	}
-	
-	SparseTable(int n, ll arr[]){
-		lg[1]=0;
-		fore(i,2,n)	lg[i]=lg[i/2]+1;
-		
-		forn(i,0,n) spt[i][0] = arr[i];
-		fore(j,1,LG)
-			for(int i=0; i+(1<<j)<=n; i++)
-				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
-	}
-	
-	ll query(int l,int r){
-		int len=lg[r-l+1];		
-		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
-	}	
-};
-//Sparse Table end
-
 //LCA euler O(log n) query start
 const int LG = 20;
 
 int in[MAXN],out[MAXN],tmr=-1;
-int prt[MAXN][LG];
+int prt[LG][MAXN];
 mset(prt,-1);
 
 void dfs_lca(int u, int p)
 {
 	in[u]=++tmr;
-	prt[u][0]=p;
-	forn(j,1,LG){
-		if(prt[u][j-1]!=-1) prt[u][j]=prt[prt[u][j-1]][j-1];
+	prt[0][u]=p;
+	forn(i,1,LG){
+		if(prt[i-1][u]!=-1) prt[i][u]=prt[i-1][prt[i-1][u]];
 	}
 	for(int v: adj[u]){
 		if(v==p) continue;
@@ -970,10 +1350,10 @@ int lca(int u, int v)
 {
 	if(ischild(u,v)) return u;
 	for(int i=LG-1;i>=0;i--){
-		if(prt[u][i]!=-1 && !ischild(prt[u][i],v))
-			u=prt[u][i];
+		if(prt[i][u]!=-1 && !ischild(prt[i][u],v))
+			u=prt[i][u];
 	}
-	return prt[u][0];
+	return prt[0][u];
 }
 //LCA euler O(log n) query end
 
@@ -1084,27 +1464,153 @@ lcast=SparseTableLCA(euler);
 
 //LCA O(1) query end
 
-//Iterative ST start
-ll t[2*MAXN];
+//Centroid decomposition start
+int sz[MAXN];
+bool vst[MAXN];
 
-void build(){
-	for(int i=n-1;i>0;i--) 	t[i]=t[2*i]+t[2*i+1];	
-}
-
-void update(int p,int val){
-	for(t[p+=n]=val;p>1;p/=2)	t[p/2]=t[p]+t[p^1];
-}
-
-ll query(int l,int r){
-	r++;
-	ll sum=0;
-	for(l+=n,r+=n;l<r;l/=2,r/=2){
-		if(l&1)	sum+=t[l++];
-		if(r&1)	sum+=t[--r];
+void dfs_sz(int u, int p)
+{
+	sz[u]=1;
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		dfs_sz(v,u);
+		sz[u]+=sz[v];
 	}
-	return sum;
 }
-//Iterative ST end
+
+void centroid(int u, int p, int r)
+{
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		if(sz[v]*2>sz[r]) return centroid(v,u,r);
+	}
+	return u;
+}
+
+void prep(int u, int p)
+{
+	for(int v: adj[u])
+	{
+		if(v==p || vst[v]) continue;
+		
+	}
+}
+
+void solve(int u)
+{
+	dfs_sz(u,-1);
+	u=centroid(u,-1,u);
+	
+	//do stuffs
+	prep(u,-1);
+	for(int v: adj[u])
+	{
+		if(vst[v]) continue;
+		
+	}
+	
+	vst[u]=1;
+	for(int v: adj[u])
+	{
+		if(vst[v]) continue;
+		solve(v);
+	}
+}
+//Centroid decomposition end
+
+//Sparse Table start: O(1) Min Query
+const int LG = 20;
+
+int lg[MAXN+1];
+ll spt[MAXN][LG+1];
+
+struct SparseTable
+{	
+	ll merge(ll x, ll y){
+		return min(x,y);
+	}
+	
+	SparseTable(int n, ll arr[]){
+		lg[1]=0;
+		fore(i,2,n)	lg[i]=lg[i/2]+1;
+		
+		forn(i,0,n) spt[i][0] = arr[i];
+		fore(j,1,LG)
+			for(int i=0; i+(1<<j)<=n; i++)
+				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
+	}
+	
+	ll query(int l,int r){
+		int len=lg[r-l+1];		
+		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
+	}	
+};
+//Sparse Table end
+
+//Convex Hull Dynamic start (CHT)
+//Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
+struct Line {
+	mutable ll k, m, p;
+	bool operator<(const Line& o) const { return k < o.k; }
+	bool operator<(ll x) const { return p < x; }
+};
+
+struct ConvexHullDynamic: multiset<Line, less<>> {
+	const ll inf = LLONG_MAX; //double: inf = 1.0L
+	inline ll div(ll a, ll b){
+		return a/b - ((a^b)<0 && a%b);
+	}
+	bool isect(iterator x, iterator y){
+		if(y == end()){ x->p = inf; return false; }
+		if(x->k == y->k) x->p = x->m > y->m ? inf : -inf;
+		else x->p = div(y->m - x->m, x->k - y->k);
+		return x->p >= y->p;
+	}
+	void add(ll k, ll m){
+		auto z = insert({k, m, 0}), y = z++, x = y;
+		while(isect(y, z)) z = erase(z);
+		if(x!=begin() && isect(--x, y))
+			isect(x, y = erase(y));
+		while((y=x) != begin() && (--x)->p >= y->p)
+			isect(x, erase(y));
+	}
+	ll query(ll x){
+		if(empty()) return 0;
+		auto l = *lower_bound(x);
+		return l.k * x + l.m;
+	}
+};
+//Convex Hull Dynamic end (CHT)
+
+//Convex Hull fast start (CHT)
+struct Line {
+	ll m, b;
+	Line(ll _m, ll _b): m(_m), b(_b) {}
+	inline ll eval(ll x){ return m*x+b; }
+};
+
+struct ConvexHull {
+	deque<Line> d;
+	inline void clear(){ d.clear(); }
+	bool bad(const Line &Z){
+		if(int(d.size())<2) return false;
+		const Line &X = d[int(d.size())-2], &Y = d[int(d.size())-1];
+		return (X.b-Z.b)*(Y.m-X.m) <= (X.b-Y.b)*(Z.m-X.m);
+	}
+	void addline(ll m, ll b){
+		Line l = Line(m,b);
+		while(bad(l)) d.pop_back();
+		d.push_back(l);
+	}
+	ll query(ll x){
+		if(d.empty()) return 0;
+		while(int(d.size())>1 && (d[0].b-d[1].b <= x*(d[1].m-d[0].m))) d.pop_front();
+		return d.front().eval(x);
+	}
+};
+//Convex Hull fast end (CHT)
 
 //Combi/Maths start
 vector<ll> fact,ifact,inv,pow2;
@@ -1305,7 +1811,7 @@ ll getSumDiv(ll n)
 {
 	return sumdiv[n];
 }
-ll modpow(ll a, ll b, ll mod)
+ll pw(ll a, ll b, ll mod)
 {
 	ll r = 1;
 	if(b < 0) b += mod*100000LL;
@@ -1319,13 +1825,13 @@ ll modpow(ll a, ll b, ll mod)
 }
 ll inv(ll a, ll mod)
 {
-	return modpow(a, mod - 2, mod);
+	return pw(a, mod - 2, mod);
 }
 ll invgeneral(ll a, ll mod)
 {
 	ll ph = phi(mod);
 	ph--;
-	return modpow(a, ph, mod);
+	return pw(a, ph, mod);
 }
 void getpf(vector<ii>& pf, ll n)
 {
@@ -1410,445 +1916,17 @@ forn(i,0,Q){
 }
 //Sqrt decomposition/Mo's algorithm end
 
-//Convex Hull Dynamic start (CHT)
-//Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
-struct Line {
-	mutable ll k, m, p;
-	bool operator<(const Line& o) const { return k < o.k; }
-	bool operator<(ll x) const { return p < x; }
-};
-
-struct ConvexHullDynamic: multiset<Line, less<>> {
-	const ll inf = LLONG_MAX; //double: inf = 1.0L
-	inline ll div(ll a, ll b){
-		return a/b - ((a^b)<0 && a%b);
-	}
-	bool isect(iterator x, iterator y){
-		if(y == end()){ x->p = inf; return false; }
-		if(x->k == y->k) x->p = x->m > y->m ? inf : -inf;
-		else x->p = div(y->m - x->m, x->k - y->k);
-		return x->p >= y->p;
-	}
-	void add(ll k, ll m){
-		auto z = insert({k, m, 0}), y = z++, x = y;
-		while(isect(y, z)) z = erase(z);
-		if(x!=begin() && isect(--x, y))
-			isect(x, y = erase(y));
-		while((y=x) != begin() && (--x)->p >= y->p)
-			isect(x, erase(y));
-	}
-	ll query(ll x){
-		if(empty()) return 0;
-		auto l = *lower_bound(x);
-		return l.k * x + l.m;
-	}
-};
-//Convex Hull Dynamic end (CHT)
-
-//Convex Hull fast start (CHT)
-struct Line {
-	ll m, b;
-	Line(ll _m, ll _b): m(_m), b(_b) {}
-	inline ll eval(ll x){ return m*x+b; }
-};
-
-struct ConvexHull {
-	deque<Line> d;
-	inline void clear(){ d.clear(); }
-	bool bad(const Line &Z){
-		if(int(d.size())<2) return false;
-		const Line &X = d[int(d.size())-2], &Y = d[int(d.size())-1];
-		return (X.b-Z.b)*(Y.m-X.m) <= (X.b-Y.b)*(Z.m-X.m);
-	}
-	void addline(ll m, ll b){
-		Line l = Line(m,b);
-		while(bad(l)) d.pop_back();
-		d.push_back(l);
-	}
-	ll query(ll x){
-		if(d.empty()) return 0;
-		while(int(d.size())>1 && (d[0].b-d[1].b <= x*(d[1].m-d[0].m))) d.pop_front();
-		return d.front().eval(x);
-	}
-};
-//Convex Hull fast end (CHT)
-
-//O(V^2E) Dinic Flow
-//Initialize : MaxFlow<# of vertices, Max Value> M;
-
-template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and MX (the Max number of vertices)
-{
-	struct edge
-	{
-		int to,cap,rev;
-		edge(int to=0,int cap=0,int rev=0):to(to),cap(cap),rev(rev){}
-	};
-	vector<edge> vec[MX];
-	int level[MX];
-	int iter[MX];
+//Randomizer start
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+uniform_int_distribution<int>(1,6)(rng)
+uniform_int_distribution<> dis(1,6)
 	
-	//adds an edge of cap c to the flow graph
-	void addedge(int s,int t,int c)
-	{
-		int S=vec[s].size(),T=vec[t].size();
-		vec[s].push_back(edge(t,c,T));
-		vec[t].push_back(edge(s,0,S));
-	}
-	void bfs(int s)
-	{
-		memset(level,-1,sizeof(level));
-		queue<int> que;
-		level[s] = 0;
-		que.push(s);
-		while(!que.empty())
-		{
-			int v = que.front();que.pop();
-			for(int i=0;i<vec[v].size();i++)
-			{
-				edge&e=vec[v][i];
-				if (e.cap>0&&level[e.to]<0)
-				{
-					level[e.to]=level[v]+1;
-					que.push(e.to);
-				}
-			}
-		}
-	}
-	ll flow_dfs(int v,int t,ll f)
-	{
-		if(v==t) return f;
-		for(int &i=iter[v];i<vec[v].size();i++)
-		{
-			edge &e=vec[v][i];
-			if(e.cap>0&&level[v]<level[e.to])
-			{
-				ll d=flow_dfs(e.to,t,min(f,ll(e.cap)));
-				if (d>0)
-				{
-					e.cap-=d;
-					vec[e.to][e.rev].cap+=d;
-					return d;
-				}
-			}
-		}
-		return 0;
-	}
-	//finds max flow using dinic from s to t
-	ll maxflow(int s,int t)
-	{
-		ll flow = 0;
-		while(1)
-		{
-			bfs(s);
-			if(level[t]<0) return flow;
-			memset(iter,0,sizeof(iter));
-			while(1)
-			{
-				ll f=flow_dfs(s,t,INF);
-				if(f==0) break;
-				flow += f;
-			}
-		}
-	}
-};
-//Dinic Flow end
+	Examples:
+	cout<<rng()<<'\n';
+	cout<<dis(rng)<<'\n';
 
-//Min Cost Max Flow (MCBM) start
-struct MinCostFlow{
-    int n, s, t;
-    long long flow, cost;
-    vector<vector<int> > graph;
-    vector<Edge> e;
-    vector<long long> dist, potential;
-    vector<int> parent;
-    bool negativeCost;
- 
-    MinCostFlow(int _n){
-        // 0-based indexing
-        n = _n;
-        graph.assign(n, vector<int> ());
-        negativeCost = false;
-    }
- 
-    void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
-        if(cost < 0)
-            negativeCost = true;
- 
-        graph[u].push_back(e.size());
-        e.push_back(Edge(u, v, cap, cost));
- 
-        graph[v].push_back(e.size());
-        e.push_back(Edge(v, u, 0, -cost));
- 
-        if(!directed)
-            addEdge(v, u, cap, cost, true);
-    }
- 
-    pair<long long, long long> getMinCostFlow(int _s, int _t){
-        s = _s; t = _t;
-        flow = 0, cost = 0;
- 
-        potential.assign(n, 0);
-        if(negativeCost){
-            // run Bellman-Ford to find starting potential
-            dist.assign(n, 1LL<<62);
-            for(int i = 0, relax = false; i < n && relax; i++, relax = false){
-                for(int u = 0; u < n; u++){
-                    for(int k = 0; k < graph[u].size(); k++){
-                        int eIdx = graph[u][i];
-                        int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
- 
-                        if(dist[v] > dist[u] + w && cap > 0){
-                            dist[v] = dist[u] + w;
-                            relax = true;
-            }   }   }   }
- 
-            for(int i = 0; i < n; i++){
-                if(dist[i] < (1LL<<62)){
-                    potential[i] = dist[i];
-        }   }   }
- 
-        while(dijkstra()){
-            flow += sendFlow(t, 1LL<<62);
-        }
- 
-        return make_pair(flow, cost);
-    }
- 
-    bool dijkstra(){
-        parent.assign(n, -1);
-        dist.assign(n, 1LL<<62);
-        priority_queue<ii, vector<ii>, greater<ii> > pq;
- 
-        dist[s] = 0;
-        pq.push(ii(0, s));
- 
- 
-        while(!pq.empty()){
-            int u = pq.top().second;
-            long long d = pq.top().first;
-            pq.pop();
- 
-            if(d != dist[u]) continue;
- 
-            for(int i = 0; i < graph[u].size(); i++){
-                int eIdx = graph[u][i];
-                int v = e[eIdx].v; ll cap = e[eIdx].cap;
-                ll w = e[eIdx].cost + potential[u] - potential[v];
- 
-                if(dist[u] + w < dist[v] && cap > 0){
-                    dist[v] = dist[u] + w;
-                    parent[v] = eIdx;
- 
-                    pq.push(ii(dist[v], v));
-        }   }   }
- 
-        // update potential
-        for(int i = 0; i < n; i++){
-            if(dist[i] < (1LL<<62))
-                potential[i] += dist[i];
-        }
- 
-        return dist[t] != (1LL<<62);
-    }
- 
-    long long sendFlow(int v, long long curFlow){
-        if(parent[v] == -1)
-            return curFlow;
-        int eIdx = parent[v];
-        int u = e[eIdx].u; ll w = e[eIdx].cost;
- 
-        long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
- 
-        cost += f*w;
-        e[eIdx].cap -= f;
-        e[eIdx^1].cap += f;
- 
-        return f;
-    }
-};
-//Min Cost Max Flow (MCBM) end
-
-//Hopkroft-Karp matching (MCBM, max-cardinality bipartite matching) start
-//Read n1,n2 -> init() -> addEdge() -> maxMatching()
-const int MAXN1 = 50000;
-const int MAXN2 = 50000;
-const int MAXM = 150000;
-
-int n1, n2, edges, last[MAXN1], pre[MAXM], head[MAXM];
-int matching[MAXN2], dist[MAXN1], Q[MAXN1];
-bool used[MAXN1], vis[MAXN1];
-
-void init(int _n1, int _n2) 
-{
-    n1 = _n1;
-    n2 = _n2;
-    edges = 0;
-    fill(last, last + n1, -1);
-}
-
-void addEdge(int u, int v) 
-{
-    head[edges] = v;
-    pre[edges] = last[u];
-    last[u] = edges++;
-}
-
-void bfs() 
-{
-    fill(dist, dist + n1, -1);
-    int sizeQ = 0;
-    for (int u = 0; u < n1; ++u) {
-        if (!used[u]) {
-            Q[sizeQ++] = u;
-            dist[u] = 0;
-        }
-    }
-    for (int i = 0; i < sizeQ; i++) {
-        int u1 = Q[i];
-        for (int e = last[u1]; e >= 0; e = pre[e]) {
-            int u2 = matching[head[e]];
-            if (u2 >= 0 && dist[u2] < 0) {
-                dist[u2] = dist[u1] + 1;
-                Q[sizeQ++] = u2;
-            }
-        }
-    }
-}
-
-bool dfs(int u1) 
-{
-    vis[u1] = true;
-    for (int e = last[u1]; e >= 0; e = pre[e]) {
-        int v = head[e];
-        int u2 = matching[v];
-        if (u2 < 0 || ((!vis[u2] && dist[u2] == dist[u1] + 1) && dfs(u2))) {
-            matching[v] = u1;
-            used[u1] = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-int maxMatching() 
-{
-    fill(used, used + n1, false);
-    fill(matching, matching + n2, -1);
-    for (int res = 0;;) {
-        bfs();
-        fill(vis, vis + n1, false);
-        int f = 0;
-        for (int u = 0; u < n1; ++u)
-            if (!used[u] && dfs(u))
-                ++f;
-        if (!f)
-            return res;
-        res += f;
-    }
-}
-//Hopkroft-Karp matching end
-
-//SCC (Strongly connected components) start
-//init(n) -> read input -> tarjan() -> sccidx[]
-struct SCC
-{
-	const int INF2 = int(1e9);
-	vector<vector<int> > vec;
-	int index;
-	vector<int> idx;
-	vector<int> lowlink;
-	vector<bool> onstack;
-	stack<int> s;
-	vector<int> sccidx;
-	int scccnt;
-	vi topo;
-	
-	//lower sccidx means appear later
-	void init(int n)
-	{
-		idx.assign(n,-1);
-		index = 0;
-		onstack.assign(n,0);
-		lowlink.assign(n,INF2);
-		while(!s.empty()) s.pop();
-		sccidx.assign(n,-1);
-		scccnt = 0;
-		vec.clear();
-		topo.clear();
-		vec.resize(n);
-	}
-	
-	void addedge(int u, int v) //u -> v
-	{
-		vec[u].pb(v);
-	}
-	
-	void connect(int u)
-	{
-		idx[u] = index;
-		lowlink[u] = index;
-		index++;
-		s.push(u);
-		onstack[u] = true;
-		for(int i = 0; i < vec[u].size(); i++)
-		{
-			int v = vec[u][i];
-			if(idx[v] == -1)
-			{
-				connect(v);
-				lowlink[u] = min(lowlink[u], lowlink[v]);
-			}
-			else if(onstack[v])
-			{
-				lowlink[u] = min(lowlink[u], idx[v]);
-			}
-		}
-		if(lowlink[u] == idx[u])
-		{
-			while(1)
-			{
-				int v = s.top();
-				s.pop();
-				onstack[v] = false;
-				sccidx[v] = scccnt;
-				if(v == u) break;
-			}
-			scccnt++;
-		}
-	}
-	
-	void tarjan()
-	{
-		for(int i = 0; i < vec.size(); i++)
-		{
-			if(idx[i] == -1)
-			{
-				connect(i);
-			}
-		}
-	}
-	
-	void toposort() //if graph is a DAG and i just want to toposort
-	{
-		tarjan();
-		int n = vec.size();
-		topo.resize(n);
-		vector<ii> tmp;
-		for(int i = 0; i < n; i++)
-		{
-			tmp.pb(ii(sccidx[i],i));
-		}
-		sort(tmp.begin(),tmp.end());
-		reverse(tmp.begin(),tmp.end());
-		for(int i = 0; i < n; i++)
-		{
-			topo[i]=tmp[i].S;
-			if(i>0) assert(tmp[i].F!=tmp[i-1].F);
-		}
-	}
-};
-//SCC end
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+//Randomizer end
 
 //Binary converter start
 string BinToString(ll x)
@@ -1957,59 +2035,3 @@ Temp.resize(n);
 sort(a.begin(), a.end(), cmp_x);
 rec(0,n,a);
 //Nearest pair of points end
-
-//Centroid decomposition start
-int sz[MAXN];
-bool vst[MAXN];
-
-void dfs_sz(int u, int p)
-{
-	sz[u]=1;
-	for(int v: adj[u])
-	{
-		if(v==p || vst[v]) continue;
-		dfs_sz(v,u);
-		sz[u]+=sz[v];
-	}
-}
-
-void centroid(int u, int p, int r)
-{
-	for(int v: adj[u])
-	{
-		if(v==p || vst[v]) continue;
-		if(sz[v]*2>sz[r]) return centroid(v,u,r);
-	}
-	return u;
-}
-
-void prep(int u, int p)
-{
-	for(int v: adj[u])
-	{
-		if(v==p || vst[v]) continue;
-		
-	}
-}
-
-void solve(int u)
-{
-	dfs_sz(u,-1);
-	u=centroid(u,-1,u);
-	
-	//do stuffs
-	prep(u,-1);
-	for(int v: adj[u])
-	{
-		if(vst[v]) continue;
-		
-	}
-	
-	vst[u]=1;
-	for(int v: adj[u])
-	{
-		if(vst[v]) continue;
-		solve(v);
-	}
-}
-//Centroid decomposition end
