@@ -27,7 +27,7 @@ List of things (in order):
 		- Edmond's Karp: Min Cost Max Flow
 		- Hopkroft-Karp matching (max-cardinality bipartite matching/MCBM)
 		- Strongly connected component (SCC): Tarjan's algorithm
-	- Problem dependant
+	- Problem dependent
 		- Euler tour compression
 		- Heavy-light decomposition (HLD)
 		- Lowest Common Ancestor (LCA)
