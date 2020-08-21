@@ -790,7 +790,7 @@ void kruskal()
 		mst.pb({{u,v},w});
 		dsu.merge(u,v);
 		sumw+=w;
-		if(dsu.cc<=1) break;
+		if(dsu.cc==1) break;
 	}
 }
 //Kruskal end
