@@ -877,82 +877,84 @@ int spfa(int src)
 }
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm end
 
-//O(V^2E) Dinic Flow
-//Initialize : MaxFlow<# of vertices, Max Value> M;
-
-template<int MX, ll INF> struct MaxFlow //by yutaka1999, have to define INF and MX (the Max number of vertices)
+//Dinic Flow start: O(V^2E)
+struct DinicFlow
 {
-	struct edge
+	struct Edge
 	{
-		int to,cap,rev;
-		edge(int to=0,int cap=0,int rev=0):to(to),cap(cap),rev(rev){}
+		int v, r; ll cap;
+		Edge(int v=0, ll cap=0, int r=0): v(v), r(r), cap(cap) {}
 	};
-	vector<edge> vec[MX];
-	int level[MX];
-	int iter[MX];
+	int n_;
+	vector<vector<Edge>> adj;
+	vector<int> level, ptr;
 	
-	//adds an edge of cap c to the flow graph
-	void addedge(int s,int t,int c)
+	DinicFlow(int n)
 	{
-		int S=vec[s].size(),T=vec[t].size();
-		vec[s].push_back(edge(t,c,T));
-		vec[t].push_back(edge(s,0,S));
+		n_ = n;
+		adj.resize(n);
+		level.resize(n);
+		ptr.resize(n);
+	}
+	void addedge(int u, int v, ll c)
+	{
+		int u_sz = adj[u].size(), v_sz = adj[v].size();
+		adj[u].pb(Edge(v, c, v_sz));
+		adj[v].pb(Edge(u, 0, u_sz));
 	}
 	void bfs(int s)
 	{
-		memset(level,-1,sizeof(level));
-		queue<int> que;
+		level.assign(n_, -1);
 		level[s] = 0;
-		que.push(s);
-		while(!que.empty())
+		queue<int> q;
+		q.push(s);
+		while(!q.empty())
 		{
-			int v = que.front();que.pop();
-			for(int i=0;i<vec[v].size();i++)
+			int u = q.front(); q.pop();
+			for(int i=0;i<adj[u].size();i++)
 			{
-				edge&e=vec[v][i];
-				if (e.cap>0&&level[e.to]<0)
+				const Edge &e = adj[u][i];
+				if(e.cap>0 && level[e.v]==-1)
 				{
-					level[e.to]=level[v]+1;
-					que.push(e.to);
+					level[e.v] = level[u]+1;
+					q.push(e.v);
 				}
 			}
 		}
 	}
-	ll flow_dfs(int v,int t,ll f)
+	ll dfs(int u, int t, ll f)
 	{
-		if(v==t) return f;
-		for(int &i=iter[v];i<vec[v].size();i++)
+		if(u == t) return f;
+		for(int &i=ptr[u];i<adj[u].size();i++)
 		{
-			edge &e=vec[v][i];
-			if(e.cap>0&&level[v]<level[e.to])
+			Edge &e = adj[u][i];
+			if(e.cap>0 && level[u]+1==level[e.v])
 			{
-				ll d=flow_dfs(e.to,t,min(f,ll(e.cap)));
-				if (d>0)
-				{
-					e.cap-=d;
-					vec[e.to][e.rev].cap+=d;
-					return d;
-				}
+				ll newf = dfs(e.v, t, min(f,e.cap));
+				if(!newf) continue;
+				e.cap -= newf;
+				adj[e.v][e.r].cap += newf;
+				return newf;
 			}
 		}
 		return 0;
 	}
-	//finds max flow using dinic from s to t
-	ll maxflow(int s,int t)
+	ll flow(int s, int t)
 	{
-		ll flow = 0;
+		ll sum = 0;
 		while(1)
 		{
 			bfs(s);
-			if(level[t]<0) return flow;
-			memset(iter,0,sizeof(iter));
+			if(level[t]==-1) break;
+			ptr.assign(n_, 0);
 			while(1)
 			{
-				ll f=flow_dfs(s,t,INF);
-				if(f==0) break;
-				flow += f;
+				ll f = dfs(s, t, INF);
+				if(!f) break;
+				sum += f;
 			}
 		}
+		return sum;
 	}
 };
 //Dinic Flow end
