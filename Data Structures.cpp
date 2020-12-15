@@ -16,11 +16,12 @@ using namespace __gnu_pbds;
 #define fbo find_by_order
 #define ook order_of_key
 typedef long long ll;
-typedef pair<ll,ll> ii;
+typedef pair<int,int> ii;
 typedef vector<ll> vi;
 typedef vector<ii> vii;
 typedef long double ld;
-typedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> pbds;
+template<typename T>
+using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 void amin(ll &a, ll b){ a=min(a,b); }
 void amax(ll &a, ll b){ a=max(a,b); }
 void YES(){cout<<"YES\n";} void NO(){cout<<"NO\n";}
@@ -28,7 +29,7 @@ void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
 const ll INF = ll(1e18);
 const int MOD = 998244353;
 
-bool DEBUG = 0;
+const bool DEBUG = 0;
 const int MAXN = 100005;
 
 //Lazy Recursive ST start
@@ -767,7 +768,7 @@ struct DSU {
 		dsu[u].sz += dsu[v].sz;
 		cc--;
 	}
-	//ll get(int u){ return dsu[rt(u)].sz; }
+	ll get(int u){ return dsu[rt(u)].sz; }
 	//void set(int u, ll val){ dsu[rt(u)].sz = val; }
 };
 //DSU end
@@ -882,7 +883,7 @@ struct DinicFlow
 {
 	struct Edge
 	{
-		int v, r; ll cap;
+		int v,r; ll cap;
 		Edge(int v=0, ll cap=0, int r=0): v(v), r(r), cap(cap) {}
 	};
 	int n_;
@@ -899,8 +900,8 @@ struct DinicFlow
 	void addedge(int u, int v, ll c)
 	{
 		int u_sz = adj[u].size(), v_sz = adj[v].size();
-		adj[u].pb(Edge(v, c, v_sz));
-		adj[v].pb(Edge(u, 0, u_sz));
+		adj[u].emplace_back(v, c, v_sz);
+		adj[v].emplace_back(u, 0, u_sz);
 	}
 	void bfs(int s)
 	{
@@ -911,9 +912,8 @@ struct DinicFlow
 		while(!q.empty())
 		{
 			int u = q.front(); q.pop();
-			for(int i=0;i<adj[u].size();i++)
+			for(const Edge &e: adj[u])
 			{
-				const Edge &e = adj[u][i];
 				if(e.cap>0 && level[e.v]==-1)
 				{
 					level[e.v] = level[u]+1;
@@ -960,118 +960,124 @@ struct DinicFlow
 //Dinic Flow end
 
 //Min Cost Max Flow start
-struct MinCostFlow{
-    int n, s, t;
-    long long flow, cost;
-    vector<vector<int> > graph;
-    vector<Edge> e;
-    vector<long long> dist, potential;
-    vector<int> parent;
-    bool negativeCost;
- 
-    MinCostFlow(int _n){
-        // 0-based indexing
-        n = _n;
-        graph.assign(n, vector<int> ());
-        negativeCost = false;
-    }
- 
-    void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
-        if(cost < 0)
-            negativeCost = true;
- 
-        graph[u].push_back(e.size());
-        e.push_back(Edge(u, v, cap, cost));
- 
-        graph[v].push_back(e.size());
-        e.push_back(Edge(v, u, 0, -cost));
- 
-        if(!directed)
-            addEdge(v, u, cap, cost, true);
-    }
- 
-    pair<long long, long long> getMinCostFlow(int _s, int _t){
-        s = _s; t = _t;
-        flow = 0, cost = 0;
- 
-        potential.assign(n, 0);
-        if(negativeCost){
-            // run Bellman-Ford to find starting potential
-            dist.assign(n, 1LL<<62);
-            for(int i = 0, relax = false; i < n && relax; i++, relax = false){
-                for(int u = 0; u < n; u++){
-                    for(int k = 0; k < graph[u].size(); k++){
-                        int eIdx = graph[u][i];
-                        int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
- 
-                        if(dist[v] > dist[u] + w && cap > 0){
-                            dist[v] = dist[u] + w;
-                            relax = true;
-            }   }   }   }
- 
-            for(int i = 0; i < n; i++){
-                if(dist[i] < (1LL<<62)){
-                    potential[i] = dist[i];
-        }   }   }
- 
-        while(dijkstra()){
-            flow += sendFlow(t, 1LL<<62);
-        }
- 
-        return make_pair(flow, cost);
-    }
- 
-    bool dijkstra(){
-        parent.assign(n, -1);
-        dist.assign(n, 1LL<<62);
-        priority_queue<ii, vector<ii>, greater<ii> > pq;
- 
-        dist[s] = 0;
-        pq.push(ii(0, s));
- 
- 
-        while(!pq.empty()){
-            int u = pq.top().second;
-            long long d = pq.top().first;
-            pq.pop();
- 
-            if(d != dist[u]) continue;
- 
-            for(int i = 0; i < graph[u].size(); i++){
-                int eIdx = graph[u][i];
-                int v = e[eIdx].v; ll cap = e[eIdx].cap;
-                ll w = e[eIdx].cost + potential[u] - potential[v];
- 
-                if(dist[u] + w < dist[v] && cap > 0){
-                    dist[v] = dist[u] + w;
-                    parent[v] = eIdx;
- 
-                    pq.push(ii(dist[v], v));
-        }   }   }
- 
-        // update potential
-        for(int i = 0; i < n; i++){
-            if(dist[i] < (1LL<<62))
-                potential[i] += dist[i];
-        }
- 
-        return dist[t] != (1LL<<62);
-    }
- 
-    long long sendFlow(int v, long long curFlow){
-        if(parent[v] == -1)
-            return curFlow;
-        int eIdx = parent[v];
-        int u = e[eIdx].u; ll w = e[eIdx].cost;
- 
-        long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
- 
-        cost += f*w;
-        e[eIdx].cap -= f;
-        e[eIdx^1].cap += f;
- 
-        return f;
-    }
+struct MinCostFlow
+{
+	struct Edge {
+		int u, v; long long cap, cost;
+		Edge(int u, int v, long long cap, long long cost): u(u), v(v), cap(cap), cost(cost) {}
+	};
+	
+	int n, s, t;
+	long long flow, cost;
+	vector<vector<int> > graph;
+	vector<Edge> e;
+	vector<long long> dist, potential;
+	vector<int> parent;
+	bool negativeCost;
+	
+	MinCostFlow(int _n){
+		// 0-based indexing
+		n = _n;
+		graph.assign(n, vector<int> ());
+		negativeCost = false;
+	}
+	
+	void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
+		if(cost < 0)
+			negativeCost = true;
+	
+		graph[u].push_back(e.size());
+		e.push_back(Edge(u, v, cap, cost));
+	
+		graph[v].push_back(e.size());
+		e.push_back(Edge(v, u, 0, -cost));
+	
+		if(!directed)
+			addEdge(v, u, cap, cost, true);
+	}
+	
+	pair<long long, long long> getMinCostFlow(int _s, int _t){
+		s = _s; t = _t;
+		flow = 0, cost = 0;
+	
+		potential.assign(n, 0);
+		if(negativeCost){
+			// run Bellman-Ford to find starting potential
+			dist.assign(n, 1LL<<62);
+			for(int i = 0, relax = false; i < n && relax; i++, relax = false){
+				for(int u = 0; u < n; u++){
+					for(int k = 0; k < graph[u].size(); k++){
+						int eIdx = graph[u][i];
+						int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
+	
+						if(dist[v] > dist[u] + w && cap > 0){
+							dist[v] = dist[u] + w;
+							relax = true;
+			}   }   }   }
+	
+			for(int i = 0; i < n; i++){
+				if(dist[i] < (1LL<<62)){
+					potential[i] = dist[i];
+		}   }   }
+	
+		while(dijkstra()){
+			flow += sendFlow(t, 1LL<<62);
+		}
+	
+		return make_pair(flow, cost);
+	}
+	
+	bool dijkstra(){
+		parent.assign(n, -1);
+		dist.assign(n, 1LL<<62);
+		priority_queue<ii, vector<ii>, greater<ii> > pq;
+	
+		dist[s] = 0;
+		pq.push(ii(0, s));
+	
+	
+		while(!pq.empty()){
+			int u = pq.top().second;
+			long long d = pq.top().first;
+			pq.pop();
+	
+			if(d != dist[u]) continue;
+	
+			for(int i = 0; i < graph[u].size(); i++){
+				int eIdx = graph[u][i];
+				int v = e[eIdx].v; ll cap = e[eIdx].cap;
+				ll w = e[eIdx].cost + potential[u] - potential[v];
+	
+				if(dist[u] + w < dist[v] && cap > 0){
+					dist[v] = dist[u] + w;
+					parent[v] = eIdx;
+	
+					pq.push(ii(dist[v], v));
+		}   }   }
+	
+		// update potential
+		for(int i = 0; i < n; i++){
+			if(dist[i] < (1LL<<62))
+				potential[i] += dist[i];
+		}
+	
+		return dist[t] != (1LL<<62);
+	}
+	
+	long long sendFlow(int v, long long curFlow){
+		if(parent[v] == -1)
+			return curFlow;
+		int eIdx = parent[v];
+		int u = e[eIdx].u; ll w = e[eIdx].cost;
+	
+		long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
+	
+		cost += f*w;
+		e[eIdx].cap -= f;
+		e[eIdx^1].cap += f;
+	
+		return f;
+	}
 };
 //Min Cost Max Flow end
 
@@ -1343,16 +1349,16 @@ void dfs_lca(int u, int p)
 	out[u]=tmr;
 }
 
-bool ischild(int u, int v)
+bool isChild(int u, int v)
 {
 	return in[u]<=in[v] && out[v]<=out[u];
 }
 
 int lca(int u, int v)
 {
-	if(ischild(u,v)) return u;
+	if(isChild(u,v)) return u;
 	for(int i=LG-1;i>=0;i--){
-		if(prt[i][u]!=-1 && !ischild(prt[i][u],v))
+		if(prt[i][u]!=-1 && !isChild(prt[i][u],v))
 			u=prt[i][u];
 	}
 	return prt[0][u];
@@ -1553,6 +1559,7 @@ struct SparseTable
 
 //Convex Hull Dynamic start (CHT)
 //Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
+//Finds max by default; set Max to false for min
 struct Line {
 	mutable ll k, m, p;
 	bool operator<(const Line& o) const { return k < o.k; }
@@ -1561,6 +1568,7 @@ struct Line {
 
 struct ConvexHullDynamic: multiset<Line, less<>> {
 	const ll inf = LLONG_MAX; //double: inf = 1.0L
+	bool Max = true;
 	inline ll div(ll a, ll b){
 		return a/b - ((a^b)<0 && a%b);
 	}
@@ -1570,7 +1578,8 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 		else x->p = div(y->m - x->m, x->k - y->k);
 		return x->p >= y->p;
 	}
-	void add(ll k, ll m){
+	void add(ll k, ll m){ // k = slope, m = y-intercept
+		if(!Max) k = -k, m = -m;
 		auto z = insert({k, m, 0}), y = z++, x = y;
 		while(isect(y, z)) z = erase(z);
 		if(x!=begin() && isect(--x, y))
@@ -1579,9 +1588,9 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 			isect(x, erase(y));
 	}
 	ll query(ll x){
-		if(empty()) return 0;
+		if(empty()) return Max ? 0 : inf;
 		auto l = *lower_bound(x);
-		return l.k * x + l.m;
+		return (l.k * x + l.m) * (Max ? 1 : -1);
 	}
 };
 //Convex Hull Dynamic end (CHT)
