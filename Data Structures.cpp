@@ -1927,6 +1927,57 @@ forn(i,0,Q){
 }
 //Sqrt decomposition/Mo's algorithm end
 
+//FFT (Fast Fourier Transform) start
+typedef complex<double> cd;
+const double PI = acos(-1);
+void fft(vector<cd> &a, bool invert)
+{
+	int n=a.size();
+	for(int i=1,j=0;i<n;i++)
+	{
+		int bit=n>>1;
+		for(;j&bit;bit>>=1) j^=bit;
+		j^=bit;
+		if(i<j) swap(a[i],a[j]);
+	}
+	for(int len=2;len<=n;len<<=1)
+	{
+		double ang=2*PI/len*(invert?-1:1);
+		cd rt(cos(ang), sin(ang));
+		for(int i=0;i<n;i+=len)
+		{
+			cd w(1);
+			for(int j=0;j<len/2;j++)
+			{
+				cd u=a[i+j], v=w*a[i+j+len/2];
+				a[i+j]=u+v;
+				a[i+j+len/2]=u-v;
+				w*=rt;
+			}
+		}
+	}
+	if(invert) for(cd &x: a) x/=n;
+}
+vi mult(vi &a, vi &b)
+{
+	int n=1;
+	while(n<a.size()+b.size()) n<<=1;
+	
+	vector<cd> fa(n),fb(n);
+	for(int i=0;i<a.size();i++) fa[i]=a[i];
+	for(int i=0;i<b.size();i++) fb[i]=b[i];
+	fft(fa,0); fft(fb,0);
+	forn(i,0,n) fa[i]*=fb[i];
+	fft(fa,1);
+	
+	vi r(n);
+	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
+	return r;
+}
+//FFT (Fast Fourier Transform) end
+
+
+
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 uniform_int_distribution<int>(1,6)(rng)
@@ -1939,8 +1990,25 @@ uniform_int_distribution<> dis(1,6)
 mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
 //Randomizer end
 
+// Hash map custom hash start: unordered_map<T,T,custom_hash> mp;
+struct custom_hash {
+    static uint64_t splitmix64(uint64_t x) {
+        // http://xorshift.di.unimi.it/splitmix64.c
+        x += 0x9e3779b97f4a7c15;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+        return x ^ (x >> 31);
+    }
+
+    size_t operator()(uint64_t x) const {
+        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
+        return splitmix64(x + FIXED_RANDOM);
+    }
+};
+// Hash map custom hash end
+
 //Binary converter start
-string BinToString(ll x)
+string bconv(ll x)
 {
 	string res;
 	for(int i=8;i>=0;i--){
