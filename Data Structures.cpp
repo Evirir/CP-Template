@@ -836,6 +836,9 @@ void floyd(){
 
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm start
 // returns one of the nodes in neg cycle if it exists, otherwise -1
+int prt[MAXN];
+ll dist[MAXN];
+
 int spfa(int src)
 {
 	int cnt[n]{};
