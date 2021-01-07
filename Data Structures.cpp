@@ -835,7 +835,7 @@ void floyd(){
 //Floyd-Warshall end
 
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm start
-// returns one of the nodes in neg cycle if it exists, otherwise -1
+// Returns one of the nodes in neg cycle if it exists (0-indexed), otherwise -1
 int prt[MAXN];
 ll dist[MAXN];
 
