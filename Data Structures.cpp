@@ -496,6 +496,58 @@ public:
 };
 // 2D Segment Tree end
 
+// Persistent Segment Tree start
+inline ll merge(ll x, ll y){
+	return x+y;
+}
+struct Node {
+	Node *l, *r;
+	ll sum=0;
+	Node(ll val): l(nullptr), r(nullptr), sum(val) {}
+	Node(Node *l, Node *r): l(l), r(r), sum(0) {
+		if(l) sum=merge(sum, l->sum);
+		if(r) sum=merge(sum, r->sum);
+	}
+};
+class PersistSegmentTree {
+private:
+	int size_;
+	Node* build(ll a[], int l, int r)
+	{
+		if(l==r) return new Node(0);
+		int mid=(l+r)>>1;
+		return new Node(build(a,l,mid), build(a,mid+1,r));
+	}
+	Node* update(Node* k, int p, ll val, int l, int r)
+	{
+		if(l==r) return new Node(k->sum+val); //modification
+		int mid=(l+r)>>1;
+		if(p<=mid) return new Node(update(k->l, p, val, l, mid), k->r);
+		else return new Node(k->l, update(k->r, p, val, mid+1, r));
+	}
+	ll query(Node* k, int s, int e, int l, int r)
+	{
+		if(r<s || e<l) return 0; //dummy value
+		if(s<=l && r<=e) return k->sum;
+		int mid=(l+r)>>1;
+		return merge(query(k->l,s,e,l,mid), query(k->r,s,e,mid+1,r));
+	}
+	
+public:
+	PersistSegmentTree(): size_(0) {}
+	PersistSegmentTree(int n): size_(n) {}
+	inline Node* build(ll a[]){
+		return build(a, 0, size_-1);
+	}
+	inline Node* update(Node* k, int p, ll val){
+		return update(k, p, val, 0, size_-1);
+	}
+	inline ll query(Node* k, int l, int r){
+		return query(k, l, r, 0, size_-1);
+	}
+};
+// Persistent Segment Tree end
+
 //Segment Tree Beats start (by yaketake08/tjake)
 //https://tjkendev.github.io/procon-library/cpp/range_query/segment_tree_beats_2.html
 //All intervals are [L,R)
@@ -1971,56 +2023,16 @@ void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 }
 //End Number Theory NT
 
-//Sqrt Decomposition/Mo's algorithm start
+//Sqrt decomposition/Mo's algorithm start
 int BS;
-struct query{
+struct Query {
 	int l,r,id;
+	inline ii toPair() const {
+		return {l/BS, ((l/BS)&1)?-r:r};
+	}
 };
-bool cmp(query a, query b){
-	if(a.l/BS != b.l/BS) return a.l/BS<b.l/BS;
-	return a.r<b.r;
-}
-
-int n,Q;
-int cur=0;
-ll a[30005];
-ll cnt[1000005];
-query q[200005];
-ll ans[200005];
-
-void add(int p){
-	if(!cnt[a[p]]) cur++;
-	cnt[a[p]]++;
-}
-
-void remove(int p){
-	cnt[a[p]]--;
-	if(!cnt[a[p]]) cur--;
-}
-
-mset(cnt,0);
-	
-BS=sqrt(n);
-forn(i,0,n) cin>>a[i];
-cin>>Q;
-forn(i,0,Q){
-	int l,r; cin>>l>>r; l--; r--;
-	q[i].l=l; q[i].r=r;
-	q[i].id=i;
-}
-
-sort(q,q+Q,cmp);
-
-int mo_l=0, mo_r=-1;
-forn(i,0,Q){
-	int L=q[i].l, R=q[i].r;
-	
-	while(mo_l<L) remove(mo_l++);
-	while(mo_l>L) add(--mo_l);
-	while(mo_r<R) add(++mo_r);
-	while(mo_r>R) remove(mo_r--);
-	
-	ans[q[i].id]=cur;
+inline bool operator<(const Query &a, const Query &b) {
+	return a.toPair() < b.toPair();
 }
 //Sqrt decomposition/Mo's algorithm end
 
@@ -2072,8 +2084,6 @@ vi mult(vi &a, vi &b)
 	return r;
 }
 //FFT (Fast Fourier Transform) end
-
-
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
