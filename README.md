@@ -6,10 +6,12 @@ List of things (in order):
 1. Segment/Fenwick tree
 	- Segment tree (all ranges are closed i.e. l,r inclusive)
 		- Point update
-		- Range update (Lazy propoagation)
-		- Short iterative ver on CF
+		- Range update (Lazy propagation)
+		- Short iterative ver. [[source](https://codeforces.com/blog/entry/18051)]
+		- 2D segment tree
+		- Persistent segment tree
+		- Segment tree beats (e.g. range min/max update) [[source](https://tjkendev.github.io/procon-library/cpp/range_query/segment_tree_beats_2.html)]
 	- Fenwick tree: point and range update
-	- Segment tree beats (e.g. range min/max update)
 
 2. String algorithms
 	- Prefix function (KMP)
@@ -17,7 +19,7 @@ List of things (in order):
 	- Trie
 
 3. Graph theory
-	- Classical
+	- Algorithms/DS
 		- DSU (Disjoint-set union)
 		- Kruskal
 		- Dijkstra
@@ -27,7 +29,7 @@ List of things (in order):
 		- Edmonds-Karp: Min Cost Max Flow
 		- Hopkroft-Karp matching (max-cardinality bipartite matching/MCBM)
 		- Strongly connected component (SCC): Tarjan's algorithm
-	- Problem dependent
+	- Common Techniques
 		- Euler tour compression
 		- Heavy-light decomposition (HLD)
 		- Lowest Common Ancestor (LCA)
@@ -38,9 +40,9 @@ List of things (in order):
 
 4. Data structures
 	- Sparse table
-	- Convex hull trick
+	- Convex hull trick (CHT)
 		- Dynamic version: O(log n) query
-		- Everything is sorted version: O(1) query
+		- Offline version: O(1) query
 
 5. Maths
 	- Combinatorics
@@ -51,8 +53,11 @@ List of things (in order):
 	
 6. Square root decomposition/Mo's algorithm
 
-7. Miscellaneous
+7. Fast Fourier Transform (FFT)
+
+8. Miscellaneous
 	- Randomizer (Mersenne prime twister, mt19937)
+	- unordered_map/hash map custom hash (http://xorshift.di.unimi.it/splitmix64.c)
 	- Binary converter: print numbers in binary
 	- Grid movement: 4/8 directions
 	- Nearest pair of points
