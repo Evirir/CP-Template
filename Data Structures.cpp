@@ -4,6 +4,7 @@
 using namespace std;
 using namespace __gnu_pbds;
 
+#pragma GCC optimize("Ofast")
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
@@ -16,7 +17,7 @@ using namespace __gnu_pbds;
 #define fbo find_by_order
 #define ook order_of_key
 typedef long long ll;
-typedef pair<int,int> ii;
+typedef pair<ll,ll> ii;
 typedef vector<ll> vi;
 typedef vector<ii> vii;
 typedef long double ld;
@@ -301,104 +302,6 @@ struct IterSegmentTree{
 
 forn(i,0,n) cin>>t[n+i];
 //Point iterative ST end
-
-//Fenwick Tree (FenwickPoint) start
-struct FenwickPoint{
-	vector<ll> fw;
-	int siz;
-	FenwickPoint(): fw(vector<ll>()), siz(0) {}
-	FenwickPoint(int N)
-	{
-		fw.assign(N+1,0);
-		siz = N+1;
-	}
-	void reset(int N)
-	{
-		fw.assign(N+1,0);
-		siz = N+1;
-	}
-	void add(int p, ll val)
-	{
-		for(p++; p<siz; p+=(p&(-p)))
-		{
-			fw[p]+=val;
-		}
-	}
-	ll sum(int p)
-	{
-		ll res=0;
-		for(; p; p-=(p&(-p)))
-		{
-			res+=fw[p];
-		}
-		return res;
-	}
-	ll query(int l, int r)
-	{
-		l++; r++;
-		if(r<l) return 0;
-		if(l==0) return sum(r);
-		return sum(r)-sum(l-1);
-	}
-	void modify(int p, ll val)
-	{
-		add(p, val-query(p,p));
-	}
-};
-//Fenwick Tree (FenwickPoint) end
-
-//FenwickRange start
-struct FenwickRange
-{
-	vector<ll> fw,fw2;
-	int siz;
-	FenwickRange(): fw(vector<ll>()), fw2(vector<ll>()), siz(0) {}
-	FenwickRange(int N)
-	{
-		fw.assign(N+1,0);
-		fw2.assign(N+1,0);
-		siz = N+1;
-	}
-	void reset(int N)
-	{
-		fw.assign(N+1,0);
-		fw2.assign(N+1,0);
-		siz = N+1;
-	}
-	void add(int l, int r, ll val) //[l,r] + val
-	{   
-		l++; r++;
-		for(int tl=l; tl<siz; tl+=(tl&(-tl)))
-		{
-			fw[tl]+=val, fw2[tl]-=val*ll(l-1);
-		}
-		for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
-		{
-			fw[tr]-=val, fw2[tr]+=val*ll(r);
-		}
-	}
-	ll sum(int r) //[1,r]
-	{                         
-		ll res=0;
-		for(int tr=r; tr; tr-=(tr&(-tr)))
-		{
-			res+=fw[tr]*ll(r)+fw2[tr];
-		}
-		return res;
-	}
-	ll query(int l, int r)
-	{
-		l++; r++;
-		if(r<l) return 0;
-		if(l==0) return sum(r);
-		return sum(r)-sum(l-1);
-	}
-	void modify(int p, ll val)
-	{
-		add(p,p,val-query(p,p));
-	}
-};
-//FenwickRange end
 
 // 2D Segment Tree start
 class SegmentTree2D {
@@ -843,6 +746,104 @@ public:
 	}
 };
 //Segment Tree Beats end
+
+//Fenwick Tree (FenwickPoint) start
+struct FenwickPoint{
+	vector<ll> fw;
+	int siz;
+	FenwickPoint(): fw(vector<ll>()), siz(0) {}
+	FenwickPoint(int N)
+	{
+		fw.assign(N+1,0);
+		siz = N+1;
+	}
+	void reset(int N)
+	{
+		fw.assign(N+1,0);
+		siz = N+1;
+	}
+	void add(int p, ll val)
+	{
+		for(p++; p<siz; p+=(p&(-p)))
+		{
+			fw[p]+=val;
+		}
+	}
+	ll sum(int p)
+	{
+		ll res=0;
+		for(; p; p-=(p&(-p)))
+		{
+			res+=fw[p];
+		}
+		return res;
+	}
+	ll query(int l, int r)
+	{
+		l++; r++;
+		if(r<l) return 0;
+		if(l==0) return sum(r);
+		return sum(r)-sum(l-1);
+	}
+	void modify(int p, ll val)
+	{
+		add(p, val-query(p,p));
+	}
+};
+//Fenwick Tree (FenwickPoint) end
+
+//FenwickRange start
+struct FenwickRange
+{
+	vector<ll> fw,fw2;
+	int siz;
+	FenwickRange(): fw(vector<ll>()), fw2(vector<ll>()), siz(0) {}
+	FenwickRange(int N)
+	{
+		fw.assign(N+1,0);
+		fw2.assign(N+1,0);
+		siz = N+1;
+	}
+	void reset(int N)
+	{
+		fw.assign(N+1,0);
+		fw2.assign(N+1,0);
+		siz = N+1;
+	}
+	void add(int l, int r, ll val) //[l,r] + val
+	{   
+		l++; r++;
+		for(int tl=l; tl<siz; tl+=(tl&(-tl)))
+		{
+			fw[tl]+=val, fw2[tl]-=val*ll(l-1);
+		}
+		for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
+		{
+			fw[tr]-=val, fw2[tr]+=val*ll(r);
+		}
+	}
+	ll sum(int r) //[1,r]
+	{                         
+		ll res=0;
+		for(int tr=r; tr; tr-=(tr&(-tr)))
+		{
+			res+=fw[tr]*ll(r)+fw2[tr];
+		}
+		return res;
+	}
+	ll query(int l, int r)
+	{
+		l++; r++;
+		if(r<l) return 0;
+		if(l==0) return sum(r);
+		return sum(r)-sum(l-1);
+	}
+	void modify(int p, ll val)
+	{
+		add(p,p,val-query(p,p));
+	}
+};
+//FenwickRange end
 
 //Prefix function start/KMP (Knuth–Morris–Pratt)
 vector<int> prefix_function(string &s){
