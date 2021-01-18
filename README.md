@@ -1,6 +1,9 @@
 # CP-Template
 C++ Templates for Competitive Programming
 
+Main file is Data Structures.cpp
+See also: [zscoder's template](https://github.com/zscoder/CompetitiveProgramming/blob/master/Data%20Structures%20Class%20Template.cpp)
+
 List of things (in order):
 
 1. Segment/Fenwick tree
