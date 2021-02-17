@@ -21,6 +21,7 @@ List of things (in order):
 	- Prefix function (KMP)
 	- Z-algorithm
 	- Trie
+	- Suffix Array
 
 3. Graph theory
 	- Algorithms/DS
@@ -31,7 +32,7 @@ List of things (in order):
 		- SPFA (Shortest path faster algorithm)/Bellman-Ford
 		- Dinic Flow O(V^2E)
 		- Edmonds-Karp: Min Cost Max Flow
-		- Hopkroft-Karp matching (max-cardinality bipartite matching/MCBM)
+		- Hopcroft-Karp matching (max-cardinality bipartite matching/MCBM)
 		- Strongly connected component (SCC): Tarjan's algorithm
 	- Common Techniques
 		- Euler tour compression

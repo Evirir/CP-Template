@@ -897,6 +897,72 @@ void addstring(const string &s){
 }
 //Trie end
 
+// Suffix array start
+const int MAX_N = 500005;
+const int MAX_C = 305; // Maximum initial rank + 1
+
+int RA[MAX_N], tempRA[MAX_N]; // rank array and temporary rank array
+int SA[MAX_N], tempSA[MAX_N]; // suffix array and temporary suffix array. SA[i] = starting position of i-th suffix in lexicographical order
+int RSA[MAX_N]; // RSA[i]: the i-th suffix is in the RSA[i]-ith lexicographically smallest suffix
+int SRT[MAX_N]; // for counting/radix sort
+int Phi[MAX_N], LCP[MAX_N], PLCP[MAX_N]; // for LCP counting
+
+class SuffixArray {
+public:
+	vector<int> T; // the input string, up to MAX_N characters
+	int n; // the length of input string
+	void countingSort(int k) { // O(n)
+		int i, sum, maxi = max(MAX_C, n); // up to 255 ASCII chars or length of n
+		memset(SRT, 0, sizeof SRT); // clear frequency table
+		for (i = 0; i < n; i++) // count the frequency of each integer rank
+			SRT[i + k < n ? RA[i + k] : 0]++;
+		for (i = sum = 0; i < maxi; i++) {
+			int t = SRT[i]; SRT[i] = sum; sum += t;
+		}
+		for (i = 0; i < n; i++) // shuffle the suffix array if necessary
+			tempSA[SRT[SA[i] + k < n ? RA[SA[i] + k] : 0]++] = SA[i];
+		for (i = 0; i < n; i++) // update the suffix array SA
+			SA[i] = tempSA[i];
+	}
+	void constructSA(const vector<int> &s) { // this version can go up to 100000 characters
+		int i, k, r;
+		T = s;
+		n = s.size();
+		for (i = 0; i < n; i++) RA[i] = T[i]; // initial rankings
+		for (i = 0; i < n; i++) SA[i] = i; // initial SA: {0, 1, 2, ..., n-1}
+		for (k = 1; k < n; k <<= 1) { // repeat sorting process log n times
+			countingSort(k); // actually radix sort: sort based on the second item
+			countingSort(0); // then (stable) sort based on the first item
+			tempRA[SA[0]] = r = 0; // re-ranking; start from rank r = 0
+			for (i = 1; i < n; i++) // compare adjacent suffixes
+				tempRA[SA[i]] = // if same pair => same rank r; otherwise, increase r
+				(RA[SA[i]] == RA[SA[i - 1]] && RA[SA[i] + k] == RA[SA[i - 1] + k]) ? r : ++r;
+			for (i = 0; i < n; i++) // update the rank array RA
+				RA[i] = tempRA[i];
+			if (RA[SA[n - 1]] == n - 1) break; // nice optimization trick
+		}
+	}
+	void computeLCP() {
+		int i, L;
+		Phi[SA[0]] = -1; // default value
+		for (i = 1; i < n; i++) // compute Phi in O(n)
+			Phi[SA[i]] = SA[i - 1]; // remember which suffix is behind this suffix
+		for (i = L = 0; i < n; i++) { // compute Permuted LCP in O(n)
+			if (Phi[i] == -1) { PLCP[i] = 0; continue; } // special case
+			while (T[i + L] == T[Phi[i] + L]) L++; // L increased max n times
+			PLCP[i] = L;
+			L = max(L - 1, 0); // L decreased max n times
+		}
+		for (i = 0; i < n; i++) // compute LCP in O(n)
+			LCP[i] = PLCP[SA[i]]; // put the permuted LCP to the correct position
+	}
+	void constructRSA() {
+		int i;
+		for (i = 0; i < n; i++) RSA[SA[i]] = i;
+	}
+};
+// Suffix array end
+
 //DSU start
 struct DSU {
 	struct node{ int p; ll sz; };
@@ -1231,7 +1297,7 @@ struct MinCostFlow
 };
 //Min Cost Max Flow end
 
-//Hopkroft-Karp matching (MCBM, max-cardinality bipartite matching) start
+//Hopcroft-Karp matching (MCBM, max-cardinality bipartite matching) start
 //Read n1,n2 -> init() -> addEdge() -> maxMatching()
 const int MAXN1 = 50000;
 const int MAXN2 = 50000;
@@ -1241,75 +1307,74 @@ int n1, n2, edges, last[MAXN1], pre[MAXM], head[MAXM];
 int matching[MAXN2], dist[MAXN1], Q[MAXN1];
 bool used[MAXN1], vis[MAXN1];
 
-void init(int _n1, int _n2) 
-{
-    n1 = _n1;
-    n2 = _n2;
-    edges = 0;
-    fill(last, last + n1, -1);
-}
-
-void addEdge(int u, int v) 
-{
-    head[edges] = v;
-    pre[edges] = last[u];
-    last[u] = edges++;
-}
-
-void bfs() 
-{
-    fill(dist, dist + n1, -1);
-    int sizeQ = 0;
-    for (int u = 0; u < n1; ++u) {
-        if (!used[u]) {
-            Q[sizeQ++] = u;
-            dist[u] = 0;
-        }
-    }
-    for (int i = 0; i < sizeQ; i++) {
-        int u1 = Q[i];
-        for (int e = last[u1]; e >= 0; e = pre[e]) {
-            int u2 = matching[head[e]];
-            if (u2 >= 0 && dist[u2] < 0) {
-                dist[u2] = dist[u1] + 1;
-                Q[sizeQ++] = u2;
-            }
-        }
-    }
-}
-
-bool dfs(int u1) 
-{
-    vis[u1] = true;
-    for (int e = last[u1]; e >= 0; e = pre[e]) {
-        int v = head[e];
-        int u2 = matching[v];
-        if (u2 < 0 || ((!vis[u2] && dist[u2] == dist[u1] + 1) && dfs(u2))) {
-            matching[v] = u1;
-            used[u1] = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-int maxMatching() 
-{
-    fill(used, used + n1, false);
-    fill(matching, matching + n2, -1);
-    for (int res = 0;;) {
-        bfs();
-        fill(vis, vis + n1, false);
-        int f = 0;
-        for (int u = 0; u < n1; ++u)
-            if (!used[u] && dfs(u))
-                ++f;
-        if (!f)
-            return res;
-        res += f;
-    }
-}
-//Hopkroft-Karp matching end
+class HopcroftKarp {
+public:
+	void init(int _n1, int _n2) 
+	{
+		n1 = _n1;
+		n2 = _n2;
+		edges = 0;
+		fill(last, last + n1, -1);
+	}
+	void addEdge(int u, int v) 
+	{
+		head[edges] = v;
+		pre[edges] = last[u];
+		last[u] = edges++;
+	}
+	void bfs() 
+	{
+		fill(dist, dist + n1, -1);
+		int sizeQ = 0;
+		for (int u = 0; u < n1; ++u) {
+			if (!used[u]) {
+				Q[sizeQ++] = u;
+				dist[u] = 0;
+			}
+		}
+		for (int i = 0; i < sizeQ; i++) {
+			int u1 = Q[i];
+			for (int e = last[u1]; e >= 0; e = pre[e]) {
+				int u2 = matching[head[e]];
+				if (u2 >= 0 && dist[u2] < 0) {
+					dist[u2] = dist[u1] + 1;
+					Q[sizeQ++] = u2;
+				}
+			}
+		}
+	}
+	bool dfs(int u1) 
+	{
+		vis[u1] = true;
+		for (int e = last[u1]; e >= 0; e = pre[e]) {
+			int v = head[e];
+			int u2 = matching[v];
+			if (u2 < 0 || ((!vis[u2] && dist[u2] == dist[u1] + 1) && dfs(u2))) {
+				matching[v] = u1;
+				used[u1] = true;
+				return true;
+			}
+		}
+		return false;
+	}
+	int maxMatching() 
+	{
+		fill(used, used + n1, false);
+		fill(matching, matching + n2, -1);
+		for (int res = 0;;) {
+			bfs();
+			fill(vis, vis + n1, false);
+			int f = 0;
+			for (int u = 0; u < n1; ++u)
+				if (!used[u] && dfs(u))
+					++f;
+			if (!f)
+				return res;
+			res += f;
+		}
+	}
+};
+//Hopcroft-Karp matching end
 
 //SCC (Strongly connected components) start
 //init(n) -> read input -> tarjan() -> sccidx[]
@@ -1323,6 +1388,7 @@ struct SCC
 	vector<bool> onstack;
 	stack<int> s;
 	vector<int> sccidx;
+	vector<vector<int>> adj; //condensation graph
 	int scccnt;
 	vi topo;
 	
@@ -1340,12 +1406,10 @@ struct SCC
 		topo.clear();
 		vec.resize(n);
 	}
-	
 	void addedge(int u, int v) //u -> v
 	{
 		vec[u].pb(v);
 	}
-	
 	void connect(int u)
 	{
 		idx[u] = index;
@@ -1379,7 +1443,6 @@ struct SCC
 			scccnt++;
 		}
 	}
-	
 	void tarjan()
 	{
 		for(int i = 0; i < vec.size(); i++)
@@ -1390,7 +1453,25 @@ struct SCC
 			}
 		}
 	}
-	
+	void condense() //run after tarjan
+	{
+		adj.resize(scccnt);
+		for(int u = 0; u < vec.size(); u++)
+		{
+			for(int v: vec[u])
+			{
+				if(sccidx[u] != sccidx[v])
+				{
+					adj[sccidx[u]].push_back(sccidx[v]);
+				}
+			}
+		}
+		for(int u = 0; u < scccnt; u++)
+		{
+			sort(adj[u].begin(), adj[u].end());
+			adj[u].erase(unique(adj[u].begin(), adj[u].end()), adj[u].end());
+		}
+	}
 	void toposort() //if graph is a DAG and i just want to toposort
 	{
 		tarjan();
@@ -2025,7 +2106,7 @@ void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 //End Number Theory NT
 
 //Sqrt decomposition/Mo's algorithm start
-int BS;
+const int BS;
 struct Query {
 	int l,r,id;
 	inline ii toPair() const {
@@ -2034,6 +2115,38 @@ struct Query {
 };
 inline bool operator<(const Query &a, const Query &b) {
 	return a.toPair() < b.toPair();
+}
+
+void add(int p)
+{
+	
+}
+
+void remove(int p)
+{
+	
+}
+
+int L=0,R=-1;
+for(int i=0;i<Q;i++)
+{
+	int ql=q[i].l, qr=q[i].r, id=q[i].id;
+	while(L>ql)
+	{
+		add(--L);
+	}
+	while(R<qr)
+	{
+		add(++R);
+	}
+	while(L<ql)
+	{
+		remove(L++);
+	}
+	while(R>qr)
+	{
+		remove(R--);
+	}
 }
 //Sqrt decomposition/Mo's algorithm end
 
@@ -2088,8 +2201,8 @@ vi mult(vi &a, vi &b)
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-uniform_int_distribution<int>(1,6)(rng)
-uniform_int_distribution<> dis(1,6)
+uniform_int_distribution<int>(1,6)(rng);
+uniform_int_distribution<> dis(1,6);
 	
 	Examples:
 	cout<<rng()<<'\n';
@@ -2160,8 +2273,8 @@ void dfs(int x, int y)
 //Grid movement (4-direction) end
 
 //Grid movement (8-direction) start
-int dx[8]={-1,0,1,-1,1,-1,0,1};
-int dy[8]={-1,-1,-1,0,0,1,1,1};
+const int dx[]={-1,0,1,-1,1,-1,0,1};
+const int dy[]={-1,-1,-1,0,0,1,1,1};
 //Grid movement (8-direction) end
 
 //Nearest/Closest pair of points start
