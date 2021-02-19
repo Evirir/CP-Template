@@ -1027,9 +1027,9 @@ void dijkstra(int src)
 		for(auto tmp: adj[u])
 		{
 			int v=tmp.F; ll w=tmp.S;
-			if(dist[v]>dist[u]+w)
+			if(dist[v]>curd+w)
 			{
-				dist[v]=dist[u]+w;
+				dist[v]=curd+w;
 				q.push({dist[v],v});
 			}
 		}
@@ -1510,48 +1510,48 @@ void dfs_euler(int u, int p){
 //Euler tour end
 
 //HLD (Heavy-light decomposition) start
-#define LG 21
-
 int in[MAXN],out[MAXN],tmr=-1;
 int prt[MAXN],sz[MAXN],dep[MAXN];
 int top[MAXN];
 
-void dfs_sz(int u, int p){
-	sz[u]=1;
-	prt[u]=p;
-
-	if(adj[u][0]==p && adj[u].size()>1) swap(adj[u][0],adj[u][1]);
+void dfs_sz(int u, int p)
+{
+	sz[u] = 1;
+	prt[u] = p;
+	if(adj[u].size()>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
 	
-	for(int &v: adj[u]){
-		if(v==p) continue;
-		dep[v]=dep[u]+1;
-		dfs_sz(v,u);
-		sz[u]+=sz[v];
-		if(sz[v]>sz[adj[u][0]]) swap(v,adj[u][0]);
+	forn(i,0,adj[u].size())
+	{
+		int v = adj[u][i];
+		if(v == p) continue;
+		dep[v] = dep[u] + 1;
+		dfs_sz(v, u);
+		sz[u] += sz[v];
+		if(sz[v] > sz[adj[u][0]]) swap(adj[u][i], adj[u][0]);
 	}
 }
-
-void dfs_hld(int u, int p){
-	in[u]=++tmr;
-	for(int v: adj[u]){
-		if(v==p) continue;
-		top[v] = (v==adj[u][0]) ? top[u] : v;
-		dfs_hld(v,u);
+void dfs_hld(int u, int p)
+{
+	in[u] = ++tmr;
+	for(int v: adj[u])
+	{
+		if(v == p) continue;
+		top[v] = (v == adj[u][0]) ? top[u] : v;
+		dfs_hld(v, u);
 	}
-	out[u]=tmr;
+	out[u] = tmr;
 }
-
-ll merge_hld(ll x, ll y){ return x+y; }
-ll Query(int u, int v){
-	ll ans=0;
-	while(top[u]!=top[v]){
-		if(dep[top[u]]<dep[top[v]]) swap(u,v);
-		ans=merge_hld(ans,st.query(in[top[u]],in[u]));
-		u=prt[top[u]];
+inline ll merge_hld(ll x, ll y){ return x+y; }
+ll Query(int u, int v)
+{
+	ll ans = 0;
+	while(top[u] != top[v]){
+		if(dep[top[u]] < dep[top[v]]) swap(u, v);
+		ans = merge_hld(ans, st.query(in[top[u]], in[u]));
+		u = prt[top[u]];
 	}
-	
-	if(dep[u]<dep[v]) swap(u,v);
-	return merge_hld(ans,st.query(in[v],in[u]));
+	if(dep[u] < dep[v]) swap(u, v);
+	return merge_hld(ans, st.query(in[v], in[u]));
 }
 
 st.update(in[u],in[u],w);
@@ -1759,7 +1759,7 @@ void solve(int u)
 }
 //Centroid decomposition end
 
-//Sparse Table start: O(1) Min Query
+//Sparse Table start: O(1) Max Query
 const int LG = 20;
 
 struct SparseTable
@@ -1967,7 +1967,7 @@ Matrix operator^(Matrix A, ll b){
 //Matrix end
 
 //Number Theory NT start
-vector<ll> primes, totient, sumdiv, bigdiv;
+vector<ll> primes, totient, sumdiv, bigdiv, lowprime;
 vector<bool> prime;
 void Sieve(ll n)
 {
@@ -1982,6 +1982,25 @@ void Sieve(ll n)
 			{
 				prime[j] = false;
 			}
+		}
+	}
+}
+void Sieve(ll n) // linear Sieve
+{
+	prime.assign(n+1, 1);
+	lowprime.assign(n+1, 0);
+	prime[1] = false;
+	for(ll i = 2; i <= n; i++)
+	{
+		if(lowprime[i] == 0)
+		{
+			primes.pb(i);
+			lowprime[i] = i;
+		}
+		for(int j=0; j<primes.size() && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
+		{
+			prime[j] = false;
+			lowprime[i*primes[j]] = lowprime[i];
 		}
 	}
 }
