@@ -965,9 +965,9 @@ public:
 
 //DSU start
 struct DSU {
-	struct Node{ int p; ll sz; };
+	struct Node{ int p, sz; };
 	vector<Node> dsu; int cc;
-	Node& operator[](int id){ return dsu[id]; }
+	Node& operator[](int id){ return dsu[rt(id)]; }
 	DSU(int n){ dsu.resize(n);
 		forn(i,0,n){ cc=n; dsu[i].p=i; dsu[i].sz=1;}
 	}
@@ -981,7 +981,7 @@ struct DSU {
 		dsu[u].sz += dsu[v].sz;
 		cc--;
 	}
-	inline ll get(int u){ return dsu[rt(u)].sz; }
+	inline int get(int u){ return dsu[rt(u)].sz; }
 };
 //DSU end
 
