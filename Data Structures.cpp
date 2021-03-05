@@ -965,14 +965,14 @@ public:
 
 //DSU start
 struct DSU {
-	struct node{ int p; ll sz; };
-	vector<node> dsu; int cc;
-	node& operator[](int id){ return dsu[id]; }
+	struct Node{ int p; ll sz; };
+	vector<Node> dsu; int cc;
+	Node& operator[](int id){ return dsu[id]; }
 	DSU(int n){ dsu.resize(n);
 		forn(i,0,n){ cc=n; dsu[i].p=i; dsu[i].sz=1;}
 	}
-	int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
-	bool sameset(int u, int v){ return rt(u)==rt(v); }
+	inline int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
+	inline bool sameset(int u, int v){ return rt(u)==rt(v); }
 	void merge(int u, int v){
 		u = rt(u); v = rt(v);
 		if(u == v) return;
@@ -981,8 +981,7 @@ struct DSU {
 		dsu[u].sz += dsu[v].sz;
 		cc--;
 	}
-	ll get(int u){ return dsu[rt(u)].sz; }
-	//void set(int u, ll val){ dsu[rt(u)].sz = val; }
+	inline ll get(int u){ return dsu[rt(u)].sz; }
 };
 //DSU end
 
