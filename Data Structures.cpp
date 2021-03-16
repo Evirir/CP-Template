@@ -1492,23 +1492,7 @@ struct SCC
 };
 //SCC end
 
-//Euler tour start
-int in[MAXN],out[MAXN];
-vi euler;
-int tmr=-1;
-
-void dfs_euler(int u, int p){
-	in[u]=++tmr;
-	euler.pb(u);
-	for(int v: adj[u]){
-		if(v==p) continue;
-		dfs_euler(v,u);
-	}
-	out[u]=tmr;
-}
-//Euler tour end
-
-//HLD (Heavy-light decomposition) start
+// HLD (Heavy-light decomposition) start
 int in[MAXN],out[MAXN],tmr=-1;
 int prt[MAXN],sz[MAXN],dep[MAXN];
 int top[MAXN];
@@ -1519,7 +1503,7 @@ void dfs_sz(int u, int p)
 	prt[u] = p;
 	if(adj[u].size()>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
 	
-	forn(i,0,adj[u].size())
+	for(int i = 0; i < adj[u].size(); i++)
 	{
 		int v = adj[u][i];
 		if(v == p) continue;
@@ -1531,6 +1515,7 @@ void dfs_sz(int u, int p)
 }
 void dfs_hld(int u, int p)
 {
+	if(p == -1) top[u] = u;
 	in[u] = ++tmr;
 	for(int v: adj[u])
 	{
@@ -1540,11 +1525,12 @@ void dfs_hld(int u, int p)
 	}
 	out[u] = tmr;
 }
-inline ll merge_hld(ll x, ll y){ return x+y; }
+inline ll merge_hld(ll x, ll y){ return x + y; }
 ll Query(int u, int v)
 {
 	ll ans = 0;
-	while(top[u] != top[v]){
+	while(top[u] != top[v])
+	{
 		if(dep[top[u]] < dep[top[v]]) swap(u, v);
 		ans = merge_hld(ans, st.query(in[top[u]], in[u]));
 		u = prt[top[u]];
@@ -1556,7 +1542,7 @@ ll Query(int u, int v)
 st.update(in[u],in[u],w);
 dfs_sz(0,-1);
 dfs_hld(0,-1);
-//HLD (Heavy-light decomposition) end
+// HLD (Heavy-light decomposition) end
 
 // HLD alt start
 struct edge {
