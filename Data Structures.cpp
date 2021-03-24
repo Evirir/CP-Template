@@ -1525,6 +1525,7 @@ void dfs_hld(int u, int p)
 	}
 	out[u] = tmr;
 }
+inline void init_hld(int rt){ dfs_sz(rt, -1); dfs_hld(rt, -1); }
 inline ll merge_hld(ll x, ll y){ return x + y; }
 ll Query(int u, int v)
 {
@@ -1538,10 +1539,22 @@ ll Query(int u, int v)
 	if(dep[u] < dep[v]) swap(u, v);
 	return merge_hld(ans, st.query(in[v], in[u]));
 }
+// For lazy segtree, untested (I can't find problems to test)
+void Update(int u, int v, ll val)
+{
+	while(top[u] != top[v])
+	{
+		if(dep[top[u]] < dep[top[v]]) swap(u, v);
+		st.update(in[top[u]], in[u], val);
+		u = prt[top[u]];
+	}
+	if(dep[u] < dep[v]) swap(u, v);
+	st.update(in[v], in[u], val);
+}
 
-st.update(in[u],in[u],w);
-dfs_sz(0,-1);
-dfs_hld(0,-1);
+// init_hld(root) -> update/queries
+// Point update: st.update(in[u],w);
+// Update, Query: Range update/query on the path between u, v
 // HLD (Heavy-light decomposition) end
 
 // HLD alt start
