@@ -2048,7 +2048,8 @@ struct ConvexHull {
 vector<ll> fact,ifact,inv,pow2;
 ll add(ll a, ll b)
 {
-	a+=b; a%=MOD;
+	a+=b;
+	if(a>=MOD) a%=MOD;
 	if(a<0) a+=MOD;
 	return a;
 }
