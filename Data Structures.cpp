@@ -1769,12 +1769,10 @@ void dfs_lca(int u, int p)
 	}
 	out[u]=tmr;
 }
-
 bool isChild(int u, int v)
 {
 	return in[u]<=in[v] && out[v]<=out[u];
 }
-
 int lca(int u, int v)
 {
 	if(isChild(u,v)) return u;
@@ -1896,6 +1894,9 @@ lcast=SparseTableLCA(euler);
 //Centroid decomposition start
 int sz[MAXN];
 bool vst[MAXN];
+int cprt[MAXN]; //centroid tree parent
+vector<int> child[MAXN]; //subtree of centroid tree
+mset(cprt,-1);
 
 void dfs_sz(int u, int p)
 {
@@ -1907,8 +1908,7 @@ void dfs_sz(int u, int p)
 		sz[u]+=sz[v];
 	}
 }
-
-void centroid(int u, int p, int r)
+int centroid(int u, int p, int r)
 {
 	for(int v: adj[u])
 	{
@@ -1917,28 +1917,40 @@ void centroid(int u, int p, int r)
 	}
 	return u;
 }
-
+int build_tree(int u)
+{
+	dfs_sz(u,-1);
+	u=centroid(u,-1,u);
+	vst[u]=1;
+	for(int v: adj[u])
+	{
+		if(vst[v]) continue;
+		cprt[build_tree(v)]=u;
+	}
+	return u;
+}
 void prep(int u, int p)
 {
 	for(int v: adj[u])
 	{
 		if(v==p || vst[v]) continue;
 		
+		prep(v, u);
 	}
 }
-
 void solve(int u)
 {
 	dfs_sz(u,-1);
 	u=centroid(u,-1,u);
 	
-	//do stuffs
 	prep(u,-1);
 	for(int v: adj[u])
 	{
 		if(vst[v]) continue;
 		
 	}
+	
+	//do stuffs
 	
 	vst[u]=1;
 	for(int v: adj[u])
@@ -2361,8 +2373,8 @@ for(int i=0;i<Q;i++)
 //Sqrt decomposition/Mo's algorithm end
 
 //FFT (Fast Fourier Transform) start
-typedef complex<double> cd;
-const double PI = acos(-1);
+typedef complex<ld> cd;
+const ld PI = acos(-1);
 void fft(vector<cd> &a, bool invert)
 {
 	int n=a.size();
@@ -2375,7 +2387,7 @@ void fft(vector<cd> &a, bool invert)
 	}
 	for(int len=2;len<=n;len<<=1)
 	{
-		double ang=2*PI/len*(invert?-1:1);
+		ld ang=2*PI/len*(invert?-1:1);
 		cd rt(cos(ang), sin(ang));
 		for(int i=0;i<n;i+=len)
 		{
@@ -2408,6 +2420,139 @@ vi mult(vi &a, vi &b)
 	return r;
 }
 //FFT (Fast Fourier Transform) end
+
+// NTT (Number Theoretic Transform) start
+
+// Source: https://cp-algorithms.com/algebra/fft.html
+//const int MOD = 998244353;
+const int ROOT = 3; // primitive root
+const int ROOT_1 = 2446678; // ROOT's inverse
+const int ROOT_PW = 1 << 23;
+ll mult(ll a, ll b)
+{
+	if(a>MOD) a%=MOD;
+	if(b>MOD) b%=MOD;
+	ll ans=(a*b)%MOD;
+	if(ans<0) ans+=MOD;
+	return ans;
+}
+ll pw(ll a, ll b)
+{
+	ll r=1;
+	while(b){
+		if(b&1) r=mult(r,a);
+		a=mult(a,a);
+		b>>=1;
+	}
+	return r;
+}
+ll inverse(ll a)
+{
+	return pw(a,MOD-2);
+}
+void ntt(vi &a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        int wlen = invert ? ROOT_1 : ROOT;
+        for (int i = len; i < ROOT_PW; i <<= 1)
+            wlen = (int)(1LL * wlen * wlen % MOD);
+
+        for (int i = 0; i < n; i += len) {
+            int w = 1;
+            for (int j = 0; j < len / 2; j++) {
+                int u = a[i+j], v = (int)(1LL * a[i+j+len/2] * w % MOD);
+                a[i+j] = u + v < MOD ? u + v : u + v - MOD;
+                a[i+j+len/2] = u - v >= 0 ? u - v : u - v + MOD;
+                w = (int)(1LL * w * wlen % MOD);
+            }
+        }
+    }
+
+    if (invert) {
+        int n_1 = inverse(n);
+        for (int & x : a)
+            x = (int)(1LL * x * n_1 % MOD);
+    }
+}
+vi mult(vi &a, vi &b)
+{
+	int n=1;
+	while(n<a.size()+b.size()) n<<=1;
+	
+	vi fa(n),fb(n);
+	for(int i=0;i<a.size();i++) fa[i]=a[i];
+	for(int i=0;i<b.size();i++) fb[i]=b[i];
+	ntt(fa, 0); ntt(fb, 0);
+	forn(i,0,n) fa[i]*=fb[i];
+	ntt(fa, 1);
+	
+	vi r(n);
+	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
+	return r;
+}
+// NTT (Number Theoretic Transform) end
+
+// FFT mod start
+// Usage: res = convMod<MOD>(A, B);
+
+// Source: http://neerc.ifmo.ru/trains/toulouse/2017/fft2.pdf
+typedef complex<double> CD;
+void fft(vector<CD>& a) {
+	int n = a.size(), L = 31 - __builtin_clz(n);
+	static vector<complex<long double>> R(2, 1);
+	static vector<CD> rt(2, 1);  // (^ 10% faster if double)
+	for (static int k = 2; k < n; k *= 2) {
+		R.resize(n); rt.resize(n);
+		auto x = polar(1.0L, acos(-1.0L) / k);
+		forn(i,k,2*k) rt[i] = R[i] = i&1 ? R[i/2] * x : R[i/2];
+	}
+	vector<int> rev(n);
+	forn(i,0,n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;
+	forn(i,0,n) if (i < rev[i]) swap(a[i], a[rev[i]]);
+	for (int k = 1; k < n; k *= 2)
+		for (int i = 0; i < n; i += 2*k) forn(j,0,k) {
+			// CD z = rt[j+k] * a[i+j+k]; // (25% faster if hand-rolled)  /// include-line
+			auto x = (double *)&rt[j+k], y = (double *)&a[i+j+k];		/// exclude-line
+			CD z(x[0]*y[0] - x[1]*y[1], x[0]*y[1] + x[1]*y[0]);		   /// exclude-line
+			a[i + j + k] = a[i + j] - z;
+			a[i + j] += z;
+		}
+}
+
+typedef vector<ll> vl;
+template<int M> vl convMod(const vl &a, const vl &b) {
+	if (a.empty() || b.empty()) return {};
+	vl res(a.size() + b.size() - 1);
+	int B=32-__builtin_clz((int)res.size()), n=1<<B, cut=int(sqrt(M));
+	vector<CD> L(n), R(n), outs(n), outl(n);
+	forn(i,0,a.size()) L[i] = CD((int)a[i] / cut, (int)a[i] % cut);
+	forn(i,0,b.size()) R[i] = CD((int)b[i] / cut, (int)b[i] % cut);
+	fft(L), fft(R);
+	forn(i,0,n) {
+		int j = -i & (n - 1);
+		outl[j] = (L[i] + conj(L[j])) * R[i] / (2.0 * n);
+		outs[j] = (L[i] - conj(L[j])) * R[i] / (2.0 * n) / 1i;
+	}
+	fft(outl), fft(outs);
+	forn(i,0,res.size()) {
+		ll av = ll(real(outl[i])+.5), cv = ll(imag(outs[i])+.5);
+		ll bv = ll(imag(outl[i])+.5) + ll(real(outs[i])+.5);
+		res[i] = ((av % M * cut + bv) % M * cut + cv) % M;
+	}
+	return res;
+}
+// FFT mod end
 
 //Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
