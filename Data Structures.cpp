@@ -1503,14 +1503,13 @@ void dfs_sz(int u, int p)
 	prt[u] = p;
 	if(adj[u].size()>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
 	
-	for(int i = 0; i < adj[u].size(); i++)
+	for(auto &v: adj[u])
 	{
-		int v = adj[u][i];
 		if(v == p) continue;
 		dep[v] = dep[u] + 1;
 		dfs_sz(v, u);
 		sz[u] += sz[v];
-		if(sz[v] > sz[adj[u][0]]) swap(adj[u][i], adj[u][0]);
+		if(sz[v] > sz[adj[u][0]]) swap(v, adj[u][0]);
 	}
 }
 void dfs_hld(int u, int p)
@@ -1529,7 +1528,7 @@ inline void init_hld(int rt){ dfs_sz(rt, -1); dfs_hld(rt, -1); }
 inline ll merge_hld(ll x, ll y){ return x + y; }
 ll Query(int u, int v)
 {
-	ll ans = 0;
+	ll ans = 0; // dummy value
 	while(top[u] != top[v])
 	{
 		if(dep[top[u]] < dep[top[v]]) swap(u, v);
