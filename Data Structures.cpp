@@ -415,30 +415,39 @@ struct Node {
 class PersistSegmentTree {
 private:
 	int size_;
-	Node* build(ll a[], int l, int r)
+	Node* build(int l, int r)
 	{
 		if(l==r) return new Node(0);
 		int mid=(l+r)>>1;
-		return new Node(build(a,l,mid), build(a,mid+1,r));
+		return new Node(build(l, mid), build(mid+1, r));
+	}
+	Node* build(ll a[], int l, int r)
+	{
+		if(l==r) return new Node(a[l]);
+		int mid=(l+r)>>1;
+		return new Node(build(a, l, mid), build(a, mid+1, r));
 	}
 	Node* update(Node* k, int p, ll val, int l, int r)
 	{
-		if(l==r) return new Node(k->sum+val); //modification
+		if(l==r) return new Node(k->sum + val); //modification
 		int mid=(l+r)>>1;
 		if(p<=mid) return new Node(update(k->l, p, val, l, mid), k->r);
-		else return new Node(k->l, update(k->r, p, val, mid+1, r));
+		return new Node(k->l, update(k->r, p, val, mid+1, r));
 	}
 	ll query(Node* k, int s, int e, int l, int r)
 	{
 		if(r<s || e<l) return 0; //dummy value
 		if(s<=l && r<=e) return k->sum;
 		int mid=(l+r)>>1;
-		return merge(query(k->l,s,e,l,mid), query(k->r,s,e,mid+1,r));
+		return merge(query(k->l, s, e, l, mid), query(k->r, s, e, mid+1, r));
 	}
 	
 public:
 	PersistSegmentTree(): size_(0) {}
 	PersistSegmentTree(int n): size_(n) {}
+	inline Node* build(){
+		return build(0, size_-1);
+	}
 	inline Node* build(ll a[]){
 		return build(a, 0, size_-1);
 	}
@@ -860,7 +869,7 @@ vector<int> prefix_function(string &s){
 }
 //Prefix function end
 
-//Z-algorithm start [Z algorithm]
+//Z-algorithm/Z-function start [Z algorithm/Z function]
 vector<int> z_function(string &s){
 	int n=(int)s.length();
 	vector<int> z(n);
@@ -969,7 +978,7 @@ struct DSU {
 	vector<Node> dsu; int cc;
 	Node& operator[](int id){ return dsu[rt(id)]; }
 	DSU(int n){ dsu.resize(n);
-		forn(i,0,n){ cc=n; dsu[i].p=i; dsu[i].sz=1;}
+		forn(i,0,n){ cc=n; dsu[i]={i,1}; }
 	}
 	inline int rt(int u){ return (dsu[u].p==u) ? u : dsu[u].p=rt(dsu[u].p); }
 	inline bool sameset(int u, int v){ return rt(u)==rt(v); }
@@ -981,7 +990,7 @@ struct DSU {
 		dsu[u].sz += dsu[v].sz;
 		cc--;
 	}
-	inline int get(int u){ return dsu[rt(u)].sz; }
+	inline Node& get(int u){ return dsu[rt(u)]; }
 };
 //DSU end
 
@@ -1749,7 +1758,7 @@ public:
 // HLD alt end
 
 //LCA euler O(log n) query start
-const int LG = 20;
+const int LG = 21;
 
 int in[MAXN],out[MAXN],tmr=-1;
 int prt[LG][MAXN];
@@ -2123,6 +2132,428 @@ void getpf(vector<ii>& pf, ll n)
 	if(n>1) pf.pb({n,1});
 }
 //Combi/Maths end
+
+// KACTL Geometry start
+template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
+template<class T>
+struct Point {
+	typedef Point P;
+	T x, y;
+	explicit Point(T x=0, T y=0) : x(x), y(y) {}
+	bool operator<(P p) const { return tie(x,y) < tie(p.x,p.y); }
+	bool operator==(P p) const { return tie(x,y)==tie(p.x,p.y); }
+	P operator+(P p) const { return P(x+p.x, y+p.y); }
+	P operator-(P p) const { return P(x-p.x, y-p.y); }
+	P operator*(T d) const { return P(x*d, y*d); }
+	P operator/(T d) const { return P(x/d, y/d); }
+	T dot(P p) const { return x*p.x + y*p.y; }
+	T cross(P p) const { return x*p.y - y*p.x; }
+	T cross(P a, P b) const { return (a-*this).cross(b-*this); }
+	T dist2() const { return x*x + y*y; }
+	double dist() const { return sqrt((double)dist2()); }
+	// angle to x-axis in interval [-pi, pi]
+	double angle() const { return atan2(y, x); }
+	P unit() const { return *this/dist(); } // makes dist()=1
+	P perp() const { return P(-y, x); } // rotates +90 degrees
+	P normal() const { return perp().unit(); }
+	// returns point rotated 'a' radians ccw around the origin
+	P rotate(double a) const {
+		return P(x*cos(a)-y*sin(a),x*sin(a)+y*cos(a)); }
+	friend ostream& operator<<(ostream& os, P p) {
+		return os << "(" << p.x << "," << p.y << ")"; }
+};
+template<class T> struct Point3D {
+	typedef Point3D P;
+	typedef const P& R;
+	T x, y, z;
+	explicit Point3D(T x=0, T y=0, T z=0) : x(x), y(y), z(z) {}
+	bool operator<(R p) const {
+		return tie(x, y, z) < tie(p.x, p.y, p.z); }
+	bool operator==(R p) const {
+		return tie(x, y, z) == tie(p.x, p.y, p.z); }
+	P operator+(R p) const { return P(x+p.x, y+p.y, z+p.z); }
+	P operator-(R p) const { return P(x-p.x, y-p.y, z-p.z); }
+	P operator*(T d) const { return P(x*d, y*d, z*d); }
+	P operator/(T d) const { return P(x/d, y/d, z/d); }
+	T dot(R p) const { return x*p.x + y*p.y + z*p.z; }
+	P cross(R p) const {
+		return P(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y - y*p.x);
+	}
+	T dist2() const { return x*x + y*y + z*z; }
+	double dist() const { return sqrt((double)dist2()); }
+	//Azimuthal angle (longitude) to x-axis in interval [-pi, pi]
+	double phi() const { return atan2(y, x); } 
+	//Zenith angle (latitude) to the z-axis in interval [0, pi]
+	double theta() const { return atan2(sqrt(x*x+y*y),z); }
+	P unit() const { return *this/(T)dist(); } //makes dist()=1
+	//returns unit vector normal to *this and p
+	P normal(P p) const { return cross(p).unit(); }
+	//returns point rotated 'angle' radians ccw around axis
+	P rotate(double angle, P axis) const {
+		double s = sin(angle), c = cos(angle); P u = axis.unit();
+		return u*dot(u)*(1-c) + (*this)*c - cross(u)*s;
+	}
+};
+
+// ------- Lines start -------
+template<class P>
+double lineDist(const P& a, const P& b, const P& p) {
+	return (double)(b-a).cross(p-a)/(b-a).dist();
+}
+template<class P>
+int sideOf(P s, P e, P p) { return sgn(s.cross(e, p)); }
+
+template<class P>
+int sideOf(const P& s, const P& e, const P& p, double eps) {
+	auto a = (e-s).cross(p-s);
+	double l = (e-s).dist()*eps;
+	return (a > l) - (a < -l);
+}
+// {0/-1,{0,0}} if no inter/infinite inter, {1,point} otherwise
+template<class P>
+pair<int, P> lineInter(P s1, P e1, P s2, P e2) {
+	auto d = (e1 - s1).cross(e2 - s2);
+	if (d == 0) // if parallel
+		return {-(s1.cross(e1, s2) == 0), P(0, 0)};
+	auto p = s2.cross(e1, e2), q = s2.cross(e2, s1);
+	return {1, (s1 * p + e1 * q) / d};
+}
+// projects p on line ab, refl returns reflection instead
+template<class P>
+P lineProj(P a, P b, P p, bool refl=false) {
+	P v = b - a;
+	return p - v.perp()*(1+refl)*v.cross(p-a)/v.dist2();
+}
+#define P Point<double>
+P linearTransformation(const P& p0, const P& p1,
+		const P& q0, const P& q1, const P& r) {
+	P dp = p1-p0, dq = q1-q0, num(dp.cross(dq), dp.dot(dq));
+	return q0 + P((r-p0).cross(num), (r-p0).dot(num))/dp.dist2();
+}
+#undef P
+// ------- Lines end -------
+
+// ------- Segments start -------
+template<class P> bool onSegment(P s, P e, P p) {
+	return p.cross(s, e) == 0 && (s - p).dot(e - p) <= 0;
+}
+#define P Point<double>
+double segDist(P& s, P& e, P& p) {
+	if (s==e) return (p-s).dist();
+	auto d = (e-s).dist2(), t = min(d,max(.0,(p-s).dot(e-s)));
+	return ((p-s)*d-(e-s)*t).dist()/d;
+}
+template<class P> vector<P> segInter(P a, P b, P c, P d) {
+	auto oa = c.cross(d, a), ob = c.cross(d, b),
+	     oc = a.cross(b, c), od = a.cross(b, d);
+	// Checks if intersection is single non-endpoint point.
+	if (sgn(oa) * sgn(ob) < 0 && sgn(oc) * sgn(od) < 0)
+		return {(a * ob - b * oa) / (ob - oa)};
+	set<P> s;
+	if (onSegment(c, d, a)) s.insert(a);
+	if (onSegment(c, d, b)) s.insert(b);
+	if (onSegment(a, b, c)) s.insert(c);
+	if (onSegment(a, b, d)) s.insert(d);
+	return {all(s)};
+}
+#undef
+// ------- Segments end -------
+
+// ------- Polygons start -------
+// The double of the area, points ccw order (cw gives negative)
+template<class T>
+T polygonArea2(vector<Point<T>>& v) {
+	T a = v.back().cross(v[0]);
+	rep(i,0,sz(v)-1) a += v[i].cross(v[i+1]);
+	return a;
+}
+template<class P>
+bool inPolygon(vector<P> &p, P a, bool strict = true) {
+	int cnt = 0, n = sz(p);
+	rep(i,0,n) {
+		P q = p[(i + 1) % n];
+		if (onSegment(p[i], q, a)) return !strict;
+		//or: if (segDist(p[i], q, a) <= eps) return !strict;
+		cnt ^= ((a.y<p[i].y) - (a.y<q.y)) * a.cross(p[i], q) > 0;
+	}
+	return cnt;
+}
+#define P Point<double>
+P polygonCenter(const vector<P>& v) {
+	P res(0, 0); double A = 0;
+	for (int i = 0, j = sz(v) - 1; i < sz(v); j = i++) {
+		res = res + (v[i] + v[j]) * v[j].cross(v[i]);
+		A += v[j].cross(v[i]);
+	}
+	return res / A / 3;
+}
+vector<P> polygonCut(const vector<P>& poly, P s, P e) {
+	vector<P> res;
+	rep(i,0,sz(poly)) {
+		P cur = poly[i], prev = i ? poly[i-1] : poly.back();
+		bool side = s.cross(e, cur) < 0;
+		if (side != (s.cross(e, prev) < 0))
+			res.push_back(lineInter(s, e, cur, prev).second);
+		if (side)
+			res.push_back(cur);
+	}
+	return res;
+}
+double rat(P a, P b) { return sgn(b.x) ? a.x/b.x : a.y/b.y; }
+double polyUnion(vector<vector<P>>& poly) {
+	double ret = 0;
+	rep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {
+		P A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];
+		vector<pair<double, int>> segs = {{0, 0}, {1, 0}};
+		rep(j,0,sz(poly)) if (i != j) {
+			rep(u,0,sz(poly[j])) {
+				P C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];
+				int sc = sideOf(A, B, C), sd = sideOf(A, B, D);
+				if (sc != sd) {
+					double sa = C.cross(D, A), sb = C.cross(D, B);
+					if (min(sc, sd) < 0)
+						segs.emplace_back(sa / (sa - sb), sgn(sc - sd));
+				} else if (!sc && !sd && j<i && sgn((B-A).dot(D-C))>0){
+					segs.emplace_back(rat(C - A, B - A), 1);
+					segs.emplace_back(rat(D - A, B - A), -1);
+				}
+			}
+		}
+		sort(all(segs));
+		for (auto& s : segs) s.first = min(max(s.first, 0.0), 1.0);
+		double sum = 0;
+		int cnt = segs[0].second;
+		rep(j,1,sz(segs)) {
+			if (!cnt) sum += segs[j].first - segs[j - 1].first;
+			cnt += segs[j].second;
+		}
+		ret += A.cross(B) * sum;
+	}
+	return ret / 2;
+}
+#undef P
+template<class V, class L>
+double signedPolyVolume(const V& p, const L& trilist) {
+	double v = 0;
+	for (auto i : trilist) v += p[i.a].cross(p[i.b]).dot(p[i.c]);
+	return v / 6;
+}
+// ------- Polygons end -------
+
+// ------- Hull start -------
+#define P Point<ll>
+vector<P> convexHull(vector<P> pts) {
+	if (sz(pts) <= 1) return pts;
+	sort(all(pts));
+	vector<P> h(sz(pts)+1);
+	int s = 0, t = 0;
+	for (int it = 2; it--; s = --t, reverse(all(pts)))
+		for (P p : pts) {
+			while (t >= s + 2 && h[t-2].cross(h[t-1], p) <= 0) t--;
+			h[t++] = p;
+		}
+	return {h.begin(), h.begin() + t - (t == 2 && h[0] == h[1])};
+}
+#undef
+// points ccw order, strict = exclude boundary
+bool inHull(const vector<Point<ll>>& l, Point<ll> p, bool strict = true) {
+	int a = 1, b = sz(l) - 1, r = !strict;
+	if (sz(l) < 3) return r && onSegment(l[0], l.back(), p);
+	if (sideOf(l[0], l[a], l[b]) > 0) swap(a, b);
+	if (sideOf(l[0], l[a], p) >= r || sideOf(l[0], l[b], p)<= -r)
+		return false;
+	while (abs(a - b) > 1) {
+		int c = (a + b) / 2;
+		(sideOf(l[0], l[c], p) > 0 ? b : a) = c;
+	}
+	return sgn(l[a].cross(l[b], p)) < r;
+}
+
+// - Line hull intersection start
+#define cmp(i,j) sgn(dir.perp().cross(poly[(i)%n]-poly[(j)%n]))
+#define extr(i) cmp(i + 1, i) >= 0 && cmp(i, i - 1 + n) < 0
+template <class P> int extrVertex(vector<P>& poly, P dir) {
+	int n = sz(poly), lo = 0, hi = n;
+	if (extr(0)) return 0;
+	while (lo + 1 < hi) {
+		int m = (lo + hi) / 2;
+		if (extr(m)) return m;
+		int ls = cmp(lo + 1, lo), ms = cmp(m + 1, m);
+		(ls < ms || (ls == ms && ls == cmp(lo, m)) ? hi : lo) = m;
+	}
+	return lo;
+}
+#define cmpL(i) sgn(a.cross(poly[i], b))
+template <class P>
+array<int, 2> lineHull(P a, P b, vector<P>& poly) {
+	int endA = extrVertex(poly, (a - b).perp());
+	int endB = extrVertex(poly, (b - a).perp());
+	if (cmpL(endA) < 0 || cmpL(endB) > 0)
+		return {-1, -1};
+	array<int, 2> res;
+	rep(i,0,2) {
+		int lo = endB, hi = endA, n = sz(poly);
+		while ((lo + 1) % n != hi) {
+			int m = ((lo + hi + (lo < hi ? 0 : n)) / 2) % n;
+			(cmpL(m) == cmpL(endB) ? lo : hi) = m;
+		}
+		res[i] = (lo + !cmpL(hi)) % n;
+		swap(endA, endB);
+	}
+	if (res[0] == res[1]) return {res[0], -1};
+	if (!cmpL(res[0]) && !cmpL(res[1]))
+		switch ((res[0] - res[1] + sz(poly) + 1) % sz(poly)) {
+			case 0: return {res[0], res[0]};
+			case 2: return {res[1], res[1]};
+		}
+	return res;
+}
+// - Line hull intersection end
+
+// Closest pair of points O(n log n)
+#define P Point<ll>
+pair<P, P> closest(vector<P> v) {
+	assert(sz(v) > 1);
+	set<P> S;
+	sort(all(v), [](P a, P b) { return a.y < b.y; });
+	pair<ll, pair<P, P>> ret{LLONG_MAX, {P(), P()}};
+	int j = 0;
+	for (P p : v) {
+		P d{1 + (ll)sqrt(ret.first), 0};
+		while (v[j].y <= p.y - d.x) S.erase(v[j++]);
+		auto lo = S.lower_bound(p - d), hi = S.upper_bound(p + d);
+		for (; lo != hi; ++lo)
+			ret = min(ret, {(*lo - p).dist2(), {*lo, p}});
+		S.insert(p);
+	}
+	return ret.second;
+}
+#undef P
+
+// ------- Hull end-------
+
+// KD-tree start
+#define T long long
+#define P Point<T>
+const T INF = numeric_limits<T>::max();
+
+bool on_x(const P& a, const P& b) { return a.x < b.x; }
+bool on_y(const P& a, const P& b) { return a.y < b.y; }
+
+struct Node {
+	P pt; // if this is a leaf, the single point in it
+	T x0 = INF, x1 = -INF, y0 = INF, y1 = -INF; // bounds
+	Node *first = 0, *second = 0;
+
+	T distance(const P& p) { // min squared distance to a point
+		T x = (p.x < x0 ? x0 : p.x > x1 ? x1 : p.x);
+		T y = (p.y < y0 ? y0 : p.y > y1 ? y1 : p.y);
+		return (P(x,y) - p).dist2();
+	}
+
+	Node(vector<P>&& vp) : pt(vp[0]) {
+		for (P p : vp) {
+			x0 = min(x0, p.x); x1 = max(x1, p.x);
+			y0 = min(y0, p.y); y1 = max(y1, p.y);
+		}
+		if (vp.size() > 1) {
+			// split on x if width >= height (not ideal...)
+			sort(all(vp), x1 - x0 >= y1 - y0 ? on_x : on_y);
+			// divide by taking half the array for each child (not
+			// best performance with many duplicates in the middle)
+			int half = sz(vp)/2;
+			first = new Node({vp.begin(), vp.begin() + half});
+			second = new Node({vp.begin() + half, vp.end()});
+		}
+	}
+};
+
+struct KDTree {
+	Node* root;
+	KDTree(const vector<P>& vp) : root(new Node({all(vp)})) {}
+
+	pair<T, P> search(Node *node, const P& p) {
+		if (!node->first) {
+			// uncomment if we should not find the point itself:
+			// if (p == node->pt) return {INF, P()};
+			return make_pair((p - node->pt).dist2(), node->pt);
+		}
+
+		Node *f = node->first, *s = node->second;
+		T bfirst = f->distance(p), bsec = s->distance(p);
+		if (bfirst > bsec) swap(bsec, bfirst), swap(f, s);
+
+		// search closest side first, other side if needed
+		auto best = search(f, p);
+		if (bsec < best.first)
+			best = min(best, search(s, p));
+		return best;
+	}
+
+	// find nearest point to a point, and its squared distance
+	// (requires an arbitrary operator< for Point)
+	pair<T, P> nearest(const P& p) {
+		return search(root, p);
+	}
+};
+#undef T
+#undef P
+// KD-tree end
+
+// KACTL Geometry end
+
+// Geometry (self-made) start (incomplete)
+template<class T> struct Point {
+	T x,y;
+	Point(): x(0), y(0) {}
+	Point(T x, T y): x(x), y(y) {}
+	Point operator+(const Point &p) { return {x+p.x, y+p.y}; }
+	Point operator-(const Point &p) { return {x-p.x, y-p.y}; }
+	Point operator*(T p) { return {x*p, y*p}; }
+	Point operator/(T p) { return {x/p, y/p}; }
+	Point translate(const Point &v) { return *this+v; }
+	Point scale(const Point &c, ld factor) { return c+(*this-c)*factor; }
+	Point rotate(double d) { return *this * polar(1.0, d); } // counter-clockwise, d in rad
+	Point perp() { return {-y, x}; }
+};
+template<class T> bool operator==(const Point<T> &a, const Point<T> &b) { return a.x==b.x && a.y==b.y; }
+template<class T> bool operator!=(const Point<T> &a, const Point<T> &b) { return !(a==b); }
+template<class T> ostream& operator<<(ostream& out, const Point<T> &p) { return out<<"("<<p.x<<","<<p.y<<")"; }
+template<class T> T sq(const Point<T> &p) { return p.x*p.x + p.y*p.y; }
+template<class T> ld abs(const Point<T> &p) { return sqrtl(sq(p)); }
+template<class T> T dot(const Point<T> &a, const Point<T> &b) { return a.x*b.x + a.y*b.y; }
+template<class T> T cross(const Point<T> &a, const Point<T> &b) { return a.x*b.y - b.x*a.y; }
+template<class T> bool isPerp(const Point<T> &a, const Point<T> &b) { return dot(a,b)==0; }
+template<class T> T angle(const Point<T> &a, const Point<T> &b) {
+	T cosTheta = dot(a,b) / abs(a) / abs(b);
+	return acos(max(-1.0, min(1.0, cosTheta)));
+}
+template<class T> bool orient(const Point<T> &a, const Point<T> &b, const Point<T> &c) { return cross(b-a, c-a); }
+template<class T> ld areaPoly(const vector<Point<T>> &v) {
+	ld area = 0;
+	for(int i=0,n=v.size();i<n;i++) area+=cross(v[i],v[(i+1)%n]);
+	return abs(area)/2.0;
+}
+
+template<class T> struct Line {
+	Point<T> v; T c;
+	Line(const Point<T> &v, T c): v(v), c(c) {}
+	Line(T a, T b, T c): v({b,-a}), c(c) {}    // ax+by=c
+	Line(const Point<T> &a, const Point<T> &b): v(b-a), c(cross(v,a)) {} // between a and b
+	bool operator()(const Point<T> &a, const Point<T> &b) { return dot(v,a)<dot(v,b); } // compare points on line in order
+	T side(const Point<T> &p) { return cross(v,p)-c; }
+	Line translate(Point<T> &p) { return {v, c+cross(v,p)}; }
+	Line shiftLeft(double dist) { return {v, c+dist*abs(v)}; }
+	Point<T> proj(Point<T> &p) { return p - perp(v)*side(p)/sq(v); }
+	Point<T> reflect(Point<T> &p) { return p - perp(v)*2*side(p)/sq(v); }
+};
+template<class T> pair<int, Point<T>> lineInter(Line<T> &a, Line<T> &b) {
+	T d = cross(a.v, b.v);
+	if(d==0) return {0, {0,0}};
+	Point<T> res = (b.v*a.c - a.v*b.c)*1.0L/d;
+	return {1, res};
+}
+// Geometry (self-made) end
 
 //Matrix start
 struct Matrix{
