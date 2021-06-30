@@ -2077,7 +2077,8 @@ ll mult(ll a, ll b)
 {
 	if(a>MOD) a%=MOD;
 	if(b>MOD) b%=MOD;
-	ll ans=(a*b)%MOD;
+	ll ans=a*b;
+	if(ans>=MOD) ans%=MOD;
 	if(ans<0) ans+=MOD;
 	return ans;
 }
