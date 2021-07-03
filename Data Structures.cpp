@@ -33,7 +33,7 @@ const int MOD = 998244353;
 const bool DEBUG = 0;
 const int MAXN = 100005;
 
-//Lazy Recursive ST start
+// Lazy Recursive ST start
 class LazySegmentTree{
 private:
 	int size_;
@@ -93,9 +93,9 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-//Lazy recursive ST end
+// Lazy recursive ST end
 
-//Lazy recursive ST with struct start
+// Lazy recursive ST with struct start
 struct Node{
 	ll sum,mn,mx;
 	Node(){sum=mn=mx=0;}
@@ -165,9 +165,9 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-//Lazy recursive ST with struct end
+// Lazy recursive ST with struct end
 
-//Point recursive ST start
+// Point recursive ST start
 class PointSegmentTree{
 private:
 	int size_;
@@ -211,9 +211,9 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-//Point recursive ST end
+// Point recursive ST end
 
-//Point recursive ST with struct start
+// Point recursive ST with struct start
 struct Node{
 	ll sum,mn,mx;
 	Node(){sum=mn=mx=0;}
@@ -271,9 +271,9 @@ public:
 		return query(l, r, 1, 0, size_-1);
 	}
 };
-//Point recursive with struct ST end
+// Point recursive with struct ST end
 
-//Point iterative ST start
+// Point iterative ST start
 struct IterSegmentTree{
 	vector<ll> t;
 	
@@ -301,7 +301,7 @@ struct IterSegmentTree{
 };
 
 forn(i,0,n) cin>>t[n+i];
-//Point iterative ST end
+// Point iterative ST end
 
 // 2D Segment Tree start
 class SegmentTree2D {
@@ -460,9 +460,9 @@ public:
 };
 // Persistent Segment Tree end
 
-//Segment Tree Beats start (by yaketake08/tjake)
-//https://tjkendev.github.io/procon-library/cpp/range_query/segment_tree_beats_2.html
-//All intervals are [L,R)
+// Segment Tree Beats start (by yaketake08/tjake)
+// https://tjkendev.github.io/procon-library/cpp/range_query/segment_tree_beats_2.html
+// All intervals are [L,R)
 
 #define N MAXN
 class SegmentTree {
@@ -754,9 +754,9 @@ public:
 		return _query_sum(a, b, 0, 0, n0);
 	}
 };
-//Segment Tree Beats end
+// Segment Tree Beats end
 
-//Fenwick Tree (FenwickPoint) start
+// Fenwick Tree (FenwickPoint) start
 struct FenwickPoint{
 	vector<ll> fw;
 	int siz;
@@ -799,9 +799,9 @@ struct FenwickPoint{
 		add(p, val-query(p,p));
 	}
 };
-//Fenwick Tree (FenwickPoint) end
+// Fenwick Tree (FenwickPoint) end
 
-//FenwickRange start
+// FenwickRange start
 struct FenwickRange
 {
 	vector<ll> fw,fw2;
@@ -852,9 +852,9 @@ struct FenwickRange
 		add(p,p,val-query(p,p));
 	}
 };
-//FenwickRange end
+// FenwickRange end
 
-//Prefix function start/KMP (Knuth–Morris–Pratt)
+// Prefix function start/KMP (Knuth–Morris–Pratt)
 vector<int> prefix_function(string &s){
 	int n=(int)s.length();
 	vector<int> pi(n);
@@ -867,9 +867,9 @@ vector<int> prefix_function(string &s){
 	}
 	return pi;
 }
-//Prefix function end
+// Prefix function end
 
-//Z-algorithm/Z-function start [Z algorithm/Z function]
+// Z-algorithm/Z-function start [Z algorithm/Z function]
 vector<int> z_function(string &s){
 	int n=(int)s.length();
 	vector<int> z(n);
@@ -880,9 +880,9 @@ vector<int> z_function(string &s){
 	}
 	return z;
 }
-//Z-algorithm end [Z algorithm]
+// Z-algorithm end
 
-//Trie start
+// Trie start
 struct TrieNode{
 	int next[26];
 	bool leaf = false;
@@ -904,7 +904,7 @@ void addstring(const string &s){
 	}
 	Trie[v].leaf = true;
 }
-//Trie end
+// Trie end
 
 // Aho-Corasick start [Aho Corasick]
 // Reference: https://codeforces.com/blog/entry/14854
@@ -987,7 +987,7 @@ struct AhoCorasick
 		}
 	}
 };
-// Aho-Corasick end [Aho corasick]
+// Aho-Corasick end
 
 // Suffix array start
 const int MAX_N = 500005;
@@ -1055,7 +1055,7 @@ public:
 };
 // Suffix array end
 
-//DSU start
+// DSU start
 struct DSU {
 	struct Node{ int p, sz; };
 	vector<Node> dsu; int cc;
@@ -1075,9 +1075,9 @@ struct DSU {
 	}
 	inline Node& get(int u){ return dsu[rt(u)]; }
 };
-//DSU end
+// DSU end
 
-//Kruskal start
+// Kruskal start
 int n,m;
 vector<pair<ll,ii>> edges;
 vector<pair<ii,ll>> mst;
@@ -1098,9 +1098,9 @@ void kruskal()
 		if(dsu.cc==1) break;
 	}
 }
-//Kruskal end
+// Kruskal end
 
-//Dijkstra start
+// Dijkstra start
 vii adj[MAXN];
 ll dist[MAXN];
 
@@ -1126,9 +1126,9 @@ void dijkstra(int src)
 		}
 	}
 }
-//Dijkstra end
+// Dijkstra end
 
-//Floyd-Warshall start
+// Floyd-Warshall start
 ll dist[MAXN][MAXN];
 void floyd(){
 	forn(i,0,n) forn(j,0,n) dist[i][j] = (adj[i][j]==0 ? INF : adj[i][j]);
@@ -1136,7 +1136,7 @@ void floyd(){
 	forn(k,0,n) forn(i,0,n) forn(j,0,n)
 		dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j]);
 }
-//Floyd-Warshall end
+// Floyd-Warshall end
 
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm start
 // Returns one of the nodes in neg cycle if it exists (0-indexed), otherwise -1
@@ -1185,7 +1185,7 @@ int spfa(int src)
 }
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm end
 
-//Dinic Flow start: O(V^2E)
+// Dinic Flow start: O(V^2E)
 struct DinicFlow
 {
 	struct Edge
@@ -1264,9 +1264,9 @@ struct DinicFlow
 		return sum;
 	}
 };
-//Dinic Flow end
+// Dinic Flow end
 
-//Min Cost Max Flow start
+// Min Cost Max Flow start
 struct MinCostFlow
 {
 	struct Edge {
@@ -1386,10 +1386,10 @@ struct MinCostFlow
 		return f;
 	}
 };
-//Min Cost Max Flow end
+// Min Cost Max Flow end
 
-//Hopcroft-Karp matching (MCBM, max-cardinality bipartite matching) start
-//Read n1,n2 -> init() -> addEdge() -> maxMatching()
+// Hopcroft-Karp matching (MCBM, max-cardinality bipartite matching) start
+// Read n1,n2 -> init() -> addEdge() -> maxMatching()
 const int MAXN1 = 50000;
 const int MAXN2 = 50000;
 const int MAXM = 150000;
@@ -1465,10 +1465,10 @@ public:
 		}
 	}
 };
-//Hopcroft-Karp matching end
+// Hopcroft-Karp matching end
 
-//SCC (Strongly connected components) start
-//init(n) -> read input -> tarjan() -> sccidx[]
+// SCC (Strongly connected components) start
+// init(n) -> read input -> tarjan() -> sccidx[]
 struct SCC
 {
 	const int INF2 = int(1e9);
@@ -1479,11 +1479,11 @@ struct SCC
 	vector<bool> onstack;
 	stack<int> s;
 	vector<int> sccidx;
-	vector<vector<int>> adj; //condensation graph
+	vector<vector<int>> adj; // condensation graph
 	int scccnt;
 	vi topo;
 	
-	//lower sccidx means appear later
+	// lower sccidx means appear later
 	void init(int n)
 	{
 		idx.assign(n,-1);
@@ -1544,7 +1544,7 @@ struct SCC
 			}
 		}
 	}
-	void condense() //run after tarjan
+	void condense() // run after tarjan
 	{
 		adj.resize(scccnt);
 		for(int u = 0; u < vec.size(); u++)
@@ -1563,7 +1563,7 @@ struct SCC
 			adj[u].erase(unique(adj[u].begin(), adj[u].end()), adj[u].end());
 		}
 	}
-	void toposort() //if graph is a DAG and i just want to toposort
+	void toposort() // if graph is a DAG and i just want to toposort
 	{
 		tarjan();
 		int n = vec.size();
@@ -1582,7 +1582,7 @@ struct SCC
 		}
 	}
 };
-//SCC end
+// SCC end
 
 // HLD (Heavy-light decomposition) start
 int in[MAXN],out[MAXN],tmr=-1;
@@ -1648,199 +1648,7 @@ void Update(int u, int v, ll val)
 // Update, Query: Range update/query on the path between u, v
 // HLD (Heavy-light decomposition) end
 
-// HLD alt start
-struct edge {
-	int to;
-	long long dist;
-};
-class segTree {
-	struct T {
-		int l, r;
-		long long sum, lazy;
-		void update(long long x) {
-			sum += (r - l + 1)*x;
-			lazy += x;
-		}
-	};
-public:
-	vector<T>tree;
-	segTree(int n) {
-		tree.resize(n * 4 + 5);
-	}
-	void pushDown(int curr) {
-		long long lazy = tree[curr].lazy;
-		if (lazy) {
-			int l = curr << 1, r = curr << 1 | 1;
-			tree[l].update(lazy);
-			tree[r].update(lazy);
-			tree[curr].lazy = 0;
-		}
-	}
-
-	void pushUp(int curr) {
-		int l = curr << 1, r = curr << 1 | 1;
-		tree[curr].sum = tree[l].sum + tree[r].sum;
-	}
-
-	void build(int l, int r, int curr) {
-		tree[curr].l = l, tree[curr].r = r, tree[curr].sum = tree[curr].lazy = 0;
-		if (r == l) tree[curr].sum = 0;
-		else if (r > l) {
-			build(l, (r + l) / 2, curr << 1);
-			build((r + l) / 2 + 1, r, curr << 1 | 1);
-			pushUp(curr);
-		}
-	}
-
-	void update(int LL, int RR, long long x, int curr = 1) {
-		int l = tree[curr].l, r = tree[curr].r;
-		if (LL <= l && r <= RR)tree[curr].update(x);
-		else {
-			pushDown(curr);
-			int m = (l + r) / 2, ls = curr << 1, rs = curr << 1 | 1;
-			if (LL <= m)update(LL, RR, x, ls);
-			if (RR > m)update(LL, RR, x, rs);
-			pushUp(curr);
-		}
-	}
-
-	long long query(int LL, int RR, int curr = 1) {
-		int l = tree[curr].l, r = tree[curr].r;
-		int m = (l + r) / 2, ls = curr << 1, rs = curr << 1 | 1;
-		if (LL <= l && r <= RR)return tree[curr].sum;
-		else {
-			pushDown(curr);
-			long long ret = 0;
-			if (LL <= m)ret += query(LL, RR, ls);
-			if (RR > m)ret += query(LL, RR, rs);
-			return ret;
-		}
-	}
-};
-class HLD {
-private:
-	vector<vector<edge>>T;
-	vector<long long>dist; //Stores distance to root
-	void solve(int curr = 0) {
-		chainid[curr] = chainSize.size() - 1;
-		chainPosition[curr] = chainSize.back();
-		chainSize.back()++;
-
-		int maxx = 0;
-		int maxxNode = -1;
-
-		for (auto it : T[curr]) {
-			if (level[it.to] > level[curr]) {
-				if (maxx < sz[it.to]) {
-					maxx = sz[it.to];
-					maxxNode = it.to;
-				}
-			}
-		}
-
-		if (maxxNode == -1)return;
-		solve(maxxNode);
-
-		for (auto it : T[curr]) {
-			if (level[it.to] > level[curr]) {
-				if (it.to != maxxNode) {
-					chainSize.push_back(0);
-					head.push_back(curr);
-					solve(it.to);
-				}
-			}
-		}
-	}
-
-	void dfs(int node) {
-		sz[node] = 1;
-		for (int i = 0; i < T[node].size(); i++) {
-			int t = T[node][i].to;
-			long long d = T[node][i].dist;
-			if (t == p[node])continue;
-			p[t] = node;
-			level[t] = level[node] + 1;
-			dist[t] = dist[node] + d;
-			dfs(t);
-			sz[node] += sz[t];
-		}
-	}
-
-public:
-	vector<int> head; //parent of the top node of the chain
-	vector<int> chainid;
-	vector<int> chainPosition;
-	vector<int> chainSize;
-	vector<int> level;
-	vector<int> sz;
-	vector<int>p;
-	vector<int>top; //Top node of the chain
-	vector<segTree*>st;
-	HLD(vector<vector<edge>>x, int start = 0) :T(x) {
-		head.reserve(T.size());
-		chainid.resize(T.size());
-		chainPosition.resize(T.size());
-		chainSize.reserve(T.size());
-		p.resize(T.size());
-		dist.resize(T.size() + 5, 0);
-		//level.resize(T.size(), -1);
-		sz.resize(T.size());
-		chainSize.push_back(0);
-		head.push_back(-1);
-		level.resize(T.size() + 5);
-		level[start] = 0;
-		dfs(start);
-		solve(start);
-		top.resize(chainSize.size());
-		for (int i = 0; i < T.size(); i++) {
-			if (chainPosition[i] == 0)top[chainid[i]] = i;
-		}
-		/*st.resize(chainSize.size());
-		for (int i = 0; i < chainSize.size(); i++) {
-			st[i] = new segTree(chainSize[i]);
-			st[i]->build(0, chainSize[i], 1);
-		}*/
-	}
-	int LCA(int x, int y) {
-		while (chainid[x] != chainid[y]) {
-			if (level[top[chainid[x]]] > level[top[chainid[y]]])swap(x, y);
-			y = head[chainid[y]];
-		}
-		if (level[x] > level[y])swap(x, y);
-		return x;
-	}
-	long long getdist(long long a, long long b) {
-		long long x = LCA(a, b);
-		return abs(dist[a] - dist[x]) + abs(dist[b] - dist[x]);
-	}
-	void update(int x, int y) {
-		while (true) {
-			if (chainid[x] == chainid[y]) {
-				if (x == y)break;
-				st[chainid[y]]->update(chainPosition[x] + 1, chainPosition[y], 1);
-				break;
-			}
-			st[chainid[y]]->update(0, chainPosition[y], 1);
-			y = head[chainid[y]];
-		}
-	}
-	int query(int x, int y) {
-		int ans = 0;
-		while (true) {
-			if (chainid[x] == chainid[y]) {
-				if (x == y)break;
-				ans += st[chainid[y]]->query(chainPosition[x] + 1, chainPosition[y]);
-				break;
-			}
-			ans += st[chainid[y]]->query(0, chainPosition[y]);
-			y = head[chainid[y]];
-		}
-		return ans;
-	}
-};
-// HLD alt end
-
-//LCA euler O(log n) query start
+// LCA euler O(log n) query start
 const int LG = 21;
 
 int in[MAXN],out[MAXN],tmr=-1;
@@ -1873,9 +1681,9 @@ int lca(int u, int v)
 	}
 	return prt[0][u];
 }
-//LCA euler O(log n) query end
+// LCA euler O(log n) query end
 
-//LCA depth O(log n) query start
+// LCA depth O(log n) query start
 const int LG = 20;
 
 int dep[MAXN], prt[MAXN][LG];
@@ -1915,18 +1723,18 @@ int lca(int u, int v)
 	}
 	return prt[u][0];
 }
-//LCA depth O(log n) query end
+// LCA depth O(log n) query end
 
-//Binary parent start
+// Binary parent start
 int goup(int u, int h){
 	for(int i=LG-1;i>=0;i--){
 		if(h&(1<<i)) u=prt[u][i];
 	}
 	return u;
 }
-//Binary parent end
+// Binary parent end
 
-//LCA O(1) query start
+// LCA O(1) query start
 vi adj[MAXN];
 int lg[MAXN+1];
 ll spt[MAXN][LG+1];
@@ -1976,17 +1784,17 @@ int lca(int u, int v){
 	return lcast.query(l,r);
 }	
 
-//in main()
+// in main()
 dfs_lca(0,-1);
 lcast=SparseTableLCA(euler);
 
-//LCA O(1) query end
+// LCA O(1) query end
 
-//Centroid decomposition start
+// Centroid decomposition start
 int sz[MAXN];
 bool vst[MAXN];
-int cprt[MAXN]; //centroid tree parent
-vector<int> child[MAXN]; //subtree of centroid tree
+int cprt[MAXN]; // centroid tree parent
+vector<int> child[MAXN]; // subtree of centroid tree
 mset(cprt,-1);
 
 void dfs_sz(int u, int p)
@@ -2041,7 +1849,7 @@ void solve(int u)
 		
 	}
 	
-	//do stuffs
+	// do stuffs
 	
 	vst[u]=1;
 	for(int v: adj[u])
@@ -2050,9 +1858,9 @@ void solve(int u)
 		solve(v);
 	}
 }
-//Centroid decomposition end
+// Centroid decomposition end
 
-//Sparse Table start: O(1) Max Query
+// Sparse Table start: O(1) Max Query
 const int LG = 20;
 
 struct SparseTable
@@ -2079,11 +1887,11 @@ struct SparseTable
 		return max(x,y);
 	}
 };
-//Sparse Table end
+// Sparse Table end
 
-//Convex Hull Dynamic start (CHT)
-//Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
-//Finds max by default; set Max to false for min
+// Convex Hull Dynamic start (CHT)
+// Source: https://github.com/kth-competitive-programming/kactl/blob/master/content/data-structures/LineContainer.h
+// Finds max by default; set Max to false for min
 struct Line {
 	mutable ll k, m, p;
 	bool operator<(const Line& o) const { return k < o.k; }
@@ -2117,7 +1925,7 @@ struct ConvexHullDynamic: multiset<Line, less<>> {
 		return (l.k * x + l.m) * (Max ? 1 : -1);
 	}
 };
-//Convex Hull Dynamic end (CHT)
+// Convex Hull Dynamic end (CHT)
 
 // Li Chao Tree start
 struct Line {
@@ -2164,7 +1972,7 @@ struct LiChaoTree {
 };
 // Li Chao Tree end
 
-//Convex Hull fast start (CHT)
+// Convex Hull fast start (CHT)
 struct Line {
 	ll m, b;
 	Line(ll _m, ll _b): m(_m), b(_b) {}
@@ -2190,9 +1998,9 @@ struct ConvexHull {
 		return d.front().eval(x);
 	}
 };
-//Convex Hull fast end (CHT)
+// Convex Hull fast end (CHT)
 
-//Combi/Maths start
+// Combi/Maths start
 vector<ll> fact,ifact,inv,pow2;
 ll add(ll a, ll b)
 {
@@ -2260,7 +2068,436 @@ void getpf(vector<ii>& pf, ll n)
 	}
 	if(n>1) pf.pb({n,1});
 }
-//Combi/Maths end
+// Combi/Maths end
+
+// Matrix start
+struct Matrix{
+	vector<vector<ll>> a;
+	vector<ll>& operator[](int x){ return a[x]; }
+	inline int r(){ return a.size(); }
+	inline int c(){ return (a.size() ? a[0].size() : 0); }
+	
+	Matrix(int r_ = 0, int c_ = 0, bool identity = 0){
+		a.resize(r_, vector<ll>(c_));
+		if(identity){
+			assert(r_ == c_);
+			for(int i = 0; i < r_; i++) a[i][i] = 1;
+		}
+	}
+	inline Matrix(const vector<vector<ll>>& v){ a = v; }
+	inline void operator=(const vector<vector<ll>>& v){ a = v; }
+};
+Matrix operator*(Matrix A, Matrix B){
+	assert(A.c() == B.r());
+	const ll MOD2 = ll(MOD) * MOD; //MOD
+	Matrix C(A.r(), B.c());
+	for(int i = 0; i < A.r(); i++){
+		for(int j = 0; j < B.c(); j++){
+			ll w = 0;
+			for(int k = 0; k < A.c(); k++){
+				w += ll(A[i][k]) * B[k][j];
+				if(w >= MOD2) w -= MOD2; //MOD
+			}
+			C[i][j] = w % MOD; //MOD
+		}
+	}
+	return C;
+}
+Matrix operator^(Matrix A, ll b){
+	assert(A.r() == A.c());
+	Matrix R = Matrix(A.r(), A.r(), 1);
+	for(; b; b >>= 1){
+		if(b & 1) R = R * A;
+		A = A * A;
+	}
+	return R;
+}
+// Matrix end
+
+// Number Theory NT start
+vector<ll> primes, totient, sumdiv, bigdiv, lowprime;
+vector<bool> prime;
+void Sieve(ll n)
+{
+	prime.assign(n+1, 1);
+	prime[1] = false;
+	for(ll i = 2; i <= n; i++)
+	{
+		if(prime[i])
+		{
+			primes.pb(i);
+			for(ll j = i*i; j <= n; j += i)
+			{
+				prime[j] = false;
+			}
+		}
+	}
+}
+void Sieve(ll n) // linear Sieve
+{
+	prime.assign(n+1, 1);
+	lowprime.assign(n+1, 0);
+	prime[1] = false;
+	for(ll i = 2; i <= n; i++)
+	{
+		if(lowprime[i] == 0)
+		{
+			primes.pb(i);
+			lowprime[i] = i;
+		}
+		for(int j=0; j<primes.size() && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
+		{
+			prime[j] = false;
+			lowprime[i*primes[j]] = lowprime[i];
+		}
+	}
+}
+ll phi(ll x)
+{
+	map<ll,ll> pf;
+	ll num = 1; ll num2 = x;
+	for(ll i = 0; primes[i]*primes[i] <= x; i++)
+	{
+		if(x%primes[i]==0)
+		{
+			num2/=primes[i];
+			num*=(primes[i]-1);
+		}
+		while(x%primes[i]==0)
+		{
+			x/=primes[i];
+			pf[primes[i]]++;
+		}
+	}
+	if(x>1)
+	{
+		pf[x]++; num2/=x; num*=(x-1);
+	}
+	x = 1;
+	num*=num2;
+	return num;
+}
+bool isprime(ll x)
+{
+	if(x==1) return false;
+	for(ll i = 0; primes[i]*primes[i] <= x; i++)
+	{
+		if(x%primes[i]==0) return false;
+	}
+	return true;
+}
+void SievePhi(ll n)
+{
+	totient.resize(n+1);
+	for (int i = 1; i <= n; ++i) totient[i] = i;
+	for (int i = 2; i <= n; ++i)
+	{
+		if (totient[i] == i)
+		{
+			for (int j = i; j <= n; j += i)
+			{
+				totient[j] -= totient[j] / i;
+			}
+		}
+	}
+}
+void SieveSumDiv(ll n)
+{
+	sumdiv.resize(n+1);
+	for(int i = 1; i <= n; ++i)
+	{
+		for(int j = i; j <= n; j += i)
+		{
+			sumdiv[j] += i;
+		}
+	}
+}
+ll getPhi(ll n)
+{
+	return totient[n];
+}
+ll getSumDiv(ll n)
+{
+	return sumdiv[n];
+}
+ll pw(ll a, ll b, ll mod)
+{
+	ll r = 1;
+	if(b < 0) b += mod*100000LL;
+	while(b)
+	{
+		if(b&1) r = (r*a)%mod;
+		a = (a*a)%mod;
+		b>>=1;
+	}
+	return r;
+}
+ll inv(ll a, ll mod)
+{
+	return pw(a, mod - 2, mod);
+}
+ll invgeneral(ll a, ll mod)
+{
+	ll ph = phi(mod);
+	ph--;
+	return pw(a, ph, mod);
+}
+void getpf(vector<ii>& pf, ll n)
+{
+	for(ll i = 0; primes[i]*primes[i] <= n; i++)
+	{
+		int cnt = 0;
+		while(n%primes[i]==0)
+		{
+			n/=primes[i]; cnt++;
+		}
+		if(cnt>0) pf.pb(ii(primes[i], cnt));
+	}
+	if(n>1)
+	{
+		pf.pb(ii(n, 1));
+	}
+}
+void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
+{
+	ll x, k;
+	if(i >= pf.size()) return;
+	x = n;
+	for(k = 0; k <= pf[i].S; k++)
+	{
+		if(i==int(pf.size())-1) div.pb(x);
+		getdiv(div, pf, x, i + 1);
+		x *= pf[i].F;
+	}
+}
+// End Number Theory NT
+
+// Sqrt decomposition/Mo's algorithm start
+const int BS;
+struct Query {
+	int l,r,id;
+	inline ii toPair() const {
+		return {l/BS, ((l/BS)&1)?-r:r};
+	}
+};
+inline bool operator<(const Query &a, const Query &b) {
+	return a.toPair() < b.toPair();
+}
+
+void add(int p)
+{
+	
+}
+
+void remove(int p)
+{
+	
+}
+
+int L=0,R=-1;
+for(int i=0;i<Q;i++)
+{
+	int ql=q[i].l, qr=q[i].r, id=q[i].id;
+	while(L>ql)
+	{
+		add(--L);
+	}
+	while(R<qr)
+	{
+		add(++R);
+	}
+	while(L<ql)
+	{
+		remove(L++);
+	}
+	while(R>qr)
+	{
+		remove(R--);
+	}
+}
+// Sqrt decomposition/Mo's algorithm end
+
+// FFT (Fast Fourier Transform) start
+typedef complex<ld> cd;
+const ld PI = acos(-1);
+void fft(vector<cd> &a, bool invert)
+{
+	int n=a.size();
+	for(int i=1,j=0;i<n;i++)
+	{
+		int bit=n>>1;
+		for(;j&bit;bit>>=1) j^=bit;
+		j^=bit;
+		if(i<j) swap(a[i],a[j]);
+	}
+	for(int len=2;len<=n;len<<=1)
+	{
+		ld ang=2*PI/len*(invert?-1:1);
+		cd rt(cos(ang), sin(ang));
+		for(int i=0;i<n;i+=len)
+		{
+			cd w(1);
+			for(int j=0;j<len/2;j++)
+			{
+				cd u=a[i+j], v=w*a[i+j+len/2];
+				a[i+j]=u+v;
+				a[i+j+len/2]=u-v;
+				w*=rt;
+			}
+		}
+	}
+	if(invert) for(cd &x: a) x/=n;
+}
+vi mult(vi &a, vi &b)
+{
+	int n=1;
+	while(n<a.size()+b.size()) n<<=1;
+	
+	vector<cd> fa(n),fb(n);
+	for(int i=0;i<a.size();i++) fa[i]=a[i];
+	for(int i=0;i<b.size();i++) fb[i]=b[i];
+	fft(fa,0); fft(fb,0);
+	forn(i,0,n) fa[i]*=fb[i];
+	fft(fa,1);
+	
+	vi r(n);
+	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
+	return r;
+}
+// FFT (Fast Fourier Transform) end
+
+// NTT (Number Theoretic Transform) start
+
+// Source: https://cp-algorithms.com/algebra/fft.html
+//const int MOD = 998244353;
+const int ROOT = 3; // primitive root
+const int ROOT_1 = 2446678; // ROOT's inverse
+const int ROOT_PW = 1 << 23;
+ll mult(ll a, ll b)
+{
+	if(a>MOD) a%=MOD;
+	if(b>MOD) b%=MOD;
+	ll ans=(a*b)%MOD;
+	if(ans<0) ans+=MOD;
+	return ans;
+}
+ll pw(ll a, ll b)
+{
+	ll r=1;
+	while(b){
+		if(b&1) r=mult(r,a);
+		a=mult(a,a);
+		b>>=1;
+	}
+	return r;
+}
+ll inverse(ll a)
+{
+	return pw(a,MOD-2);
+}
+void ntt(vi &a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        int wlen = invert ? ROOT_1 : ROOT;
+        for (int i = len; i < ROOT_PW; i <<= 1)
+            wlen = (int)(1LL * wlen * wlen % MOD);
+
+        for (int i = 0; i < n; i += len) {
+            int w = 1;
+            for (int j = 0; j < len / 2; j++) {
+                int u = a[i+j], v = (int)(1LL * a[i+j+len/2] * w % MOD);
+                a[i+j] = u + v < MOD ? u + v : u + v - MOD;
+                a[i+j+len/2] = u - v >= 0 ? u - v : u - v + MOD;
+                w = (int)(1LL * w * wlen % MOD);
+            }
+        }
+    }
+
+    if (invert) {
+        int n_1 = inverse(n);
+        for (int & x : a)
+            x = (int)(1LL * x * n_1 % MOD);
+    }
+}
+vi mult(vi &a, vi &b)
+{
+	int n=1;
+	while(n<a.size()+b.size()) n<<=1;
+	
+	vi fa(n),fb(n);
+	for(int i=0;i<a.size();i++) fa[i]=a[i];
+	for(int i=0;i<b.size();i++) fb[i]=b[i];
+	ntt(fa, 0); ntt(fb, 0);
+	forn(i,0,n) fa[i]*=fb[i];
+	ntt(fa, 1);
+	
+	vi r(n);
+	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
+	return r;
+}
+// NTT (Number Theoretic Transform) end
+
+// FFT mod start
+// Usage: res = convMod<MOD>(A, B);
+
+// Source: http://neerc.ifmo.ru/trains/toulouse/2017/fft2.pdf
+typedef complex<double> CD;
+void fft(vector<CD>& a) {
+	int n = a.size(), L = 31 - __builtin_clz(n);
+	static vector<complex<long double>> R(2, 1);
+	static vector<CD> rt(2, 1);  // (^ 10% faster if double)
+	for (static int k = 2; k < n; k *= 2) {
+		R.resize(n); rt.resize(n);
+		auto x = polar(1.0L, acos(-1.0L) / k);
+		forn(i,k,2*k) rt[i] = R[i] = i&1 ? R[i/2] * x : R[i/2];
+	}
+	vector<int> rev(n);
+	forn(i,0,n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;
+	forn(i,0,n) if (i < rev[i]) swap(a[i], a[rev[i]]);
+	for (int k = 1; k < n; k *= 2)
+		for (int i = 0; i < n; i += 2*k) forn(j,0,k) {
+			// CD z = rt[j+k] * a[i+j+k]; // (25% faster if hand-rolled)  /// include-line
+			auto x = (double *)&rt[j+k], y = (double *)&a[i+j+k];		/// exclude-line
+			CD z(x[0]*y[0] - x[1]*y[1], x[0]*y[1] + x[1]*y[0]);		   /// exclude-line
+			a[i + j + k] = a[i + j] - z;
+			a[i + j] += z;
+		}
+}
+
+typedef vector<ll> vl;
+template<int M> vl convMod(const vl &a, const vl &b) {
+	if (a.empty() || b.empty()) return {};
+	vl res(a.size() + b.size() - 1);
+	int B=32-__builtin_clz((int)res.size()), n=1<<B, cut=int(sqrt(M));
+	vector<CD> L(n), R(n), outs(n), outl(n);
+	forn(i,0,a.size()) L[i] = CD((int)a[i] / cut, (int)a[i] % cut);
+	forn(i,0,b.size()) R[i] = CD((int)b[i] / cut, (int)b[i] % cut);
+	fft(L), fft(R);
+	forn(i,0,n) {
+		int j = -i & (n - 1);
+		outl[j] = (L[i] + conj(L[j])) * R[i] / (2.0 * n);
+		outs[j] = (L[i] - conj(L[j])) * R[i] / (2.0 * n) / 1i;
+	}
+	fft(outl), fft(outs);
+	forn(i,0,res.size()) {
+		ll av = ll(real(outl[i])+.5), cv = ll(imag(outs[i])+.5);
+		ll bv = ll(imag(outl[i])+.5) + ll(real(outs[i])+.5);
+		res[i] = ((av % M * cut + bv) % M * cut + cv) % M;
+	}
+	return res;
+}
+// FFT mod end
 
 // KACTL Geometry start
 template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
@@ -2684,436 +2921,7 @@ template<class T> pair<int, Point<T>> lineInter(Line<T> &a, Line<T> &b) {
 }
 // Geometry (self-made) end
 
-//Matrix start
-struct Matrix{
-	vector<vector<ll>> a;
-	vector<ll>& operator[](int x){ return a[x]; }
-	inline int r(){ return a.size(); }
-	inline int c(){ return (a.size() ? a[0].size() : 0); }
-	
-	Matrix(int r_ = 0, int c_ = 0, bool identity = 0){
-		a.resize(r_, vector<ll>(c_));
-		if(identity){
-			assert(r_ == c_);
-			for(int i = 0; i < r_; i++) a[i][i] = 1;
-		}
-	}
-	inline Matrix(const vector<vector<ll>>& v){ a = v; }
-	inline void operator=(const vector<vector<ll>>& v){ a = v; }
-};
-Matrix operator*(Matrix A, Matrix B){
-	assert(A.c() == B.r());
-	const ll MOD2 = ll(MOD) * MOD; //MOD
-	Matrix C(A.r(), B.c());
-	for(int i = 0; i < A.r(); i++){
-		for(int j = 0; j < B.c(); j++){
-			ll w = 0;
-			for(int k = 0; k < A.c(); k++){
-				w += ll(A[i][k]) * B[k][j];
-				if(w >= MOD2) w -= MOD2; //MOD
-			}
-			C[i][j] = w % MOD; //MOD
-		}
-	}
-	return C;
-}
-Matrix operator^(Matrix A, ll b){
-	assert(A.r() == A.c());
-	Matrix R = Matrix(A.r(), A.r(), 1);
-	for(; b; b >>= 1){
-		if(b & 1) R = R * A;
-		A = A * A;
-	}
-	return R;
-}
-//Matrix end
-
-//Number Theory NT start
-vector<ll> primes, totient, sumdiv, bigdiv, lowprime;
-vector<bool> prime;
-void Sieve(ll n)
-{
-	prime.assign(n+1, 1);
-	prime[1] = false;
-	for(ll i = 2; i <= n; i++)
-	{
-		if(prime[i])
-		{
-			primes.pb(i);
-			for(ll j = i*i; j <= n; j += i)
-			{
-				prime[j] = false;
-			}
-		}
-	}
-}
-void Sieve(ll n) // linear Sieve
-{
-	prime.assign(n+1, 1);
-	lowprime.assign(n+1, 0);
-	prime[1] = false;
-	for(ll i = 2; i <= n; i++)
-	{
-		if(lowprime[i] == 0)
-		{
-			primes.pb(i);
-			lowprime[i] = i;
-		}
-		for(int j=0; j<primes.size() && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
-		{
-			prime[j] = false;
-			lowprime[i*primes[j]] = lowprime[i];
-		}
-	}
-}
-ll phi(ll x)
-{
-	map<ll,ll> pf;
-	ll num = 1; ll num2 = x;
-	for(ll i = 0; primes[i]*primes[i] <= x; i++)
-	{
-		if(x%primes[i]==0)
-		{
-			num2/=primes[i];
-			num*=(primes[i]-1);
-		}
-		while(x%primes[i]==0)
-		{
-			x/=primes[i];
-			pf[primes[i]]++;
-		}
-	}
-	if(x>1)
-	{
-		pf[x]++; num2/=x; num*=(x-1);
-	}
-	x = 1;
-	num*=num2;
-	return num;
-}
-bool isprime(ll x)
-{
-	if(x==1) return false;
-	for(ll i = 0; primes[i]*primes[i] <= x; i++)
-	{
-		if(x%primes[i]==0) return false;
-	}
-	return true;
-}
-void SievePhi(ll n)
-{
-	totient.resize(n+1);
-	for (int i = 1; i <= n; ++i) totient[i] = i;
-	for (int i = 2; i <= n; ++i)
-	{
-		if (totient[i] == i)
-		{
-			for (int j = i; j <= n; j += i)
-			{
-				totient[j] -= totient[j] / i;
-			}
-		}
-	}
-}
-void SieveSumDiv(ll n)
-{
-	sumdiv.resize(n+1);
-	for(int i = 1; i <= n; ++i)
-	{
-		for(int j = i; j <= n; j += i)
-		{
-			sumdiv[j] += i;
-		}
-	}
-}
-ll getPhi(ll n)
-{
-	return totient[n];
-}
-ll getSumDiv(ll n)
-{
-	return sumdiv[n];
-}
-ll pw(ll a, ll b, ll mod)
-{
-	ll r = 1;
-	if(b < 0) b += mod*100000LL;
-	while(b)
-	{
-		if(b&1) r = (r*a)%mod;
-		a = (a*a)%mod;
-		b>>=1;
-	}
-	return r;
-}
-ll inv(ll a, ll mod)
-{
-	return pw(a, mod - 2, mod);
-}
-ll invgeneral(ll a, ll mod)
-{
-	ll ph = phi(mod);
-	ph--;
-	return pw(a, ph, mod);
-}
-void getpf(vector<ii>& pf, ll n)
-{
-	for(ll i = 0; primes[i]*primes[i] <= n; i++)
-	{
-		int cnt = 0;
-		while(n%primes[i]==0)
-		{
-			n/=primes[i]; cnt++;
-		}
-		if(cnt>0) pf.pb(ii(primes[i], cnt));
-	}
-	if(n>1)
-	{
-		pf.pb(ii(n, 1));
-	}
-}
-void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
-{
-	ll x, k;
-	if(i >= pf.size()) return;
-	x = n;
-	for(k = 0; k <= pf[i].S; k++)
-	{
-		if(i==int(pf.size())-1) div.pb(x);
-		getdiv(div, pf, x, i + 1);
-		x *= pf[i].F;
-	}
-}
-//End Number Theory NT
-
-//Sqrt decomposition/Mo's algorithm start
-const int BS;
-struct Query {
-	int l,r,id;
-	inline ii toPair() const {
-		return {l/BS, ((l/BS)&1)?-r:r};
-	}
-};
-inline bool operator<(const Query &a, const Query &b) {
-	return a.toPair() < b.toPair();
-}
-
-void add(int p)
-{
-	
-}
-
-void remove(int p)
-{
-	
-}
-
-int L=0,R=-1;
-for(int i=0;i<Q;i++)
-{
-	int ql=q[i].l, qr=q[i].r, id=q[i].id;
-	while(L>ql)
-	{
-		add(--L);
-	}
-	while(R<qr)
-	{
-		add(++R);
-	}
-	while(L<ql)
-	{
-		remove(L++);
-	}
-	while(R>qr)
-	{
-		remove(R--);
-	}
-}
-//Sqrt decomposition/Mo's algorithm end
-
-//FFT (Fast Fourier Transform) start
-typedef complex<ld> cd;
-const ld PI = acos(-1);
-void fft(vector<cd> &a, bool invert)
-{
-	int n=a.size();
-	for(int i=1,j=0;i<n;i++)
-	{
-		int bit=n>>1;
-		for(;j&bit;bit>>=1) j^=bit;
-		j^=bit;
-		if(i<j) swap(a[i],a[j]);
-	}
-	for(int len=2;len<=n;len<<=1)
-	{
-		ld ang=2*PI/len*(invert?-1:1);
-		cd rt(cos(ang), sin(ang));
-		for(int i=0;i<n;i+=len)
-		{
-			cd w(1);
-			for(int j=0;j<len/2;j++)
-			{
-				cd u=a[i+j], v=w*a[i+j+len/2];
-				a[i+j]=u+v;
-				a[i+j+len/2]=u-v;
-				w*=rt;
-			}
-		}
-	}
-	if(invert) for(cd &x: a) x/=n;
-}
-vi mult(vi &a, vi &b)
-{
-	int n=1;
-	while(n<a.size()+b.size()) n<<=1;
-	
-	vector<cd> fa(n),fb(n);
-	for(int i=0;i<a.size();i++) fa[i]=a[i];
-	for(int i=0;i<b.size();i++) fb[i]=b[i];
-	fft(fa,0); fft(fb,0);
-	forn(i,0,n) fa[i]*=fb[i];
-	fft(fa,1);
-	
-	vi r(n);
-	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
-	return r;
-}
-//FFT (Fast Fourier Transform) end
-
-// NTT (Number Theoretic Transform) start
-
-// Source: https://cp-algorithms.com/algebra/fft.html
-//const int MOD = 998244353;
-const int ROOT = 3; // primitive root
-const int ROOT_1 = 2446678; // ROOT's inverse
-const int ROOT_PW = 1 << 23;
-ll mult(ll a, ll b)
-{
-	if(a>MOD) a%=MOD;
-	if(b>MOD) b%=MOD;
-	ll ans=(a*b)%MOD;
-	if(ans<0) ans+=MOD;
-	return ans;
-}
-ll pw(ll a, ll b)
-{
-	ll r=1;
-	while(b){
-		if(b&1) r=mult(r,a);
-		a=mult(a,a);
-		b>>=1;
-	}
-	return r;
-}
-ll inverse(ll a)
-{
-	return pw(a,MOD-2);
-}
-void ntt(vi &a, bool invert) {
-    int n = a.size();
-
-    for (int i = 1, j = 0; i < n; i++) {
-        int bit = n >> 1;
-        for (; j & bit; bit >>= 1)
-            j ^= bit;
-        j ^= bit;
-
-        if (i < j)
-            swap(a[i], a[j]);
-    }
-
-    for (int len = 2; len <= n; len <<= 1) {
-        int wlen = invert ? ROOT_1 : ROOT;
-        for (int i = len; i < ROOT_PW; i <<= 1)
-            wlen = (int)(1LL * wlen * wlen % MOD);
-
-        for (int i = 0; i < n; i += len) {
-            int w = 1;
-            for (int j = 0; j < len / 2; j++) {
-                int u = a[i+j], v = (int)(1LL * a[i+j+len/2] * w % MOD);
-                a[i+j] = u + v < MOD ? u + v : u + v - MOD;
-                a[i+j+len/2] = u - v >= 0 ? u - v : u - v + MOD;
-                w = (int)(1LL * w * wlen % MOD);
-            }
-        }
-    }
-
-    if (invert) {
-        int n_1 = inverse(n);
-        for (int & x : a)
-            x = (int)(1LL * x * n_1 % MOD);
-    }
-}
-vi mult(vi &a, vi &b)
-{
-	int n=1;
-	while(n<a.size()+b.size()) n<<=1;
-	
-	vi fa(n),fb(n);
-	for(int i=0;i<a.size();i++) fa[i]=a[i];
-	for(int i=0;i<b.size();i++) fb[i]=b[i];
-	ntt(fa, 0); ntt(fb, 0);
-	forn(i,0,n) fa[i]*=fb[i];
-	ntt(fa, 1);
-	
-	vi r(n);
-	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
-	return r;
-}
-// NTT (Number Theoretic Transform) end
-
-// FFT mod start
-// Usage: res = convMod<MOD>(A, B);
-
-// Source: http://neerc.ifmo.ru/trains/toulouse/2017/fft2.pdf
-typedef complex<double> CD;
-void fft(vector<CD>& a) {
-	int n = a.size(), L = 31 - __builtin_clz(n);
-	static vector<complex<long double>> R(2, 1);
-	static vector<CD> rt(2, 1);  // (^ 10% faster if double)
-	for (static int k = 2; k < n; k *= 2) {
-		R.resize(n); rt.resize(n);
-		auto x = polar(1.0L, acos(-1.0L) / k);
-		forn(i,k,2*k) rt[i] = R[i] = i&1 ? R[i/2] * x : R[i/2];
-	}
-	vector<int> rev(n);
-	forn(i,0,n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;
-	forn(i,0,n) if (i < rev[i]) swap(a[i], a[rev[i]]);
-	for (int k = 1; k < n; k *= 2)
-		for (int i = 0; i < n; i += 2*k) forn(j,0,k) {
-			// CD z = rt[j+k] * a[i+j+k]; // (25% faster if hand-rolled)  /// include-line
-			auto x = (double *)&rt[j+k], y = (double *)&a[i+j+k];		/// exclude-line
-			CD z(x[0]*y[0] - x[1]*y[1], x[0]*y[1] + x[1]*y[0]);		   /// exclude-line
-			a[i + j + k] = a[i + j] - z;
-			a[i + j] += z;
-		}
-}
-
-typedef vector<ll> vl;
-template<int M> vl convMod(const vl &a, const vl &b) {
-	if (a.empty() || b.empty()) return {};
-	vl res(a.size() + b.size() - 1);
-	int B=32-__builtin_clz((int)res.size()), n=1<<B, cut=int(sqrt(M));
-	vector<CD> L(n), R(n), outs(n), outl(n);
-	forn(i,0,a.size()) L[i] = CD((int)a[i] / cut, (int)a[i] % cut);
-	forn(i,0,b.size()) R[i] = CD((int)b[i] / cut, (int)b[i] % cut);
-	fft(L), fft(R);
-	forn(i,0,n) {
-		int j = -i & (n - 1);
-		outl[j] = (L[i] + conj(L[j])) * R[i] / (2.0 * n);
-		outs[j] = (L[i] - conj(L[j])) * R[i] / (2.0 * n) / 1i;
-	}
-	fft(outl), fft(outs);
-	forn(i,0,res.size()) {
-		ll av = ll(real(outl[i])+.5), cv = ll(imag(outs[i])+.5);
-		ll bv = ll(imag(outl[i])+.5) + ll(real(outs[i])+.5);
-		res[i] = ((av % M * cut + bv) % M * cut + cv) % M;
-	}
-	return res;
-}
-// FFT mod end
-
-//Randomizer start
+// Randomizer start
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 uniform_int_distribution<int>(1,6)(rng);
 uniform_int_distribution<> dis(1,6);
@@ -3123,7 +2931,7 @@ uniform_int_distribution<> dis(1,6);
 	cout<<dis(rng)<<'\n';
 
 mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
-//Randomizer end
+// Randomizer end
 
 // Hash map custom hash start: unordered_map<T,T,custom_hash> mp;
 struct custom_hash {
