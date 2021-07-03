@@ -21,6 +21,7 @@ List of things (in order):
 	- Prefix function (KMP)
 	- Z-algorithm
 	- Trie
+	- Aho-Corasick
 	- Suffix Array
 
 3. Graph theory
@@ -46,8 +47,9 @@ List of things (in order):
 4. Data structures
 	- Sparse table
 	- Convex hull trick (CHT)
-		- Dynamic version: O(log n) query
+		- Dynamic version (LineContainer): O(log n) query
 		- Offline version: O(1) query
+	- Li Chao Tree \[untested\]
 
 5. Maths
 	- Combinatorics
@@ -58,9 +60,14 @@ List of things (in order):
 	
 6. Square root decomposition/Mo's algorithm
 
-7. Fast Fourier Transform (FFT)
+7. Convolutions
+	- Fast Fourier Transform (FFT)
+	- Number Theoretic Transform (NTT)
+	- FFT Mod
 
-8. Miscellaneous
+8. Geometry \[untested\]
+
+9. Miscellaneous
 	- Randomizer (Mersenne prime twister, mt19937)
 	- unordered_map/hash map custom hash (http://xorshift.di.unimi.it/splitmix64.c)
 	- Binary converter: print numbers in binary
