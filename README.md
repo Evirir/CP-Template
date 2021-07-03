@@ -49,6 +49,7 @@ List of things (in order):
 	- Convex hull trick (CHT)
 		- Dynamic version (LineContainer): O(log n) query
 		- Offline version: O(1) query
+	- Li Chao Tree \[untested\]
 
 5. Maths
 	- Combinatorics
