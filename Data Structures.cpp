@@ -906,6 +906,89 @@ void addstring(const string &s){
 }
 //Trie end
 
+// Aho-Corasick start [Aho Corasick]
+// Reference: https://codeforces.com/blog/entry/14854
+struct AhoCorasick
+{
+	vector<int> term, len, link; // exit link, depth in trie, suffix link
+	vector<vector<int>> id; // index of string match etc, depends on problem
+	vector<vector<int>> to; // transitions
+	int sz, alpsz; // trie size, alphabet size
+	
+	// max total length, alphabet size
+	AhoCorasick(int n, int _alpsz = 26)
+	{
+		term.resize(n, 0);
+		len.resize(n, 0);
+		link.resize(n, 0);
+		id.resize(n, vector<int>());
+		to.resize(n, vector<int>(_alpsz, 0));
+		sz = 1;
+		alpsz = _alpsz;
+	}
+	int getid(char c)
+	{
+		return c - 'a';
+	}
+	void add(const string &s, int i = 0) // index of string etc
+	{
+		int cur = 0;
+		for(auto ch: s)
+		{
+			int c = getid(ch);
+			if(!to[cur][c])
+			{
+				to[cur][c] = sz++;
+				len[to[cur][c]] = len[cur] + 1;
+			}
+			cur = to[cur][c];
+		}
+		term[cur] = cur;
+		id[cur].pb(i);
+	}
+	void push_links()
+	{
+		int que[sz];
+		int l = 0, r = 1;
+		que[0] = 0;
+		while(l < r)
+		{
+			int u = que[l++];
+			int v = link[u];
+			if(!term[u]) term[u] = term[v];
+			for(int c = 0; c < alpsz; c++)
+			{
+				if(to[u][c])
+				{
+					link[to[u][c]] = u ? to[v][c] : 0;
+					que[r++] = to[u][c];
+				}
+				else
+				{
+					to[u][c] = to[v][c];
+				}
+			}
+		}
+	}
+	void go(const string& s)
+	{
+		int u = 0;
+		for(auto ch: s)
+		{
+			u = to[u][getid(ch)];
+			
+			// traversing exit links
+			int v = term[u];
+			while(v)
+			{
+				// do something
+				v = term[link[v]];
+			}
+		}
+	}
+};
+// Aho-Corasick end [Aho corasick]
+
 // Suffix array start
 const int MAX_N = 500005;
 const int MAX_C = 305; // Maximum initial rank + 1
