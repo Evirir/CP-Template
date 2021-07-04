@@ -916,13 +916,13 @@ struct AhoCorasick
 	int sz, alpsz; // trie size, alphabet size
 	
 	// max total length, alphabet size
-	AhoCorasick(int n, int _alpsz = 26)
+	AhoCorasick(int n, int alpsz_ = 26)
 	{
 		term.resize(n, 0);
 		len.resize(n, 0);
 		link.resize(n, 0);
 		id.resize(n, vector<int>());
-		to.resize(n, vector<int>(_alpsz, 0));
+		to.resize(n, vector<int>(alpsz_, 0));
 		sz = 1;
 		alpsz = _alpsz;
 	}
