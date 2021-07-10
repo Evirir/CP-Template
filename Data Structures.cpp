@@ -2018,6 +2018,10 @@ ll mult(ll a, ll b)
 	if(ans<0) ans+=MOD;
 	return ans;
 }
+void radd(ll &a, ll b)
+{
+	a=add(a,b);
+}
 ll pw(ll a, ll b)
 {
 	ll r=1;
