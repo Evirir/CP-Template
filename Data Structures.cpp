@@ -2005,7 +2005,7 @@ vector<ll> fact,ifact,inv,pow2;
 ll add(ll a, ll b)
 {
 	a+=b;
-	if(a>=MOD) a%=MOD;
+	if(abs(a)>=MOD) a%=MOD;
 	if(a<0) a+=MOD;
 	return a;
 }
