@@ -4,7 +4,6 @@
 using namespace std;
 using namespace __gnu_pbds;
 
-#pragma GCC optimize("Ofast")
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
@@ -13,7 +12,6 @@ using namespace __gnu_pbds;
 #define pb push_back
 #define F first
 #define S second
-#define pqueue priority_queue
 #define fbo find_by_order
 #define ook order_of_key
 typedef long long ll;
@@ -23,8 +21,6 @@ typedef vector<ii> vii;
 typedef long double ld;
 template<typename T>
 using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-void amin(ll &a, ll b){ a=min(a,b); }
-void amax(ll &a, ll b){ a=max(a,b); }
 void YES(){cout<<"YES\n";} void NO(){cout<<"NO\n";}
 void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
 const ll INF = ll(1e18);
@@ -2011,12 +2007,12 @@ ll add(ll a, ll b)
 }
 ll mult(ll a, ll b)
 {
-	if(a>MOD) a%=MOD;
-	if(b>MOD) b%=MOD;
-	ll ans=a*b;
-	if(abs(ans)>=MOD) ans%=MOD;
-	if(ans<0) ans+=MOD;
-	return ans;
+	if(abs(a)>=MOD) a%=MOD;
+	if(abs(b)>=MOD) b%=MOD;
+	a*=b;
+	if(abs(a)>=MOD) a%=MOD;
+	if(a<0) a+=MOD;
+	return a;
 }
 void radd(ll &a, ll b)
 {
