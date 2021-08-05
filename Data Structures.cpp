@@ -7,6 +7,8 @@ using namespace __gnu_pbds;
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
+#define sz(x) (int)(x).size()
+#define all(x) begin(x), end(x)
 #define forn(i,a,b) for(int i=(a);i<(b);i++)
 #define fore(i,a,b) for(int i=(a);i<=(b);i++)
 #define pb push_back
@@ -21,7 +23,6 @@ typedef vector<ii> vii;
 typedef long double ld;
 template<typename T>
 using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-void YES(){cout<<"YES\n";} void NO(){cout<<"NO\n";}
 void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
 const ll INF = ll(1e18);
 const int MOD = 998244353;
@@ -1069,7 +1070,6 @@ struct DSU {
 		dsu[u].sz += dsu[v].sz;
 		cc--;
 	}
-	inline Node& get(int u){ return dsu[rt(u)]; }
 };
 // DSU end
 
