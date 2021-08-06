@@ -64,6 +64,7 @@ List of things (in order):
 	- Fast Fourier Transform (FFT)
 	- Number Theoretic Transform (NTT)
 	- FFT Mod
+	- Fast Walsh-Hadamard Transform (FWHT): AND, OR, XOR convolution
 
 8. Geometry \[untested\]
 

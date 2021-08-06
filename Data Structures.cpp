@@ -2499,6 +2499,77 @@ template<int M> vl convMod(const vl &a, const vl &b) {
 }
 // FFT mod end
 
+// Fast Walsh-Hadamard Transform (FWHT) start
+// Source: https://alan20210202.github.io/2020/08/07/FWHT/
+// Modded xor FWHT function tested on AtCoder ABC212 H
+//
+// type: 1 = or, 2 = and, 3 = xor
+// n is the smallest power of 2 at least sz(A)
+// dir = 1/-1 for forward/inverse
+// can change int *A to ll *A
+void fwht(vector<ll> &A, int type, int dir = 1) {
+	int n = 1;
+	while(n < sz(A)) n <<= 1;
+	A.resize(n, 0);
+	for (int s = 2, h = 1; s <= n; s <<= 1, h <<= 1)
+		for (int l = 0; l < n; l += s)
+			for (int i = 0; i < h; i++) {
+				if (type == 1) // or
+					A[l + h + i] += dir * A[l + i];
+				if (type == 2) // and
+					A[l + i] += dir * A[l + h + i];
+				if (type == 3) { // xor
+					int t = A[l + h + i];
+					A[l + h + i] = A[l + i] - t;
+					A[l + i] = A[l + i] + t;
+					if(dir < 0) A[l + h + i] /= 2, A[l + i] /= 2;
+				}
+			}
+}
+vector<ll> mult(vector<ll> &a, vector<ll> &b, int type)
+{
+	fwht(a,type);
+	fwht(b,type);
+	vector<ll> ans(sz(a));
+	for(int i=0;i<sz(a);i++) ans[i]=a[i]*b[i];
+	fwht(ans,type,-1);
+	return ans;
+}
+// modded version
+void fwht(vector<ll> &A, int type, int dir = 1) {
+	const ll inv2 = inverse(2);
+	int n = 1;
+	while(n < sz(A)) n <<= 1;
+	A.resize(n, 0);
+	for (int s = 2, h = 1; s <= n; s <<= 1, h <<= 1)
+		for (int l = 0; l < n; l += s)
+			for (int i = 0; i < h; i++) {
+				if (type == 1) // or
+					A[l + h + i] = add(A[l + h + i], dir * A[l + i]);
+				if (type == 2) // and
+					A[l + i] = add(A[l + i], dir * A[l + h + i]);
+				if (type == 3) { // xor
+					int t = A[l + h + i];
+					A[l + h + i] = add(A[l + i],  -t);
+					A[l + i] = add(A[l + i], t);
+					if(dir < 0) {
+						A[l + h + i] = mult(A[l + h + i], inv2);
+						A[l + i] = mult(A[l + i], inv2);
+					}
+				}
+			}
+}
+vector<ll> mult(vector<ll> &a, vector<ll> &b, int type)
+{
+	fwht(a,type);
+	fwht(b,type);
+	vector<ll> ans(sz(a));
+	for(int i=0;i<sz(a);i++) ans[i]=mult(a[i],b[i]);
+	fwht(ans,type,-1);
+	return ans;
+}
+// Fast Walsh-Hadamard Transform (FWHT) end
+
 // KACTL Geometry start
 template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
 template<class T>
