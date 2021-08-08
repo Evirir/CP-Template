@@ -2570,6 +2570,44 @@ vector<ll> mult(vector<ll> &a, vector<ll> &b, int type)
 }
 // Fast Walsh-Hadamard Transform (FWHT) end
 
+// Gauss elimination start
+typedef vector<double> vd;
+const double eps = 1e-12;
+int gauss(vector<vd>& A, vd& b, vd& x) {
+	int n = sz(A), m = sz(x), rank = 0, br, bc;
+	if (n) assert(sz(A[0]) == m);
+	vi col(m); iota(all(col), 0);
+	forn(i,0,n) {
+		double v, bv = 0;
+		forn(r,i,n) forn(c,i,m)
+		if ((v = fabs(A[r][c])) > bv)
+			br = r, bc = c, bv = v;
+		if (bv <= eps) {
+			forn(j,i,n) if (fabs(b[j]) > eps) return -1;
+			break;
+		}
+		swap(A[i], A[br]);
+		swap(b[i], b[br]);
+		swap(col[i], col[bc]);
+		forn(j,0,n) swap(A[j][i], A[j][bc]);
+		bv = 1/A[i][i];
+		forn(j,i+1,n) {
+			double fac = A[j][i] * bv;
+			b[j] -= fac * b[i];
+			forn(k,i+1,m) A[j][k] -= fac*A[i][k];
+		}
+		rank++;
+	}
+	x.assign(m, 0);
+	for (int i = rank; i--;) {
+		b[i] /= A[i][i];
+		x[col[i]] = b[i];
+		forn(j,0,i) b[j] -= A[j][i] * b[i];
+		}
+	return rank; // (multiple solutions i f rank < m)
+}
+// Gauss elimination end
+
 // KACTL Geometry start
 template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
 template<class T>
