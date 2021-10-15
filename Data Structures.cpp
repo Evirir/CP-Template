@@ -1,9 +1,12 @@
 #include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+//#include <ext/pb_ds/assoc_container.hpp>
+//#include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
-using namespace __gnu_pbds;
+//using namespace __gnu_pbds;
 
+#pragma GCC optimize("O3")
+#pragma GCC target("avx2")
+#pragma GCC optimize("unroll-loops")
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
 #define setp(x) cout<<fixed<<setprecision(x)
@@ -17,13 +20,14 @@ using namespace __gnu_pbds;
 #define fbo find_by_order
 #define ook order_of_key
 typedef long long ll;
+typedef long double ld;
 typedef pair<ll,ll> ii;
 typedef vector<ll> vi;
 typedef vector<ii> vii;
-typedef long double ld;
-template<typename T>
-using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+//template<typename T>
+//using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 void SD(int t=0){ cout<<"PASSED "<<t<<endl; }
+ostream& operator<<(ostream &out, ii x){ out<<"("<<x.F<<","<<x.S<<")"; return out; }
 const ll INF = ll(1e18);
 const int MOD = 998244353;
 
@@ -880,27 +884,39 @@ vector<int> z_function(string &s){
 // Z-algorithm end
 
 // Trie start
-struct TrieNode{
+struct TrieNode {
 	int next[26];
 	bool leaf = false;
-	
-    TrieNode(){fill(begin(next), end(next), -1);}
+	TrieNode(){fill(begin(next), end(next), -1);}
 };
-
-vector<TrieNode> Trie(1);
-
-void addstring(const string &s){
-    int v = 0;
-    for(char ch : s){
-		int c = ch - 'a';
-		if(Trie[v].next[c] == -1){
-			Trie[v].next[c] = Trie.size();
-			Trie.emplace_back();
+struct Trie {
+	int siz;
+	vector<TrieNode> tr;
+	Trie(): siz(0), tr(vector<TrieNode>(1)) {}
+	TrieNode& operator[](int u){ return tr[u]; }
+	int size(){ return siz; }
+	void addstring(const string &s) {
+		int v = 0;
+		for (char ch : s) {
+			int c = ch - 'a';
+			if (tr[v].next[c] == -1) {
+				tr[v].next[c] = tr.size();
+				tr.emplace_back();
+			}
+			v = tr[v].next[c];
 		}
-		v = Trie[v].next[c];
+		if(!tr[v].leaf) siz++;
+		tr[v].leaf = true;
 	}
-	Trie[v].leaf = true;
-}
+	template<class F>
+	void dfs(int u, F f) {
+		forn(i,0,26) {
+			if(tr[u].next[i] != -1) {
+				dfs(tr[u].next[i]);
+			}
+		}
+	}
+};
 // Trie end
 
 // Aho-Corasick start [Aho Corasick]
@@ -1263,13 +1279,12 @@ struct DinicFlow
 // Dinic Flow end
 
 // Min Cost Max Flow start
+struct Edge {
+	int u, v; long long cap, cost;
+	Edge(int u, int v, long long cap, long long cost): u(u), v(v), cap(cap), cost(cost) {}
+};
 struct MinCostFlow
 {
-	struct Edge {
-		int u, v; long long cap, cost;
-		Edge(int u, int v, long long cap, long long cost): u(u), v(v), cap(cap), cost(cost) {}
-	};
-	
 	int n, s, t;
 	long long flow, cost;
 	vector<vector<int> > graph;
@@ -1383,6 +1398,129 @@ struct MinCostFlow
 	}
 };
 // Min Cost Max Flow end
+
+// Min Cost Max Flow (long double) start
+typedef pair<ld,int> dii;
+struct Edge {
+	int u, v; ld cap, cost;
+	Edge(int u, int v, ld cap, ld cost): u(u), v(v), cap(cap), cost(cost) {}
+};
+struct MinCostFlow
+{
+	int n, s, t;
+	ld flow, cost;
+	vector<vector<int> > graph;
+	vector<Edge> e;
+	vector<ld> dist, potential;
+	vector<int> parent;
+	bool negativeCost;
+	
+	MinCostFlow(int _n){
+		// 0-based indexing
+		n = _n;
+		graph.assign(n, vector<int> ());
+		negativeCost = false;
+	}
+	
+	void addEdge(int u, int v, ld cap, ld cost, bool directed = true){
+		if(cost < 0)
+			negativeCost = true;
+	
+		graph[u].push_back(e.size());
+		conv[{u,v}]=e.size();
+		e.push_back(Edge(u, v, cap, cost));
+	
+		graph[v].push_back(e.size());
+		e.push_back(Edge(v, u, 0, -cost));
+	
+		if(!directed)
+			addEdge(v, u, cap, cost, true);
+	}
+	
+	pair<ld, ld> getMinCostFlow(int _s, int _t){
+		s = _s; t = _t;
+		flow = 0, cost = 0;
+	
+		potential.assign(n, 0);
+		if(negativeCost){
+			// run Bellman-Ford to find starting potential
+			dist.assign(n, 1e10);
+			for(int i = 0, relax = false; i < n && relax; i++, relax = false){
+				for(int u = 0; u < n; u++){
+					for(int k = 0; k < sz(graph[u]); k++){
+						int eIdx = graph[u][i];
+						int v = e[eIdx].v; ld cap = e[eIdx].cap, w = e[eIdx].cost;
+	
+						if(dist[v] > dist[u] + w && cap > 1e-9){
+							dist[v] = dist[u] + w;
+							relax = true;
+			}   }   }   }
+	
+			for(int i = 0; i < n; i++){
+				if(dist[i] < (1e10)){
+					potential[i] = dist[i];
+		}   }   }
+	
+		while(dijkstra()){
+			flow += sendFlow(t, 1e10);
+		}
+	
+		return make_pair(flow, cost);
+	}
+	
+	bool dijkstra(){
+		parent.assign(n, -1);
+		dist.assign(n, 1e10);
+		priority_queue<dii, vector<dii>, greater<dii> > pq;
+	
+		dist[s] = 0;
+		pq.push(dii(0, s));
+	
+	
+		while(!pq.empty()){
+			int u = pq.top().second;
+			ld d = pq.top().first;
+			pq.pop();
+	
+			if(d != dist[u]) continue;
+	
+			for(int i = 0; i < sz(graph[u]); i++){
+				int eIdx = graph[u][i];
+				int v = e[eIdx].v; ld cap = e[eIdx].cap;
+				ld w = e[eIdx].cost + potential[u] - potential[v];
+	
+				if(dist[u] + w < dist[v] && cap > 1e-9){
+					dist[v] = dist[u] + w;
+					parent[v] = eIdx;
+	
+					pq.push(dii(dist[v], v));
+		}   }   }
+	
+		// update potential
+		for(int i = 0; i < n; i++){
+			if(dist[i] < (1e10))
+				potential[i] += dist[i];
+		}
+	
+		return dist[t] != (1e10);
+	}
+	
+	ld sendFlow(int v, ld curFlow){
+		if(parent[v] == -1)
+			return curFlow;
+		int eIdx = parent[v];
+		int u = e[eIdx].u; ld w = e[eIdx].cost;
+	
+		ld f = sendFlow(u, min(curFlow, e[eIdx].cap));
+	
+		cost += f*w;
+		e[eIdx].cap -= f;
+		e[eIdx^1].cap += f;
+	
+		return f;
+	}
+};
+// Min Cost Max Flow (long double) end
 
 // Hopcroft-Karp matching (MCBM, max-cardinality bipartite matching) start
 // Read n1,n2 -> init() -> addEdge() -> maxMatching()
@@ -2014,10 +2152,7 @@ ll mult(ll a, ll b)
 	if(a<0) a+=MOD;
 	return a;
 }
-void radd(ll &a, ll b)
-{
-	a=add(a,b);
-}
+void radd(ll &a, ll b){ a=add(a,b); }
 ll pw(ll a, ll b)
 {
 	ll r=1;
@@ -2117,6 +2252,25 @@ Matrix operator^(Matrix A, ll b){
 // Number Theory NT start
 vector<ll> primes, totient, sumdiv, bigdiv, lowprime;
 vector<bool> prime;
+void Sieve(ll n) // linear Sieve
+{
+	prime.assign(n+1, 1);
+	lowprime.assign(n+1, 0);
+	prime[1] = false;
+	for(ll i = 2; i <= n; i++)
+	{
+		if(lowprime[i] == 0)
+		{
+			primes.pb(i);
+			lowprime[i] = i;
+		}
+		for(int j=0; j<sz(primes) && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
+		{
+			prime[j] = false;
+			lowprime[i*primes[j]] = lowprime[i];
+		}
+	}
+}
 void Sieve(ll n)
 {
 	prime.assign(n+1, 1);
@@ -2130,25 +2284,6 @@ void Sieve(ll n)
 			{
 				prime[j] = false;
 			}
-		}
-	}
-}
-void Sieve(ll n) // linear Sieve
-{
-	prime.assign(n+1, 1);
-	lowprime.assign(n+1, 0);
-	prime[1] = false;
-	for(ll i = 2; i <= n; i++)
-	{
-		if(lowprime[i] == 0)
-		{
-			primes.pb(i);
-			lowprime[i] = i;
-		}
-		for(int j=0; j<primes.size() && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
-		{
-			prime[j] = false;
-			lowprime[i*primes[j]] = lowprime[i];
 		}
 	}
 }
@@ -2271,6 +2406,31 @@ void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 	}
 }
 // End Number Theory NT
+
+// Longest increasing subsequence (lis) start
+ll lisend[MAXN];
+int lislen[MAXN], idx[MAXN], prt[MAXN];
+int lis(int n, ll a[])
+{
+	const ll inf = 2e9;
+	
+	lisend[0]=-inf;
+	for(int i=1;i<n;i++) lisend[i]=inf;
+	idx[0]=prt[0]=-1;
+	
+	int maxlen=0;
+	for(int i=0;i<n;i++)
+	{
+		int p=upper_bound(lisend, lisend+n, a[i])-lisend;
+		lisend[p]=a[i];
+		idx[p]=i;
+		prt[p]=idx[p-1];
+		maxlen=max(maxlen, p);
+		lislen[i]=maxlen;
+	}
+	return maxlen;
+}
+// Longest increasing subsequence (lis) end
 
 // Sqrt decomposition/Mo's algorithm start
 const int BS;
@@ -2573,7 +2733,7 @@ vector<ll> mult(vector<ll> &a, vector<ll> &b, int type)
 // Gauss elimination start
 typedef vector<double> vd;
 const double eps = 1e-12;
-int gauss(vector<vd>& A, vd& b, vd& x) {
+int solveLinear(vector<vd>& A, vd& b, vd& x) {
 	int n = sz(A), m = sz(x), rank = 0, br, bc;
 	if (n) assert(sz(A[0]) == m);
 	vi col(m); iota(all(col), 0);
