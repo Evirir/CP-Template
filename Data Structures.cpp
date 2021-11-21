@@ -2136,36 +2136,38 @@ struct ConvexHull {
 
 // Combi/Maths start
 vector<ll> fact,ifact,inv,pow2;
-ll add(ll a, ll b)
+ll add(ll a, ll b, ll m = MOD)
 {
 	a+=b;
-	if(abs(a)>=MOD) a%=MOD;
-	if(a<0) a+=MOD;
+	if(abs(a)>=m) a%=m;
+	if(a<0) a+=m;
 	return a;
 }
-ll mult(ll a, ll b)
+ll mult(ll a, ll b, ll m = MOD)
 {
-	if(abs(a)>=MOD) a%=MOD;
-	if(abs(b)>=MOD) b%=MOD;
+	if(abs(a)>=m) a%=m;
+	if(abs(b)>=m) b%=m;
 	a*=b;
-	if(abs(a)>=MOD) a%=MOD;
-	if(a<0) a+=MOD;
+	if(abs(a)>=m) a%=m;
+	if(a<0) a+=m;
 	return a;
 }
-void radd(ll &a, ll b){ a=add(a,b); }
-ll pw(ll a, ll b)
+void radd(ll &a, ll b, ll m = MOD){ a=add(a,b,m); }
+ll pw(ll a, ll b, ll m = MOD)
 {
+	if(abs(a)>=m) a%=m;
+	if(a==0 && b==0) return 0; // value of 0^0
 	ll r=1;
 	while(b){
-		if(b&1) r=mult(r,a);
-		a=mult(a,a);
+		if(b&1) r=mult(r,a,m);
+		a=mult(a,a,m);
 		b>>=1;
 	}
 	return r;
 }
-ll inverse(ll a)
+ll inverse(ll a, ll m = MOD)
 {
-	return pw(a,MOD-2);
+	return pw(a,m-2);
 }
 ll choose(ll a, ll b)
 {
