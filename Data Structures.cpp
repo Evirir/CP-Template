@@ -4,11 +4,11 @@
 using namespace std;
 //using namespace __gnu_pbds;
 
-#pragma GCC optimize("O3")
+#pragma GCC optimize("O3,unroll-loops")
 #pragma GCC target("avx2")
-#pragma GCC optimize("unroll-loops")
 #define watch(x) cout<<(#x)<<"="<<(x)<<'\n'
 #define mset(d,val) memset(d,val,sizeof(d))
+#define cbug if(DEBUG) cout
 #define setp(x) cout<<fixed<<setprecision(x)
 #define sz(x) (int)(x).size()
 #define all(x) begin(x), end(x)
@@ -33,6 +33,7 @@ const int MOD = 998244353;
 
 const bool DEBUG = 0;
 const int MAXN = 100005;
+const int LG = 21;
 
 // Lazy Recursive ST start
 class LazySegmentTree{
@@ -758,34 +759,21 @@ public:
 // Segment Tree Beats end
 
 // Fenwick Tree (FenwickPoint) start
-struct FenwickPoint{
+struct FenwickPoint
+{
 	vector<ll> fw;
 	int siz;
 	FenwickPoint(): fw(vector<ll>()), siz(0) {}
-	FenwickPoint(int N)
-	{
-		fw.assign(N+1,0);
-		siz = N+1;
-	}
-	void reset(int N)
-	{
-		fw.assign(N+1,0);
-		siz = N+1;
-	}
+	FenwickPoint(int N){ fw.assign(N+1,0); siz = N+1; }
+	void reset(int N){ fw.assign(N+1,0); siz = N+1; }
 	void add(int p, ll val)
 	{
-		for(p++; p<siz; p+=(p&(-p)))
-		{
-			fw[p]+=val;
-		}
+		for(p++; p<siz; p+=(p&(-p))) fw[p]+=val;
 	}
 	ll sum(int p)
 	{
 		ll res=0;
-		for(; p; p-=(p&(-p)))
-		{
-			res+=fw[p];
-		}
+		for(; p; p-=(p&(-p))) res+=fw[p];
 		return res;
 	}
 	ll query(int l, int r)
@@ -795,10 +783,7 @@ struct FenwickPoint{
 		if(l==0) return sum(r);
 		return sum(r)-sum(l-1);
 	}
-	void modify(int p, ll val)
-	{
-		add(p, val-query(p,p));
-	}
+	inline void modify(int p, ll val){ add(p, val-query(p,p)); }
 };
 // Fenwick Tree (FenwickPoint) end
 
@@ -823,22 +808,13 @@ struct FenwickRange
 	void add(int l, int r, ll val) //[l,r] + val
 	{   
 		l++; r++;
-		for(int tl=l; tl<siz; tl+=(tl&(-tl)))
-		{
-			fw[tl]+=val, fw2[tl]-=val*ll(l-1);
-		}
-		for(int tr=r+1; tr<siz; tr+=(tr&(-tr)))
-		{
-			fw[tr]-=val, fw2[tr]+=val*ll(r);
-		}
+		for(int tl=l; tl<siz; tl+=(tl&(-tl))) fw[tl]+=val, fw2[tl]-=val*ll(l-1);
+		for(int tr=r+1; tr<siz; tr+=(tr&(-tr))) fw[tr]-=val, fw2[tr]+=val*ll(r);
 	}
 	ll sum(int r) //[1,r]
 	{                         
 		ll res=0;
-		for(int tr=r; tr; tr-=(tr&(-tr)))
-		{
-			res+=fw[tr]*ll(r)+fw2[tr];
-		}
+		for(int tr=r; tr; tr-=(tr&(-tr))) res+=fw[tr]*ll(r)+fw2[tr];
 		return res;
 	}
 	ll query(int l, int r)
@@ -1916,7 +1892,7 @@ int lca(int u, int v){
 	int l=in[u],r=in[v];
 	if(l>r) swap(l,r);
 	return lcast.query(l,r);
-}	
+}
 
 // in main()
 dfs_lca(0,-1);
@@ -2014,7 +1990,7 @@ struct SparseTable
 				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
 	}
 	ll query(int l, int r){
-		int len = lg[r-l+1];		
+		int len = lg[r-l+1];
 		return merge(spt[l][len], spt[r-(1<<len)+1][len]);
 	}
 	inline ll merge(ll x, ll y){
