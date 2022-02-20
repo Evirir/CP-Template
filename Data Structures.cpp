@@ -1971,8 +1971,6 @@ void solve(int u)
 // Centroid decomposition end
 
 // Sparse Table start: O(1) Max Query
-const int LG = 20;
-
 struct SparseTable
 {
 	vector<int> lg;
