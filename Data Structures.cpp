@@ -1676,7 +1676,7 @@ struct SCC
 	void toposort() // if graph is a DAG and i just want to toposort
 	{
 		tarjan();
-		int n = vec;
+		int n = sz(vec);
 		topo.resize(n);
 		vector<ii> tmp;
 		for(int i = 0; i < n; i++)
@@ -1703,7 +1703,7 @@ void dfs_sz(int u, int p)
 {
 	sz[u] = 1;
 	prt[u] = p;
-	if(adj[u].size()>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
+	if(sz(adj[u])>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
 	
 	for(auto &v: adj[u])
 	{
