@@ -1618,7 +1618,7 @@ struct SCC
 		index++;
 		s.push(u);
 		onstack[u] = true;
-		for(int i = 0; i < vec[u].size(); i++)
+		for(int i = 0; i < sz(vec[u]); i++)
 		{
 			int v = vec[u][i];
 			if(idx[v] == -1)
@@ -1646,7 +1646,7 @@ struct SCC
 	}
 	void tarjan()
 	{
-		for(int i = 0; i < vec.size(); i++)
+		for(int i = 0; i < sz(vec); i++)
 		{
 			if(idx[i] == -1)
 			{
@@ -1657,7 +1657,7 @@ struct SCC
 	void condense() // run after tarjan
 	{
 		adj.resize(scccnt);
-		for(int u = 0; u < vec.size(); u++)
+		for(int u = 0; u < sz(vec); u++)
 		{
 			for(int v: vec[u])
 			{
@@ -1676,7 +1676,7 @@ struct SCC
 	void toposort() // if graph is a DAG and i just want to toposort
 	{
 		tarjan();
-		int n = vec.size();
+		int n = vec;
 		topo.resize(n);
 		vector<ii> tmp;
 		for(int i = 0; i < n; i++)
