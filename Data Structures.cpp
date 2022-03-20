@@ -2356,11 +2356,11 @@ void getpf(vector<ii>& pf, ll n)
 void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 {
 	ll x, k;
-	if(i >= pf.size()) return;
+	if(i >= sz(pf)) return;
 	x = n;
 	for(k = 0; k <= pf[i].S; k++)
 	{
-		if(i==int(pf.size())-1) div.pb(x);
+		if(i == sz(pf) - 1) div.pb(x);
 		getdiv(div, pf, x, i + 1);
 		x *= pf[i].F;
 	}
