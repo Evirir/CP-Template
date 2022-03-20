@@ -2247,22 +2247,6 @@ void Sieve(ll n) // linear Sieve
 		}
 	}
 }
-void Sieve(ll n)
-{
-	prime.assign(n+1, 1);
-	prime[1] = false;
-	for(ll i = 2; i <= n; i++)
-	{
-		if(prime[i])
-		{
-			primes.pb(i);
-			for(ll j = i*i; j <= n; j += i)
-			{
-				prime[j] = false;
-			}
-		}
-	}
-}
 ll phi(ll x)
 {
 	map<ll,ll> pf;
