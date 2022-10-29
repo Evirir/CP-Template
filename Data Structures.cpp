@@ -1782,7 +1782,7 @@ bool isChild(int u, int v)
 {
 	return in[u]<=in[v] && out[v]<=out[u];
 }
-int lca(int u, int v)
+int getLca(int u, int v)
 {
 	if(isChild(u,v)) return u;
 	for(int i=LG-1;i>=0;i--){
