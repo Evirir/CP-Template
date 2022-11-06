@@ -1978,7 +1978,7 @@ int buildVirtualTree(vector<int> nodes, vi vadj[])
 	auto reset = [&](int u) {
 		vadj[u].clear();
 	};
-	auto connect = [&](int u, int v) {
+	auto connect = [&](int u, int v) {  // u is parent of v
 		vadj[u].push_back(v);
 	};
 
