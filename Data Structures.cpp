@@ -2164,6 +2164,7 @@ ll mult(ll a, ll b, ll m = MOD)
 void radd(ll &a, ll b, ll m = MOD){ a=add(a,b,m); }
 ll pw(ll a, ll b, ll m = MOD)
 {
+	assert(b >= 0);  // can return 0 if desired
 	if(abs(a)>=m) a%=m;
 	if(a==0 && b==0) return 0; // value of 0^0
 	ll r=1;
@@ -2184,6 +2185,18 @@ ll choose(ll a, ll b)
 	if(b==0) return 1;
 	if(a==b) return 1;
 	return mult(fact[a],mult(ifact[b],ifact[a-b]));
+}
+// partition n into k blocks of size >= 0
+ll nonneg_partition(ll n, ll k)
+{
+	assert(k >= 1);  // can return 0 if desired
+	return choose(n + k - 1, k - 1);
+}
+// partition n into k blocks of size >= minVal
+ll partition(ll n, ll k, ll minVal = 1)
+{
+	assert(k >= 1);  // can return 0 if desired
+	return nonneg_partition(n - k * minVal, k);
 }
 void init(ll _n)
 {
