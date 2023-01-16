@@ -1089,28 +1089,28 @@ void kruskal()
 // Kruskal end
 
 // Dijkstra start
-vii adj[MAXN];
+vector<ii> adj[MAXN];  // (node, distance)
 ll dist[MAXN];
+// int parents[MAXN];
 
 void dijkstra(int src)
 {
-	priority_queue<ii,vii,greater<ii>> q;
-	forn(i,0,n)	dist[i]=INF;
-	dist[src]=0;
-	q.push({dist[src],src});
-	
-	while(!q.empty())
+	priority_queue<ii, vector<ii>, greater<ii>> q; // (distance, node)
+	fill(dist, dist + n, INF);
+	// fill(parents, parents + n, -1);
+	dist[src] = 0;
+	q.push({dist[src], src});
+	while (!q.empty())
 	{
-		int u=q.top().S; ll curd=q.top().F; q.pop();
-		if(curd>dist[u]) continue;
-		for(auto tmp: adj[u])
+		auto [cur_dist, u] = q.top();
+		q.pop();
+		if (cur_dist > dist[u]) continue;
+		for (auto [v, w] : adj[u])
 		{
-			int v=tmp.F; ll w=tmp.S;
-			if(dist[v]>curd+w)
-			{
-				dist[v]=curd+w;
-				q.push({dist[v],v});
-			}
+			if (dist[v] <= cur_dist + w) continue;
+			dist[v] = cur_dist + w;
+			// parents[v] = u;
+			q.push({dist[v], v});
 		}
 	}
 }
