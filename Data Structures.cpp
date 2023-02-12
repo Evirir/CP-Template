@@ -40,7 +40,7 @@ class LazySegmentTree{
 private:
 	int size_;
 	vector<ll> v,lazy;
-	
+
 	void update(int s, int e, ll val, int k, int l, int r){
 		push(k, l, r);
 		if(r < s || e < l) return;
@@ -54,7 +54,7 @@ private:
 			v[k] = merge(v[k*2], v[k*2+1]);
 		}
 	}
-	
+
 	ll query(int s, int e, int k, int l, int r){
 		push(k, l, r);
 		if(r < s || e < l) return 0; //dummy value
@@ -63,7 +63,7 @@ private:
 		ll rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
 		return merge(lc, rc);
 	}
- 
+
 public:
 	LazySegmentTree(): v(vector<ll>()), lazy(vector<ll>()) {}
 	LazySegmentTree(int n){
@@ -105,10 +105,10 @@ struct Node{
 };
 
 class LazySegmentTreeNode{
-private:	
+private:
 	int size_;
 	vector<Node> v,lazy;
-	
+
 	void update(int s, int e, const Node &val, int k, int l, int r){
 		push(k, l, r);
 		if(r < s || e < l) return;
@@ -122,7 +122,7 @@ private:
 			v[k] = merge(v[k*2], v[k*2+1]);
 		}
 	}
-	
+
 	Node query(int s, int e, int k, int l, int r){
 		push(k, l, r);
 		if(r < s || e < l) return Node(0,INF,-1); //dummy value
@@ -131,7 +131,7 @@ private:
 		Node rc = query(s, e, k*2+1, ((l+r)>>1)+1, r);
 		return merge(lc, rc);
 	}
- 
+
 public:
 	LazySegmentTreeNode(): v(vector<Node>()), lazy(vector<Node>()) {}
 	LazySegmentTreeNode(int n){
@@ -195,7 +195,7 @@ private:
 		ll rc = query(s, e, k*2+1, mid+1, r);
 		return merge(lc, rc);
 	}
-	
+
 public:
 	PointSegmentTree(): v(vector<ll>()) {}
 	PointSegmentTree(int n){
@@ -226,7 +226,7 @@ class PointSegmentTreeNode{
 private:
 	int size_;
 	vector<Node> v;
-	
+
 	void update(int p, const Node &val, int k, int l, int r)
 	{
 		if(p < l || r < p) return;
@@ -241,7 +241,7 @@ private:
 		update(p, val, k*2+1, mid+1, r);
 		v[k] = merge(v[k*2], v[k*2+1]);
 	}
-	
+
 	Node query(int s, int e, int k, int l, int r)
 	{
 		if(e < l || r < s) return Node(0,INF,-1); //dummy value
@@ -251,7 +251,7 @@ private:
 		Node rc = query(s, e, k*2+1, mid+1, r);
 		return merge(lc, rc);
 	}
-	
+
 public:
 	PointSegmentTreeNode(): v(vector<Node>()) {}
 	PointSegmentTreeNode(int n){
@@ -278,20 +278,20 @@ public:
 // Point iterative ST start
 struct IterSegmentTree{
 	vector<ll> t;
-	
+
 	IterSegmentTree: t(vector<ll>()) {}
 	IterSegmentTree(int _n){
 		t.resize(_n*2);
 	}
-	
+
 	void build(){
 		for(int i=n-1; i>0; i--) t[i]=t[i<<1]+t[i<<1|1];
 	}
-	
+
 	void update(int p, int val){
 		for(t[p+=n]=value; p>1; p>>=1) t[p>>1]=t[p]+t[p^1];
 	}
-	
+
 	int query(int l, int r){
 		int res=0;
 		for(l+=n,r+=n; l<r; l>>=1,r>>=1){
@@ -378,7 +378,7 @@ private:
 		ll rc = query2(s2, e2, k, k2*2+1, mid2+1, r2);
 		return merge(lc, rc);
 	}
-	
+
 public:
 	SegmentTree2D(): v(vector<vector<ll>>()) {}
 	SegmentTree2D(int n, int m){
@@ -443,7 +443,7 @@ private:
 		int mid=(l+r)>>1;
 		return merge(query(k->l, s, e, l, mid), query(k->r, s, e, mid+1, r));
 	}
-	
+
 public:
 	PersistSegmentTree(): size_(0) {}
 	PersistSegmentTree(int n): size_(n) {}
@@ -806,13 +806,13 @@ struct FenwickRange
 		siz = N+1;
 	}
 	void add(int l, int r, ll val) //[l,r] + val
-	{   
+	{
 		l++; r++;
 		for(int tl=l; tl<siz; tl+=(tl&(-tl))) fw[tl]+=val, fw2[tl]-=val*ll(l-1);
 		for(int tr=r+1; tr<siz; tr+=(tr&(-tr))) fw[tr]-=val, fw2[tr]+=val*ll(r);
 	}
 	ll sum(int r) //[1,r]
-	{                         
+	{
 		ll res=0;
 		for(int tr=r; tr; tr-=(tr&(-tr))) res+=fw[tr]*ll(r)+fw2[tr];
 		return res;
@@ -903,7 +903,7 @@ struct AhoCorasick
 	vector<vector<int>> id; // index of string match etc, depends on problem
 	vector<vector<int>> to; // transitions
 	int sz, alpsz; // trie size, alphabet size
-	
+
 	// max total length, alphabet size
 	AhoCorasick(int n, int alpsz_ = 26)
 	{
@@ -965,7 +965,7 @@ struct AhoCorasick
 		for(auto ch: s)
 		{
 			u = to[u][getid(ch)];
-			
+
 			// traversing exit links
 			int v = term[u];
 			while(v)
@@ -1076,7 +1076,7 @@ void kruskal()
 	DSU dsu(n);
 	sort(edges.begin(),edges.end());
 	sumw=0;
-	
+
 	forn(i,0,edges.size()){
 		int u=edges[i].S.F, v=edges[i].S.S; ll w=edges[i].F;
 		if(dsu.sameset(u,v)) continue;
@@ -1135,14 +1135,14 @@ int spfa(int src)
 {
 	int cnt[n]{};
 	bool inqueue[n]{};
-	
+
 	forn(i,0,n) dist[i]=INF, prt[i]=-1;
 	dist[src]=0;
-	
+
 	queue<int> q;
 	q.push(src);
 	inqueue[src]=true;
-	
+
 	while(!q.empty())
 	{
 		int u=q.front(); q.pop();
@@ -1168,7 +1168,7 @@ int spfa(int src)
 			}
 		}
 	}
-	
+
 	return -1;
 }
 // SPFA/Bellman-Ford/Shortest Path Faster Algorithm end
@@ -1184,7 +1184,7 @@ struct DinicFlow
 	int n_;
 	vector<vector<Edge>> adj;
 	vector<int> level, ptr;
-	
+
 	DinicFlow(int n)
 	{
 		n_ = n;
@@ -1268,32 +1268,32 @@ struct MinCostFlow
 	vector<long long> dist, potential;
 	vector<int> parent;
 	bool negativeCost;
-	
+
 	MinCostFlow(int _n){
 		// 0-based indexing
 		n = _n;
 		graph.assign(n, vector<int> ());
 		negativeCost = false;
 	}
-	
+
 	void addEdge(int u, int v, long long cap, long long cost, bool directed = true){
 		if(cost < 0)
 			negativeCost = true;
-	
+
 		graph[u].push_back(e.size());
 		e.push_back(Edge(u, v, cap, cost));
-	
+
 		graph[v].push_back(e.size());
 		e.push_back(Edge(v, u, 0, -cost));
-	
+
 		if(!directed)
 			addEdge(v, u, cap, cost, true);
 	}
-	
+
 	pair<long long, long long> getMinCostFlow(int _s, int _t){
 		s = _s; t = _t;
 		flow = 0, cost = 0;
-	
+
 		potential.assign(n, 0);
 		if(negativeCost){
 			// run Bellman-Ford to find starting potential
@@ -1303,73 +1303,73 @@ struct MinCostFlow
 					for(int k = 0; k < graph[u].size(); k++){
 						int eIdx = graph[u][i];
 						int v = e[eIdx].v; ll cap = e[eIdx].cap, w = e[eIdx].cost;
-	
+
 						if(dist[v] > dist[u] + w && cap > 0){
 							dist[v] = dist[u] + w;
 							relax = true;
 			}   }   }   }
-	
+
 			for(int i = 0; i < n; i++){
 				if(dist[i] < (1LL<<62)){
 					potential[i] = dist[i];
 		}   }   }
-	
+
 		while(dijkstra()){
 			flow += sendFlow(t, 1LL<<62);
 		}
-	
+
 		return make_pair(flow, cost);
 	}
-	
+
 	bool dijkstra(){
 		parent.assign(n, -1);
 		dist.assign(n, 1LL<<62);
 		priority_queue<ii, vector<ii>, greater<ii> > pq;
-	
+
 		dist[s] = 0;
 		pq.push(ii(0, s));
-	
-	
+
+
 		while(!pq.empty()){
 			int u = pq.top().second;
 			long long d = pq.top().first;
 			pq.pop();
-	
+
 			if(d != dist[u]) continue;
-	
+
 			for(int i = 0; i < graph[u].size(); i++){
 				int eIdx = graph[u][i];
 				int v = e[eIdx].v; ll cap = e[eIdx].cap;
 				ll w = e[eIdx].cost + potential[u] - potential[v];
-	
+
 				if(dist[u] + w < dist[v] && cap > 0){
 					dist[v] = dist[u] + w;
 					parent[v] = eIdx;
-	
+
 					pq.push(ii(dist[v], v));
 		}   }   }
-	
+
 		// update potential
 		for(int i = 0; i < n; i++){
 			if(dist[i] < (1LL<<62))
 				potential[i] += dist[i];
 		}
-	
+
 		return dist[t] != (1LL<<62);
 	}
-	
+
 	long long sendFlow(int v, long long curFlow){
 		if(parent[v] == -1)
 			return curFlow;
 		int eIdx = parent[v];
 		int u = e[eIdx].u; ll w = e[eIdx].cost;
-	
+
 		long long f = sendFlow(u, min(curFlow, e[eIdx].cap));
-	
+
 		cost += f*w;
 		e[eIdx].cap -= f;
 		e[eIdx^1].cap += f;
-	
+
 		return f;
 	}
 };
@@ -1390,33 +1390,33 @@ struct MinCostFlow
 	vector<ld> dist, potential;
 	vector<int> parent;
 	bool negativeCost;
-	
+
 	MinCostFlow(int _n){
 		// 0-based indexing
 		n = _n;
 		graph.assign(n, vector<int> ());
 		negativeCost = false;
 	}
-	
+
 	void addEdge(int u, int v, ld cap, ld cost, bool directed = true){
 		if(cost < 0)
 			negativeCost = true;
-	
+
 		graph[u].push_back(e.size());
 		conv[{u,v}]=e.size();
 		e.push_back(Edge(u, v, cap, cost));
-	
+
 		graph[v].push_back(e.size());
 		e.push_back(Edge(v, u, 0, -cost));
-	
+
 		if(!directed)
 			addEdge(v, u, cap, cost, true);
 	}
-	
+
 	pair<ld, ld> getMinCostFlow(int _s, int _t){
 		s = _s; t = _t;
 		flow = 0, cost = 0;
-	
+
 		potential.assign(n, 0);
 		if(negativeCost){
 			// run Bellman-Ford to find starting potential
@@ -1426,73 +1426,73 @@ struct MinCostFlow
 					for(int k = 0; k < sz(graph[u]); k++){
 						int eIdx = graph[u][i];
 						int v = e[eIdx].v; ld cap = e[eIdx].cap, w = e[eIdx].cost;
-	
+
 						if(dist[v] > dist[u] + w && cap > 1e-9){
 							dist[v] = dist[u] + w;
 							relax = true;
 			}   }   }   }
-	
+
 			for(int i = 0; i < n; i++){
 				if(dist[i] < (1e10)){
 					potential[i] = dist[i];
 		}   }   }
-	
+
 		while(dijkstra()){
 			flow += sendFlow(t, 1e10);
 		}
-	
+
 		return make_pair(flow, cost);
 	}
-	
+
 	bool dijkstra(){
 		parent.assign(n, -1);
 		dist.assign(n, 1e10);
 		priority_queue<dii, vector<dii>, greater<dii> > pq;
-	
+
 		dist[s] = 0;
 		pq.push(dii(0, s));
-	
-	
+
+
 		while(!pq.empty()){
 			int u = pq.top().second;
 			ld d = pq.top().first;
 			pq.pop();
-	
+
 			if(d != dist[u]) continue;
-	
+
 			for(int i = 0; i < sz(graph[u]); i++){
 				int eIdx = graph[u][i];
 				int v = e[eIdx].v; ld cap = e[eIdx].cap;
 				ld w = e[eIdx].cost + potential[u] - potential[v];
-	
+
 				if(dist[u] + w < dist[v] && cap > 1e-9){
 					dist[v] = dist[u] + w;
 					parent[v] = eIdx;
-	
+
 					pq.push(dii(dist[v], v));
 		}   }   }
-	
+
 		// update potential
 		for(int i = 0; i < n; i++){
 			if(dist[i] < (1e10))
 				potential[i] += dist[i];
 		}
-	
+
 		return dist[t] != (1e10);
 	}
-	
+
 	ld sendFlow(int v, ld curFlow){
 		if(parent[v] == -1)
 			return curFlow;
 		int eIdx = parent[v];
 		int u = e[eIdx].u; ld w = e[eIdx].cost;
-	
+
 		ld f = sendFlow(u, min(curFlow, e[eIdx].cap));
-	
+
 		cost += f*w;
 		e[eIdx].cap -= f;
 		e[eIdx^1].cap += f;
-	
+
 		return f;
 	}
 };
@@ -1510,20 +1510,20 @@ bool used[MAXN1], vis[MAXN1];
 
 class HopcroftKarp {
 public:
-	void init(int _n1, int _n2) 
+	void init(int _n1, int _n2)
 	{
 		n1 = _n1;
 		n2 = _n2;
 		edges = 0;
 		fill(last, last + n1, -1);
 	}
-	void addEdge(int u, int v) 
+	void addEdge(int u, int v)
 	{
 		head[edges] = v;
 		pre[edges] = last[u];
 		last[u] = edges++;
 	}
-	void bfs() 
+	void bfs()
 	{
 		fill(dist, dist + n1, -1);
 		int sizeQ = 0;
@@ -1544,7 +1544,7 @@ public:
 			}
 		}
 	}
-	bool dfs(int u1) 
+	bool dfs(int u1)
 	{
 		vis[u1] = true;
 		for (int e = last[u1]; e >= 0; e = pre[e]) {
@@ -1558,7 +1558,7 @@ public:
 		}
 		return false;
 	}
-	int maxMatching() 
+	int maxMatching()
 	{
 		fill(used, used + n1, false);
 		fill(matching, matching + n2, -1);
@@ -1592,7 +1592,7 @@ struct SCC
 	vector<vector<int>> adj; // condensation graph
 	int scccnt;
 	vi topo;
-	
+
 	// lower sccidx means appear later
 	void init(int n)
 	{
@@ -1704,7 +1704,7 @@ void dfs_sz(int u, int p)
 	sz[u] = 1;
 	prt[u] = p;
 	if(sz(adj[u])>1 && adj[u][0]==p) swap(adj[u][0], adj[u][1]);
-	
+
 	for(auto &v: adj[u])
 	{
 		if(v == p) continue;
@@ -1853,27 +1853,27 @@ vi euler;
 int tmr=-1;
 
 struct SparseTableLCA
-{	
+{
 	ll merge(ll x, ll y){
 		return (dep[x]<dep[y] ? x:y);
 	}
-	
-	SparseTableLCA(){}	
+
+	SparseTableLCA(){}
 	SparseTableLCA(vi arr){
 		int N=arr.size();
 		lg[1]=0;
 		fore(i,2,N)	lg[i]=lg[i/2]+1;
-		
+
 		forn(i,0,N) spt[i][0] = arr[i];
 		fore(j,1,LG)
 			for(int i=0; i+(1<<j)<=N; i++)
 				spt[i][j] = merge(spt[i][j-1], spt[i+(1<<(j-1))][j-1]);
 	}
-	
+
 	ll query(int l,int r){
-		int len=lg[r-l+1];		
+		int len=lg[r-l+1];
 		return merge(spt[l][len],spt[r-(1<<len)+1][len]);
-	}	
+	}
 }lcast;
 
 void dfs_lca(int u, int p){
@@ -1943,7 +1943,7 @@ void prep(int u, int p)
 	for(int v: adj[u])
 	{
 		if(v==p || vst[v]) continue;
-		
+
 		prep(v, u);
 	}
 }
@@ -1951,16 +1951,16 @@ void solve(int u)
 {
 	dfs_sz(u,-1);
 	u=centroid(u,-1,u);
-	
+
 	prep(u,-1);
 	for(int v: adj[u])
 	{
 		if(vst[v]) continue;
-		
+
 	}
-	
+
 	// do stuffs
-	
+
 	vst[u]=1;
 	for(int v: adj[u])
 	{
@@ -2010,7 +2010,7 @@ struct SparseTable
 {
 	vector<int> lg;
 	vector<vector<ll>> spt;
-	
+
 	SparseTable(){}
 	SparseTable(int n, ll arr[]){
 		lg.resize(n + 1);
@@ -2235,7 +2235,7 @@ struct Matrix{
 	vector<ll>& operator[](int x){ return a[x]; }
 	inline int r(){ return a.size(); }
 	inline int c(){ return (a.size() ? a[0].size() : 0); }
-	
+
 	Matrix(int r_ = 0, int c_ = 0, bool identity = 0){
 		a.resize(r_, vector<ll>(c_));
 		if(identity){
@@ -2421,11 +2421,11 @@ int lislen[MAXN], idx[MAXN], prt[MAXN];
 int lis(int n, ll a[])
 {
 	const ll inf = 2e9;
-	
+
 	lisend[0]=-inf;
 	for(int i=1;i<n;i++) lisend[i]=inf;
 	idx[0]=prt[0]=-1;
-	
+
 	int maxlen=0;
 	for(int i=0;i<n;i++)
 	{
@@ -2454,12 +2454,12 @@ inline bool operator<(const Query &a, const Query &b) {
 
 void add(int p)
 {
-	
+
 }
 
 void remove(int p)
 {
-	
+
 }
 
 int L=0,R=-1;
@@ -2520,14 +2520,14 @@ vi mult(vi &a, vi &b)
 {
 	int n=1;
 	while(n<a.size()+b.size()) n<<=1;
-	
+
 	vector<cd> fa(n),fb(n);
 	for(int i=0;i<a.size();i++) fa[i]=a[i];
 	for(int i=0;i<b.size();i++) fb[i]=b[i];
 	fft(fa,0); fft(fb,0);
 	forn(i,0,n) fa[i]*=fb[i];
 	fft(fa,1);
-	
+
 	vi r(n);
 	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
 	return r;
@@ -2602,14 +2602,14 @@ vi mult(vi &a, vi &b)
 {
 	int n=1;
 	while(n<a.size()+b.size()) n<<=1;
-	
+
 	vi fa(n),fb(n);
 	for(int i=0;i<a.size();i++) fa[i]=a[i];
 	for(int i=0;i<b.size();i++) fb[i]=b[i];
 	ntt(fa, 0); ntt(fb, 0);
 	forn(i,0,n) fa[i]*=fb[i];
 	ntt(fa, 1);
-	
+
 	vi r(n);
 	for(int i=0;i<n;i++) r[i]=round(fa[i].real());
 	return r;
@@ -2825,7 +2825,7 @@ template<class T> struct Point3D {
 	T dist2() const { return x*x + y*y + z*z; }
 	double dist() const { return sqrt((double)dist2()); }
 	//Azimuthal angle (longitude) to x-axis in interval [-pi, pi]
-	double phi() const { return atan2(y, x); } 
+	double phi() const { return atan2(y, x); }
 	//Zenith angle (latitude) to the z-axis in interval [0, pi]
 	double theta() const { return atan2(sqrt(x*x+y*y),z); }
 	P unit() const { return *this/(T)dist(); } //makes dist()=1
@@ -3202,7 +3202,7 @@ template<class T> pair<int, Point<T>> lineInter(Line<T> &a, Line<T> &b) {
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 uniform_int_distribution<int>(1,6)(rng);
 uniform_int_distribution<> dis(1,6);
-	
+
 	Examples:
 	cout<<rng()<<'\n';
 	cout<<dis(rng)<<'\n';
@@ -3253,8 +3253,8 @@ bool vst[MAXN][MAXN];
 forn(k,0,4){
 	int x1=x+dx[k], y1=y+dy[k];
 	if(oob(x1,y1)) continue;
-	
-	
+
+
 }
 
 void dfs(int x, int y)
@@ -3265,7 +3265,7 @@ void dfs(int x, int y)
 		int x1=x+dx[k], y1=y+dy[k];
 		if(oob(x1,y1)) continue;
 		if(vst[x1][y1]) continue;
-		
+
 		dfs(x1,y1);
 	}
 }
@@ -3307,15 +3307,15 @@ void rec(int l, int r, vector<Point> &a)
 		sort(a.begin()+l, a.begin()+r, cmp_y);
 		return;
 	}
-	
+
 	int mid=(l+r)/2;
 	ll midx=a[mid].x;
 	rec(l,mid,a);
 	rec(mid,r,a);
-	
+
 	merge(a.begin()+l, a.begin()+mid, a.begin()+mid, a.begin()+r, Temp.begin(), cmp_y);
 	copy(Temp.begin(), Temp.begin()+r-l, a.begin()+l);
-	
+
 	int sz=0;
 	for(int i=l;i<r;i++){
 		if(abs(a[i].x-midx)<mindist){
