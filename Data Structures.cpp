@@ -2290,7 +2290,7 @@ void Sieve(ll n) // linear Sieve
 		}
 		for(int j=0; j<sz(primes) && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
 		{
-			prime[j] = false;
+			prime[i*primes[j]] = false;
 			lowprime[i*primes[j]] = lowprime[i];
 		}
 	}
