@@ -2274,13 +2274,13 @@ Matrix operator^(Matrix A, ll b){
 // Matrix end
 
 // Number Theory NT start
-vector<ll> primes, totient, sumdiv, bigdiv, lowprime;
-vector<bool> prime;
+vector<ll> primes, totient, sumdiv, bigdiv, lowprime, mobius;
+vector<bool> isprime;
 void Sieve(ll n) // linear Sieve
 {
-	prime.assign(n+1, 1);
+	isprime.assign(n+1, 1);
 	lowprime.assign(n+1, 0);
-	prime[1] = false;
+	isprime[1] = false;
 	for(ll i = 2; i <= n; i++)
 	{
 		if(lowprime[i] == 0)
@@ -2290,10 +2290,25 @@ void Sieve(ll n) // linear Sieve
 		}
 		for(int j=0; j<sz(primes) && primes[j]<=lowprime[i] && i*primes[j]<=n; j++)
 		{
-			prime[i*primes[j]] = false;
+			isprime[i*primes[j]] = false;
 			lowprime[i*primes[j]] = primes[j];
 		}
 	}
+}
+void SieveMobius(ll n)
+{
+	mobius.resize(n + 1);
+	mobius[1] = 1;
+	for (ll i = 2; i <= n; i++)
+    {
+		if (lowprime[i] == i) mobius[i] = -1;
+		for (int j = 0; j < sz(primes) && primes[j] <= lowprime[i] && i * primes[j] <= n; j++)
+        {
+            ll cur = i * primes[j];
+            if (primes[j] == lowprime[i]) mobius[cur] = 0;
+            else mobius[cur] = -mobius[i];
+        }
+    }
 }
 ll phi(ll x)
 {
