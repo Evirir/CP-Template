@@ -2186,18 +2186,6 @@ ll choose(ll a, ll b)
 	if(a==b) return 1;
 	return mult(fact[a],mult(ifact[b],ifact[a-b]));
 }
-// partition n into k blocks of size >= 0
-ll nonneg_partition(ll n, ll k)
-{
-	assert(k >= 1);  // can return 0 if desired
-	return choose(n + k - 1, k - 1);
-}
-// partition n into k blocks of size >= minVal
-ll partition(ll n, ll k, ll minVal = 1)
-{
-	assert(k >= 1);  // can return 0 if desired
-	return nonneg_partition(n - k * minVal, k);
-}
 void init(ll _n)
 {
 	fact.clear(); ifact.clear(); inv.clear(); pow2.clear();
@@ -2214,6 +2202,18 @@ void init(ll _n)
 	for(int i=1;i<=_n;i++){
 	    inv[i] = mult(fact[i-1], ifact[i]);
 	}
+}
+// partition n into k blocks of size >= 0
+ll nonneg_partition(ll n, ll k)
+{
+	assert(k >= 1);  // can return 0 if desired
+	return choose(n + k - 1, k - 1);
+}
+// partition n into k blocks of size >= minVal
+ll partition(ll n, ll k, ll minVal = 1)
+{
+	assert(k >= 1);  // can return 0 if desired
+	return nonneg_partition(n - k * minVal, k);
 }
 void getpf(vector<ii>& pf, ll n)
 {
