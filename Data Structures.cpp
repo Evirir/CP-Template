@@ -2418,6 +2418,11 @@ void getpf(vector<ii>& pf, ll n)
 }
 void getdiv(vector<ll>& div, vector<ii>& pf, ll n = 1, int i = 0)
 {
+	if (pf.empty())  // divisors of 1
+	{
+		div = {1};
+		return;
+	}
 	ll x, k;
 	if(i >= sz(pf)) return;
 	x = n;
