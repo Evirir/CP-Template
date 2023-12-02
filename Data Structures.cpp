@@ -2162,6 +2162,7 @@ ll mult(ll a, ll b, ll m = MOD)
 	return a;
 }
 void radd(ll &a, ll b, ll m = MOD){ a=add(a,b,m); }
+void rmult(ll &a, ll b, ll m = MOD){ a=mult(a,b,m); }
 ll pw(ll a, ll b, ll m = MOD)
 {
 	assert(b >= 0);  // can return 0 if desired
