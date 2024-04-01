@@ -2622,11 +2622,11 @@ void ntt(vi &a, bool invert) {
 vi mult(vi &a, vi &b)
 {
 	int n=1;
-	while(n<a.size()+b.size()) n<<=1;
+	while(n<sz(a)+sz(b)) n<<=1;
 
 	vi fa(n),fb(n);
-	for(int i=0;i<a.size();i++) fa[i]=a[i];
-	for(int i=0;i<b.size();i++) fb[i]=b[i];
+	for(int i=0;i<sz(a);i++) fa[i]=a[i];
+	for(int i=0;i<sz(b);i++) fb[i]=b[i];
 	ntt(fa, 0); ntt(fb, 0);
 	forn(i,0,n) fa[i]*=fb[i];
 	ntt(fa, 1);
