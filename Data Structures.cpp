@@ -2562,28 +2562,7 @@ vi mult(vi &a, vi &b)
 const int ROOT = 3; // primitive root
 const int ROOT_1 = 2446678; // ROOT's inverse
 const int ROOT_PW = 1 << 23;
-ll mult(ll a, ll b)
-{
-	if(a>MOD) a%=MOD;
-	if(b>MOD) b%=MOD;
-	ll ans=(a*b)%MOD;
-	if(ans<0) ans+=MOD;
-	return ans;
-}
-ll pw(ll a, ll b)
-{
-	ll r=1;
-	while(b){
-		if(b&1) r=mult(r,a);
-		a=mult(a,a);
-		b>>=1;
-	}
-	return r;
-}
-ll inverse(ll a)
-{
-	return pw(a,MOD-2);
-}
+// copy add/mult/inverse from math/combi
 void ntt(vi &a, bool invert) {
     int n = a.size();
 
