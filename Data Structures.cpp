@@ -402,63 +402,65 @@ public:
 // 2D Segment Tree end
 
 // Persistent Segment Tree start
-inline ll merge(ll x, ll y){
-	return x+y;
-}
-struct Node {
-	Node *l, *r;
-	ll sum=0;
-	Node(ll val): l(nullptr), r(nullptr), sum(val) {}
-	Node(Node *l, Node *r): l(l), r(r), sum(0) {
-		if(l) sum=merge(sum, l->sum);
-		if(r) sum=merge(sum, r->sum);
-	}
+template<class T>
+struct Node
+{
+    T val;
+    int l = 0, r = 0;
 };
-class PersistSegmentTree {
+
+template<class T, T invVal>
+class PersistSegmentTree
+{
 private:
-	int size_;
-	Node* build(int l, int r)
-	{
-		if(l==r) return new Node(0);
-		int mid=(l+r)>>1;
-		return new Node(build(l, mid), build(mid+1, r));
-	}
-	Node* build(ll a[], int l, int r)
-	{
-		if(l==r) return new Node(a[l]);
-		int mid=(l+r)>>1;
-		return new Node(build(a, l, mid), build(a, mid+1, r));
-	}
-	Node* update(Node* k, int p, ll val, int l, int r)
-	{
-		if(l==r) return new Node(k->sum + val); //modification
-		int mid=(l+r)>>1;
-		if(p<=mid) return new Node(update(k->l, p, val, l, mid), k->r);
-		return new Node(k->l, update(k->r, p, val, mid+1, r));
-	}
-	ll query(Node* k, int s, int e, int l, int r)
-	{
-		if(r<s || e<l) return 0; //dummy value
-		if(s<=l && r<=e) return k->sum;
-		int mid=(l+r)>>1;
-		return merge(query(k->l, s, e, l, mid), query(k->r, s, e, mid+1, r));
-	}
+    int update(int pos, T val, int k, int l, int r) {
+        int k1 = createNode();
+        v[k1] = v[k];
+        if (l == r) {
+            v[k1].val += val;   // change this update
+            return k1;
+        }
+        int mid = (l + r) >> 1;
+        int cl = v[k1].l;
+        int cr = v[k1].r;
+        if (pos <= mid) {
+            v[k1].l = update(pos, val, cl, l, mid);
+            cl = v[k1].l;
+        } else {
+            v[k1].r = update(pos, val, cr, mid + 1, r);
+            cr = v[k1].r;
+        }
+        v[k1].val = merge(v[cl].val, v[cr].val);
+        return k1;
+    }
+    T query(int s, int e, int k, int l, int r) {
+    	if (r < s || e < l) return invVal;
+    	if (s <= l && r <= e) return v[k].val;
+    	int mid = (l + r) >> 1;
+    	T cl = query(s, e, v[k].l, l, mid);
+    	T cr = query(s, e, v[k].r, mid + 1, r);
+    	return merge(cl, cr);
+    }
 
 public:
-	PersistSegmentTree(): size_(0) {}
-	PersistSegmentTree(int n): size_(n) {}
-	inline Node* build(){
-		return build(0, size_-1);
-	}
-	inline Node* build(ll a[]){
-		return build(a, 0, size_-1);
-	}
-	inline Node* update(Node* k, int p, ll val){
-		return update(k, p, val, 0, size_-1);
-	}
-	inline ll query(Node* k, int l, int r){
-		return query(k, l, r, 0, size_-1);
-	}
+    int siz;
+    vector<Node<T>> v;
+    PersistSegmentTree(int n) : siz(1), v(1, {invVal}) {
+        while (siz < n) siz <<= 1;
+    }
+    int createNode() {
+        v.push_back({T{}, 0, 0});
+        return sz(v) - 1;
+    }
+    T merge(T x, T y) {
+        return x + y;
+    }
+    int update(int pos, T val, int node) {
+        return update(pos, val, node, 0, siz - 1);
+    }
+    T query(int l, int r, int node) {
+    	return query(l, r, node, 0, siz - 1);
+    }
 };
 // Persistent Segment Tree end
 
