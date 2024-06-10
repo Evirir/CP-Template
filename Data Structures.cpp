@@ -899,81 +899,43 @@ struct Trie {
 
 // Aho-Corasick start [Aho Corasick]
 // Reference: https://codeforces.com/blog/entry/14854
-struct AhoCorasick
-{
-	vector<int> term, len, link; // exit link, depth in trie, suffix link
-	vector<vector<int>> id; // index of string match etc, depends on problem
-	vector<vector<int>> to; // transitions
-	int sz, alpsz; // trie size, alphabet size
-
-	// max total length, alphabet size
-	AhoCorasick(int n, int alpsz_ = 26)
-	{
-		term.resize(n, 0);
-		len.resize(n, 0);
-		link.resize(n, 0);
-		id.resize(n, vector<int>());
-		to.resize(n, vector<int>(alpsz_, 0));
-		sz = 1;
-		alpsz = _alpsz;
-	}
-	int getid(char c)
-	{
-		return c - 'a';
-	}
-	void add(const string &s, int i = 0) // index of string etc
-	{
-		int cur = 0;
-		for(auto ch: s)
-		{
-			int c = getid(ch);
-			if(!to[cur][c])
-			{
-				to[cur][c] = sz++;
-				len[to[cur][c]] = len[cur] + 1;
-			}
-			cur = to[cur][c];
-		}
-		term[cur] = cur;
-		id[cur].pb(i);
-	}
-	void push_links()
-	{
-		int que[sz];
-		int l = 0, r = 1;
-		que[0] = 0;
-		while(l < r)
-		{
-			int u = que[l++];
-			int v = link[u];
-			if(!term[u]) term[u] = term[v];
-			for(int c = 0; c < alpsz; c++)
-			{
-				if(to[u][c])
-				{
-					link[to[u][c]] = u ? to[v][c] : 0;
-					que[r++] = to[u][c];
-				}
-				else
-				{
-					to[u][c] = to[v][c];
-				}
-			}
-		}
-	}
-	void go(const string& s)
-	{
+struct AhoCorasick {
+	enum {alpha = 26, first = 'A'}; // change this!
+	struct Node {
+		int fail = 0;
+        int next[alpha];
+        bool leaf = 0;
+		Node() { memset(next, 0, sizeof(next)); }
+	};
+	vector<Node> N;
+	void insert(const string& s) {
+		assert(!s.empty());
 		int u = 0;
-		for(auto ch: s)
-		{
-			u = to[u][getid(ch)];
+		for (char c : s) {
+			int nxt = N[u].next[c - first];
+			if (!nxt) {
+                nxt = N[u].next[c - first] = sz(N);
+                N.emplace_back();
+            }
+			u = nxt;
+		}
+        N[u].leaf = 1;
+	}
+	AhoCorasick(const vector<string>& v) : N(1) {
+		forn(i,0,sz(v)) insert(v[i]);
 
-			// traversing exit links
-			int v = term[u];
-			while(v)
-			{
-				// do something
-				v = term[link[v]];
+		queue<int> q;
+        forn(i,0,alpha) if (N[0].next[i]) q.push(N[0].next[i]);
+		for (; !q.empty(); q.pop()) {
+			int u = q.front(), prev = N[u].fail;
+			forn(i,0,alpha) {
+				int& nxt = N[u].next[i];
+                int y = N[prev].next[i];
+				if (!nxt) nxt = y;
+				else {
+					N[nxt].fail = y;
+					q.push(nxt);
+				}
 			}
 		}
 	}
