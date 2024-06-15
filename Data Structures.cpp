@@ -2142,7 +2142,7 @@ ll pw(ll a, ll b, ll m = MOD)
 }
 ll inverse(ll a, ll m = MOD)
 {
-	return pw(a,m-2);
+	return pw(a,m-2,m);
 }
 ll choose(ll a, ll b)
 {
