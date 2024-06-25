@@ -2144,28 +2144,28 @@ ll inverse(ll a, ll m = MOD)
 {
 	return pw(a,m-2,m);
 }
-ll choose(ll a, ll b)
+ll choose(ll a, ll b, ll m = MOD)
 {
 	if(a<b) return 0;
 	if(b==0) return 1;
 	if(a==b) return 1;
-	return mult(fact[a],mult(ifact[b],ifact[a-b]));
+	return mult(fact[a], mult(ifact[b], ifact[a - b], m), m);
 }
-void init(ll _n)
+void init(ll _n, ll m = MOD)
 {
 	fact.clear(); ifact.clear(); inv.clear(); pow2.clear();
 	fact.resize(_n+1); ifact.resize(_n+1); inv.resize(_n+1); pow2.resize(_n+1);
 	pow2[0]=1; ifact[0]=1; fact[0]=1;
 	for(int i=1;i<=_n;i++){
-		pow2[i]=add(pow2[i-1],pow2[i-1]);
-		fact[i]=mult(fact[i-1],i);
+		pow2[i] = add(pow2[i - 1], pow2[i - 1], m);
+		fact[i] = mult(fact[i - 1], i, m);
 	}
-	ifact[_n] = inverse(fact[_n]);
+	ifact[_n] = inverse(fact[_n], m);
 	for(int i=_n-1;i>=1;i--){
-	    ifact[i] = mult(ifact[i+1], i+1);
+		ifact[i] = mult(ifact[i + 1], i + 1, m);
 	}
 	for(int i=1;i<=_n;i++){
-	    inv[i] = mult(fact[i-1], ifact[i]);
+		inv[i] = mult(fact[i - 1], ifact[i], m);
 	}
 }
 // partition n into k blocks of size >= 0
